@@ -42,7 +42,7 @@ export function TableHeader<T>({ columns, sort, onToggleSort, onToggleVisibility
         <th className="px-3 py-2 text-right">
           <details className="relative inline-block">
             <summary className="list-none cursor-pointer text-sm">Columns ▾</summary>
-            <ul className="absolute right-0 z-10 mt-2 min-w-40 rounded-sm border bg-slate-400 p-2 shadow">
+            <ul className="absolute right-0 z-10 mt-2 min-w-40 rounded-sm border bg-slate-100 p-2 shadow">
               {columns.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-2 px-2 py-1">
                   <label className="text-sm">{c.header}</label>

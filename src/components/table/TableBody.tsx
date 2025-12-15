@@ -25,7 +25,7 @@ export function TableBody<T>({ columns, rows, selectable, selected, onToggleRow 
         <tr
           key={i}
           className={cn(
-            "border-b bg-slate-400 hover:bg-[color-mix(in_oklab,var(--color-surface)_70%,transparent)]",
+            "border-b bg-slate-100 hover:bg-[color-mix(in_oklab,var(--color-surface)_70%,transparent)]",
             selected.has(i) ? "outline outline-(--color-ring)" : ""
           )}
         >

@@ -12,7 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(
-            "h-10 w-full rounded-sm border bg-slate-400 px-3 pr-9 text-black placeholder:text-[color-mix(in_oklab,var(--color-muted-foreground)_80%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-ring)"
+            "h-10 w-full rounded-sm border bg-slate-100 px-3 pr-9 text-black placeholder:text-[color-mix(in_oklab,var(--color-muted-foreground)_80%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-ring)"
           )}
           {...props}
         />

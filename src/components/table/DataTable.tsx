@@ -118,14 +118,14 @@ export function DataTable<T>({
 
   if (total === 0) {
     return (
-      <div className="rounded-sm border bg-slate-400 p-4 text-sm text-black">
+      <div className="rounded-sm border bg-slate-100 p-4 text-sm text-black">
         No data to display
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-sm border bg-slate-400">
+    <div className="overflow-x-auto rounded-sm border bg-slate-100">
       <table role="table" className={cn("w-full text-sm")}>
         <TableHeader<T>
           columns={columns}
