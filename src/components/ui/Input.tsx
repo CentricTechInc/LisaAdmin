@@ -8,16 +8,18 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, rightSlot, ...props }, ref) => {
     return (
-      <div className={cn("relative", className)}>
+      <div className="relative w-full">
         <input
           ref={ref}
           className={cn(
-            "h-10 w-full rounded-sm border bg-slate-100 px-3 pr-9 text-black placeholder:text-[color-mix(in_oklab,var(--color-muted-foreground)_80%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-ring)"
+            "h-10 w-full rounded-sm border bg-slate-100 px-3 py-2 text-sm text-black placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            rightSlot && "pr-10",
+            className
           )}
           {...props}
         />
         {rightSlot ? (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">{rightSlot}</div>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>
         ) : null}
       </div>
     );

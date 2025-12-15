@@ -6,6 +6,12 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { DualActionPill } from "@/components/ui/DualActionPill";
 import { FilterPillBar } from "@/components/ui/FilterPillBar";
 import { StatCard } from "@/components/ui/StatCard";
+import { FormInput } from "@/components/ui/FormInput";
+import { FormTextarea } from "@/components/ui/FormTextarea";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { DaySelector } from "@/components/ui/DaySelector";
+import { Button } from "@/components/ui/Button";
 import {
   DemographicDonutCard,
   type DemographicSegment,
@@ -17,6 +23,7 @@ import {
 
 export default function IndexPage() {
   const [tab, setTab] = React.useState("professional");
+  const [selectedDays, setSelectedDays] = React.useState<string[]>(["mon", "wed", "fri"]);
   const customerSegments: DemographicSegment[] = [
     { id: "male", label: "Male", value: 317, color: "#FF4460" },
     { id: "female", label: "Female", value: 622, color: "#FFD1DB" },
@@ -208,6 +215,51 @@ export default function IndexPage() {
                 console.log("Add clicked");
               }}
             />
+          </div>
+
+          <div className="mt-8 grid gap-6 rounded-xl border border-[color-mix(in_oklab,var(--color-muted)_70%,transparent)] bg-white p-6">
+            <h2 className="text-lg font-semibold">Form Components Demo</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormInput
+                label="License Type"
+                placeholder="Barber"
+              />
+              <div className="flex items-end">
+                 <Checkbox
+                   label="Hairstyling"
+                   defaultChecked
+                 />
+              </div>
+            </div>
+
+            <FormTextarea
+              label="Bio/Headline"
+              placeholder="Bloom & Blade salon, established in 2003..."
+              defaultValue="Bloom & Blade salon, established in 2003 in Celina, Delaware, prides itself on delivering exceptional service at a fair price. Our dedicated team is committed to making every visit a delightful experience, ensuring that you leave feeling refreshed and beautiful. We believe in creating a welcoming atmosphere where every client feels valued."
+            />
+
+            <FileUpload
+              label="License/Certificate"
+              fileName="License Photo.jpeg"
+              onDownload={() => console.log("Download")}
+              onDelete={() => console.log("Delete")}
+            />
+
+            <div>
+              <label className="mb-2 block text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">
+                Working Days
+              </label>
+              <DaySelector
+                selectedDays={selectedDays}
+                onChange={setSelectedDays}
+              />
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button variant="brand" shape="pill" size="lg" className="w-40 text-lg font-bold">
+                Add
+              </Button>
+            </div>
           </div>
         </div>
       </main>
