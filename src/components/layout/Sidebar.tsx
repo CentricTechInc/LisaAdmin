@@ -90,8 +90,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         className
       )}
     >
-      <div className="mb-8 px-2">
-        <span className="text-3xl font-semibold text-pink-500">Lisa</span>
+      <div className="mb-8 px-2 w-full justify-center items-center flex">
+        <Image
+          src="/icons/Lisa.svg"
+          alt="Lisa logo"
+          width={96}
+          height={32}
+          className="h-8 w-auto"
+        />
       </div>
       <nav className="flex flex-1 flex-col gap-2">
         {mainItems.map((item) => renderItem(item))}
