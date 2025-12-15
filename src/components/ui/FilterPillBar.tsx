@@ -32,18 +32,17 @@ export const FilterPillBar: React.FC<FilterPillBarProps> = ({
             key={item.id}
             items={item.items}
             trigger={
-              <button
-                type="button"
+              <div
                 className={cn(
-                  "flex items-center gap-1 rounded-full px-3 py-1 text-xs sm:text-sm text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_70%,transparent)]",
+                  "flex items-center gap-1 rounded-full px-3 py-1 text-xs sm:text-sm text-gray-500 hover:bg-gray-100 cursor-pointer select-none",
                   isEmphasized
-                    ? "font-semibold text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]"
+                    ? ""
                     : ""
                 )}
               >
                 <span>{item.label}</span>
                 <span className="text-[0.6rem]">▾</span>
-              </button>
+              </div>
             }
           />
         );
