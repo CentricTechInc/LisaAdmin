@@ -15,7 +15,7 @@ export default function SplashScreen() {
   }, [router]);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-gray-200">
+    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-white via-gray-50 to-gray-200">
       {/* Top Left Decorative Pink Circle/Glow */}
       <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-[#FF4460] opacity-40 blur-[80px]" />
       

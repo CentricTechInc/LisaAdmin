@@ -24,7 +24,8 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       className={cn(
-        "flex h-24 min-w-[150px] rounded-xl border border-[color-mix(in_oklab,var(--color-muted)_70%,transparent)] bg-white px-4 py-3",
+        "flex min-w-[150px] rounded-xl border border-[color-mix(in_oklab,var(--color-muted)_70%,transparent)] bg-white px-4 py-3",
+        "h-24", // Default height, can be overridden by className
         alignClass,
         className
       )}
