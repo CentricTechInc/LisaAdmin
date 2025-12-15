@@ -1,0 +1,81 @@
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+
+export interface ApiResponse<T = unknown> {
+  data: T;
+  status: number;
+  message: string;
+}
+
+export interface ApiError {
+  status?: number;
+  message: string;
+  data?: unknown;
+}
+
+const api: AxiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api",
+  timeout: 15000,
+  withCredentials: false,
+});
+
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => config,
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response: AxiosResponse): AxiosResponse<ApiResponse> => {
+    const { status, data, statusText } = response;
+
+    let message = statusText || "Request completed";
+
+    if (status === 200) {
+      message = "Request successful";
+    } else if (status >= 200 && status < 300) {
+      message = statusText || "Request successful";
+    }
+
+    const apiResponse: ApiResponse = {
+      data,
+      status,
+      message,
+    };
+
+    return {
+      ...response,
+      data: apiResponse,
+    };
+  },
+  (error: AxiosError): Promise<never> => {
+    const status = error.response?.status;
+    const data = error.response?.data;
+
+    let message = "Unexpected error. Please try again.";
+
+    if (status === 400) {
+      message = "Request is invalid. Please check your input.";
+    } else if (status === 500) {
+      message = "Server error. Please try again later.";
+    } else if (status) {
+      message = error.response?.statusText || `Request failed with status ${status}`;
+    } else if (error.message === "Network Error") {
+      message = "Network error. Please check your connection.";
+    }
+
+    const apiError: ApiError = {
+      status,
+      message,
+      data,
+    };
+
+    return Promise.reject(apiError);
+  }
+);
+
+export default api;
+
