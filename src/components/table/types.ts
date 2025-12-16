@@ -24,4 +24,5 @@ export type DataTableProps<T> = {
   loading?: boolean
   error?: string | null
   onRetry?: () => void
+  showColumnToggle?: boolean
 }

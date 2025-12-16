@@ -101,7 +101,7 @@ export const AppointmentsBarChartCard: React.FC<AppointmentsBarChartCardProps> =
       )}
     >
       <div className="mb-2 flex items-center justify-between">
-        <div className="text-sm font-semibold text-[color-mix(in_oklab,var(--color-foreground)_95%,transparent)]">
+        <div className="text-sm text-black font-semibold">
           {title}
         </div>
         <button

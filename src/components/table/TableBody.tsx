@@ -8,9 +8,10 @@ type Props<T> = {
   selectable?: boolean;
   selected: Set<number>;
   onToggleRow: (index: number, range?: boolean) => void;
+  showExtraColumn?: boolean;
 };
 
-export function TableBody<T>({ columns, rows, selectable, selected, onToggleRow }: Props<T>) {
+export function TableBody<T>({ columns, rows, selectable, selected, onToggleRow, showExtraColumn }: Props<T>) {
   const lastSelectedRef = React.useRef<number | null>(null);
 
   const handleClick = (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,16 +41,18 @@ export function TableBody<T>({ columns, rows, selectable, selected, onToggleRow 
               </td>
             )
           )}
-          <td className="px-3 py-2 text-right">
-            {selectable ? (
-              <input
-                type="checkbox"
-                aria-label={`Select row ${i + 1}`}
-                checked={selected.has(i)}
-                onChange={(e) => handleClick(i, e)}
-              />
-            ) : null}
-          </td>
+          {showExtraColumn ? (
+            <td className="px-3 py-2 text-right">
+              {selectable ? (
+                <input
+                  type="checkbox"
+                  aria-label={`Select row ${i + 1}`}
+                  checked={selected.has(i)}
+                  onChange={(e) => handleClick(i, e)}
+                />
+              ) : null}
+            </td>
+          ) : null}
         </tr>
       ))}
     </tbody>

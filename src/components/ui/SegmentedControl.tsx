@@ -34,7 +34,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({
             type="button"
             onClick={() => onChange(opt.id)}
             className={cn(
-              "flex-1 rounded-full px-4 py-2 text-sm transition-colors",
+              "flex-1 rounded-full px-4 py-2 text-xs transition-colors min-w-fit text-center",
               isActive
                 ? "bg-[#FF4460] font-semibold text-white"
                 : "text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_70%,transparent)]"

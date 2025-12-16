@@ -76,7 +76,7 @@ export const DemographicDonutCard: React.FC<DemographicDonutCardProps> = ({
         className
       )}
     >
-      <div className="text-sm font-semibold text-[color-mix(in_oklab,var(--color-foreground)_95%,transparent)]">
+      <div className="text-sm font-semibold text-black">
         {title}
       </div>
 
@@ -88,7 +88,7 @@ export const DemographicDonutCard: React.FC<DemographicDonutCardProps> = ({
 
       <div className="mt-4 flex flex-col gap-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-semibold text-[color-mix(in_oklab,var(--color-foreground)_95%,transparent)]">
+          <span className="text-2xl font-semibold text-black">
             {totalValue}
           </span>
           <span className="text-xs text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)]">
@@ -104,7 +104,7 @@ export const DemographicDonutCard: React.FC<DemographicDonutCardProps> = ({
                 style={{ backgroundColor: s.color }}
               />
               <span className="text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)]">
-                {s.label}: {s.value}
+              {s.value}
               </span>
             </div>
           ))}

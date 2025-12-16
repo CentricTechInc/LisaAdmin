@@ -53,6 +53,7 @@ export function DataTable<T>({
   loading,
   error,
   onRetry,
+  showColumnToggle = true,
 }: DataTableProps<T>) {
   const [columns, setColumns] = React.useState<Column<T>[]>(incomingColumns);
   const [sort, setSort] = React.useState<SortState | null>(initialSort ?? null);
@@ -132,8 +133,16 @@ export function DataTable<T>({
           sort={sort}
           onToggleSort={onToggleSort}
           onToggleVisibility={onToggleVisibility}
+          showColumnToggle={showColumnToggle}
         />
-        <TableBody<T> columns={columns} rows={pageRows} selectable={selectable} selected={selected} onToggleRow={onToggleRow} />
+        <TableBody<T>
+          columns={columns}
+          rows={pageRows}
+          selectable={selectable}
+          selected={selected}
+          onToggleRow={onToggleRow}
+          showExtraColumn={showColumnToggle || selectable}
+        />
       </table>
     </div>
   );
