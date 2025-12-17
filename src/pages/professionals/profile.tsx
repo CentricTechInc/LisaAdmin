@@ -58,7 +58,7 @@ export default function ProfessionalProfile() {
             accessor: (_row) => (
                 <button
                     type="button"
-                    onClick={() => router.push("/appointment-detail")}
+                    onClick={() => router.push("/appointment-detail?source=professionals")}
                     className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors"
                     aria-label="View appointment details"
                 >

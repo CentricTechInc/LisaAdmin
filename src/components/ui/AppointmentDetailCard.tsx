@@ -45,12 +45,14 @@ export interface AppointmentDetailData {
 interface AppointmentDetailCardProps {
   data: AppointmentDetailData;
   backLink?: string;
+  onBack?: () => void;
   className?: string;
 }
 
 export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
   data,
   backLink = "/customers/profile",
+  onBack,
   className,
 }) => {
   return (
@@ -58,23 +60,46 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            href={backLink}
-            className="flex items-center justify-center w-10 h-10 bg-white rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center justify-center w-10 h-10 bg-white rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+              aria-label="Back"
             >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </Link>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          ) : (
+            <Link
+              href={backLink}
+              className="flex items-center justify-center w-10 h-10 bg-white rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+              aria-label="Back"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </Link>
+          )}
           <h1 className="text-2xl font-bold text-[#13000A]">Detail</h1>
         </div>
         <div className="px-4 py-1.5 bg-[#E6F6EC] text-[#039855] text-sm font-medium rounded-md">

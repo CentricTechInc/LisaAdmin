@@ -37,7 +37,7 @@ export default function CustomerProfile() {
       id: "action",
       header: "Action",
       accessor: (row) => (
-        <Link href="/appointment-detail" className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
+        <Link href="/appointment-detail?source=customers" className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
           <EyeIcon className="w-9 h-9" />
         </Link>
       ),
