@@ -13,7 +13,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           <input
             type="checkbox"
             ref={ref}
-            className="peer h-5 w-5 appearance-none rounded-md border-2 border-[#00C853] bg-transparent checked:bg-transparent focus:outline-none"
+            className="peer h-5 w-5 appearance-none rounded-md border-2 border-[#00C853] bg-transparent checked:bg-transparent focus:outline-none text-black"
             {...props}
           />
           <svg
@@ -31,7 +31,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           </svg>
         </div>
         {label && (
-          <span className="text-lg text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">
+          <span className="text-lg text-black">
             {label}
           </span>
         )}

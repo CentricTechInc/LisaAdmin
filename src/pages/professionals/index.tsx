@@ -15,16 +15,16 @@ type Professional = {
   email: string;
   phone: string;
   category: string;
-  status: "Active" | "Blocked";
+  status: "Active" | "Blocked" | "Rejected" | "Pending";
 };
 
 const initialProfessionals: Professional[] = [
-  { id: 1, name: "Alison Williams", email: "alisonwilliams@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Blocked" },
-  { id: 2, name: "Meet Alex", email: "m.alex@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
+  { id: 1, name: "Alison Williams", email: "alisonwilliams@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Rejected" },
+  { id: 2, name: "Meet Alex", email: "m.alex@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Blocked" },
   { id: 3, name: "Emily Johnson", email: "emily@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Blocked" },
   { id: 4, name: "Michael Brown", email: "michael@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
-  { id: 5, name: "Sarah Wilson", email: "sarah@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Active" },
-  { id: 6, name: "David Miller", email: "david@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Blocked" },
+  { id: 5, name: "Sarah Wilson", email: "sarah@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Pending" },
+  { id: 6, name: "David Miller", email: "david@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Pending" },
   { id: 7, name: "Jessica Taylor", email: "jessica@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Active" },
   { id: 8, name: "James Anderson", email: "james@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
   { id: 9, name: "Laura Martinez", email: "laura@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Blocked" },
@@ -43,10 +43,18 @@ export default function ProfessionalsPage() {
   const tabs = ["Approved", "Pending Requests", "Rejected / Block"];
 
   // Filter
-  const filteredProfessionals = professionals.filter((professional) =>
-    professional.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    professional.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProfessionals = professionals.filter((professional) => {
+    const matchesSearch = professional.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    professional.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    if (activeTab === "Approved") return professional.status === "Active";
+    if (activeTab === "Pending Requests") return professional.status === "Pending";
+    if (activeTab === "Rejected / Block") return professional.status === "Blocked" || professional.status === "Rejected";
+
+    return true;
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredProfessionals.length / pageSize);
@@ -68,8 +76,8 @@ export default function ProfessionalsPage() {
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
       <Sidebar activeId="professionals" />
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="mx-auto max-w-7xl flex flex-col gap-6">
+      <main className="flex-1 p-2 overflow-y-auto">
+        <div className="mx-auto w-full flex flex-col gap-2">
           <GreetingHeader userName="Alison" />
           
           <div className="rounded-xl bg-white p-6 shadow-sm min-h-[600px]">
@@ -142,6 +150,9 @@ export default function ProfessionalsPage() {
                       <div className="flex items-center gap-1">Category <span className="text-[10px]">↕</span></div>
                     </th>
                     <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
+                      <div className="flex items-center gap-1">Status <span className="text-[10px]">↕</span></div>
+                    </th>
+                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
                       <div className="flex items-center gap-1">Action <span className="text-[10px]">↕</span></div>
                     </th>
                   </tr>
@@ -155,32 +166,60 @@ export default function ProfessionalsPage() {
                         <td className="px-6 py-4">{professional.phone}</td>
                         <td className="px-6 py-4">{professional.category}</td>
                         <td className="px-6 py-4">
+                            <span className={cn(
+                                "px-3 py-1 rounded-md text-xs font-semibold",
+                                professional.status === "Rejected" ? "bg-[#FFEAEA] text-[#FF4460]" :
+                                professional.status === "Blocked" ? "bg-gray-100 text-gray-600" :
+                                professional.status === "Pending" ? "bg-yellow-100 text-yellow-600" :
+                                "hidden" // Active doesn't show badge in mockup for approved tab, but let's see. Mockup for "Approved" tab isn't shown, but usually active doesn't need a badge or maybe green.
+                            )}>
+                                {professional.status === "Active" ? "" : professional.status}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <button 
-                              onClick={() => router.push('/professionals/profile')}
+                              onClick={() => router.push({ 
+                                pathname: '/professionals/profile', 
+                                query: professional.status === 'Pending' ? { status: 'pending' } : 
+                                       professional.status === 'Rejected' ? { status: 'rejected' } : {} 
+                              })}
                               className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500"
                               aria-label="View details"
                             >
                               <EyeIcon className="w-5 h-5" />
                             </button>
-                            <button
-                              onClick={() => handleBlockToggle(professional.id)}
-                              className={cn(
-                                "h-8 px-4 rounded text-xs font-medium transition-colors min-w-[70px]",
-                                professional.status === "Active"
-                                  ? "bg-red-50 text-red-600 hover:bg-red-100"
-                                  : "bg-green-50 text-green-600 hover:bg-green-100"
-                              )}
-                            >
-                              {professional.status === "Active" ? "Block" : "Unblock"}
-                            </button>
-                            <button
-                                onClick={() => handleDelete(professional.id)}
-                                className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
-                                aria-label="Delete"
-                            >
-                                <TrashIcon className="w-5 h-5" />
-                            </button>
+                            {activeTab === "Approved" && (
+                              <>
+                                <button
+                                  onClick={() => handleBlockToggle(professional.id)}
+                                  className={cn(
+                                    "h-8 px-4 rounded text-xs font-medium transition-colors min-w-[70px]",
+                                    professional.status === "Active"
+                                      ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                      : "bg-green-50 text-green-600 hover:bg-green-100"
+                                  )}
+                                >
+                                  {professional.status === "Active" ? "Block" : "Unblock"}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(professional.id)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
+                                    aria-label="Delete"
+                                >
+                                    <TrashIcon className="w-5 h-5" />
+                                </button>
+                              </>
+                            )}
+                            {activeTab === "Rejected / Block" && (
+                                <button
+                                    onClick={() => handleDelete(professional.id)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
+                                    aria-label="Delete"
+                                >
+                                    <TrashIcon className="w-5 h-5" />
+                                </button>
+                            )}
                           </div>
                         </td>
                       </tr>

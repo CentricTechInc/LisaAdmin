@@ -1,0 +1,68 @@
+import React from "react";
+import Head from "next/head";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { GreetingHeader } from "@/components/layout/GreetingHeader";
+import { AppointmentDetailCard, AppointmentDetailData } from "@/components/ui/AppointmentDetailCard";
+
+const APPOINTMENT_DATA: AppointmentDetailData = {
+  status: "Completed",
+  customer: {
+    name: "Eleanor",
+    email: "eleanor@mail.com",
+    image: "/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg",
+  },
+  professional: {
+    name: "Bloom & Blade",
+    category: "Salon",
+    phone: "(631) 273-2740",
+    email: "b&b@mail.com",
+    image: "/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg",
+  },
+  notes: "Lorem ipsum dolor sit amet consectetur. Cras tincidunt purus sed scelerisque.",
+  dateTime: "12 November, 09:00 AM",
+  services: [
+    {
+      sNo: 1,
+      name: "Nail",
+      dateTime: "12 November, 09:00 AM",
+      amount: "$8.00",
+    },
+    {
+      sNo: 2,
+      name: "Facial",
+      dateTime: "12 November, 09:00 AM",
+      amount: "$24.99",
+    },
+  ],
+  payment: {
+    method: "Bank Account",
+    last4: "2345",
+    subTotal: "$32.99",
+    platformFee: "$4.95",
+    grandTotal: "$28.05",
+  },
+  review: {
+    name: "Eleanor",
+    date: "2 days ago",
+    rating: 4,
+    comment: "The place was clean, great serivce, stall are friendly. I will certainly recommend to my friends and visit again! :)",
+    image: "/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg",
+  },
+};
+
+export default function AppointmentDetail() {
+  return (
+    <div className="flex min-h-screen bg-[#F9FAFB]">
+      <Head>
+        <title>Appointment Detail | Lisa Admin</title>
+      </Head>
+      <Sidebar activeId="customers" />
+      <main className="flex-1 p-6 overflow-y-auto">
+        <div className="w-full flex flex-col gap-6">
+          <GreetingHeader userName="Alison" />
+          <AppointmentDetailCard data={APPOINTMENT_DATA} />
+        </div>
+      </main>
+    </div>
+  );
+}

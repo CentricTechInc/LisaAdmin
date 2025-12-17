@@ -37,7 +37,7 @@ export default function CustomerProfile() {
       id: "action",
       header: "Action",
       accessor: (row) => (
-        <Link href="/customers/appointment-detail" className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
+        <Link href="/appointment-detail" className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
           <EyeIcon className="w-9 h-9" />
         </Link>
       ),
@@ -83,9 +83,9 @@ export default function CustomerProfile() {
                             <p className="text-gray-500">eleanor@mail.com</p>
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                         <p className="text-xs text-gray-400 max-w-[200px] text-center md:text-right">
-                            If you want to "Block or Unblock" the user, tap here
+                            If you want to &quot;Block or Unblock&quot; the user, tap here
                         </p>
                         <Button 
                             className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
