@@ -53,11 +53,22 @@ const APPOINTMENT_DATA: AppointmentDetailData = {
 
 export default function AppointmentDetail() {
   const router = useRouter();
-  const { source } = router.query;
+  const { source, status } = router.query;
 
   const activeSidebarId = (typeof source === "string" && ["customers", "professionals", "appointments"].includes(source))
     ? source
     : "customers"; // Default or fallback
+
+  // Determine status display
+  const currentStatus = (typeof status === "string" && status) 
+    ? status.charAt(0).toUpperCase() + status.slice(1) 
+    : APPOINTMENT_DATA.status;
+
+  // Clone data with dynamic status
+  const data = {
+    ...APPOINTMENT_DATA,
+    status: currentStatus
+  };
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]">
@@ -69,7 +80,7 @@ export default function AppointmentDetail() {
         <div className="w-full flex flex-col gap-6">
           <GreetingHeader userName="Alison" />
           <AppointmentDetailCard
-            data={APPOINTMENT_DATA}
+            data={data}
             onBack={() => {
               if (typeof window !== "undefined" && window.history.length > 1) router.back();
               else router.push(`/${activeSidebarId}`);

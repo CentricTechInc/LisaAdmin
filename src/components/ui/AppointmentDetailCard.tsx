@@ -55,6 +55,19 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
   onBack,
   className,
 }) => {
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "completed":
+        return "bg-[#E6F6EC] text-[#039855]";
+      case "pending":
+        return "bg-[#FFF0F4] text-[#FF4460]"; // Pink for pending
+      case "cancelled":
+        return "bg-[#F2F4F7] text-[#344054]"; // Gray for cancelled
+      default:
+        return "bg-[#F9FAFB] text-[#344054]"; // Gray default
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       {/* Header */}
@@ -102,7 +115,7 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
           )}
           <h1 className="text-2xl font-bold text-[#13000A]">Detail</h1>
         </div>
-        <div className="px-4 py-1.5 bg-[#E6F6EC] text-[#039855] text-sm font-medium rounded-md">
+        <div className={cn("px-4 py-1.5 text-sm font-medium rounded-md", getStatusColor(data.status))}>
           {data.status}
         </div>
       </div>

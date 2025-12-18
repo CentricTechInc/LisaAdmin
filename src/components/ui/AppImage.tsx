@@ -17,7 +17,28 @@ export const AppImage: React.FC<AppImageProps> = ({
   className,
   ...props
 }) => {
-  const src = `/images/${imageName}`;
+  const [src, setSrc] = React.useState(() => {
+    if (!imageName) return "/images/avatar.png";
+    if (imageName.startsWith("data:") || imageName.startsWith("http") || imageName.startsWith("/")) {
+      return imageName;
+    }
+    return `/images/${imageName}`;
+  });
+
+  React.useEffect(() => {
+    if (!imageName) {
+      setSrc("/images/avatar.png");
+      return;
+    }
+    
+    // Check if it's a data URL (uploaded image) or external URL
+    if (imageName.startsWith("data:") || imageName.startsWith("http") || imageName.startsWith("/")) {
+      setSrc(imageName);
+    } else {
+      // It's a local image in public/images folder
+      setSrc(`/images/${imageName}`);
+    }
+  }, [imageName]);
 
   return (
     <Image
@@ -29,6 +50,7 @@ export const AppImage: React.FC<AppImageProps> = ({
         rounded ? "rounded-[1.25rem] object-cover" : "",
         className
       )}
+      onError={() => setSrc("/images/avatar.png")}
       {...props}
     />
   );

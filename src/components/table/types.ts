@@ -1,11 +1,12 @@
 export type Column<T> = {
   id: string
   header: string
-  accessor?: (row: T) => React.ReactNode
+  accessor?: (row: T, index: number, actions?: { isExpanded: boolean; toggleExpand: () => void }) => React.ReactNode
   field?: keyof T
   sortable?: boolean
   visible?: boolean
   width?: string | number
+  className?: string
 }
 
 export type SortState = { columnId: string; direction: 'asc' | 'desc' }
@@ -25,4 +26,5 @@ export type DataTableProps<T> = {
   error?: string | null
   onRetry?: () => void
   showColumnToggle?: boolean
+  renderSubComponent?: (row: T) => React.ReactNode
 }

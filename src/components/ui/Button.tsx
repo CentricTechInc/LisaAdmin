@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "success" | "danger" | "brand";
+  variant?: "primary" | "secondary" | "ghost" | "success" | "danger" | "brand" | "outline-brand";
   size?: "sm" | "md" | "lg";
   shape?: "default" | "pill" | "square";
   isLoading?: boolean;
@@ -38,6 +38,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-[var(--color-danger)] text-white hover:bg-[color-mix(in_oklab,var(--color-danger)_85%,black)]",
       brand:
         "bg-[#FF4460] text-white hover:bg-[#E03350]",
+      "outline-brand":
+        "bg-transparent border border-[#FF4460] text-[#FF4460] hover:bg-red-50",
     }[variant];
 
     return (

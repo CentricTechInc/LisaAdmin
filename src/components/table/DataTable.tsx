@@ -12,8 +12,8 @@ function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null) {
   const dir = sort.direction === "asc" ? 1 : -1;
   const copy = [...rows];
   copy.sort((a, b) => {
-    const av = col.accessor ? col.accessor(a) : col.field ? a[col.field] : undefined;
-    const bv = col.accessor ? col.accessor(b) : col.field ? b[col.field] : undefined;
+    const av = col.accessor ? col.accessor(a, 0) : col.field ? a[col.field] : undefined;
+    const bv = col.accessor ? col.accessor(b, 0) : col.field ? b[col.field] : undefined;
     const ax = typeof av === "string" ? av.toLowerCase() : av;
     const bx = typeof bv === "string" ? bv.toLowerCase() : bv;
     if (ax == null && bx == null) return 0;
@@ -29,10 +29,10 @@ function sortRows<T>(rows: T[], columns: Column<T>[], sort: SortState | null) {
 function filterRows<T>(rows: T[], columns: Column<T>[], term?: string) {
   if (!term) return rows;
   const t = term.toLowerCase();
-  return rows.filter((r) =>
+  return rows.filter((r, i) =>
     columns.some((c) => {
       if (c.visible === false) return false;
-      const v = c.accessor ? c.accessor(r) : c.field ? r[c.field] : undefined;
+      const v = c.accessor ? c.accessor(r, i) : c.field ? r[c.field] : undefined;
       const s = typeof v === "string" ? v : v != null ? String(v) : "";
       return s.toLowerCase().includes(t);
     })
@@ -54,10 +54,12 @@ export function DataTable<T>({
   error,
   onRetry,
   showColumnToggle = true,
+  renderSubComponent,
 }: DataTableProps<T>) {
   const [columns, setColumns] = React.useState<Column<T>[]>(incomingColumns);
   const [sort, setSort] = React.useState<SortState | null>(initialSort ?? null);
   const [selected, setSelected] = React.useState<Set<number>>(new Set());
+  const [expanded, setExpanded] = React.useState<Set<number>>(new Set());
 
   React.useEffect(() => setColumns(incomingColumns), [incomingColumns]);
 
@@ -94,6 +96,15 @@ export function DataTable<T>({
         for (let i = min; i <= max; i++) next.add(i);
         return next;
       }
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const onToggleExpand = (index: number) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
       if (next.has(index)) next.delete(index);
       else next.add(index);
       return next;
@@ -142,6 +153,9 @@ export function DataTable<T>({
           selected={selected}
           onToggleRow={onToggleRow}
           showExtraColumn={showColumnToggle || selectable}
+          expanded={expanded}
+          onToggleExpand={onToggleExpand}
+          renderSubComponent={renderSubComponent}
         />
       </table>
     </div>

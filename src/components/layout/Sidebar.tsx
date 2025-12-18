@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const content = (
       <div
         className={cn(
-          "flex items-center gap-3 rounded-full px-4 py-2 text-sm transition-colors",
+          "flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors",
           isActive
             ? "bg-[#13000A] text-white"
             : "text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_60%,transparent)]"

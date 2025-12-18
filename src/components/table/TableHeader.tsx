@@ -21,7 +21,8 @@ export function TableHeader<T>({ columns, sort, onToggleSort, onToggleVisibility
               scope="col"
               className={cn(
                 "select-none whitespace-nowrap border-b px-3 py-2 text-left text-sm font-medium text-black",
-                col.sortable ? "cursor-pointer" : ""
+                col.sortable ? "cursor-pointer" : "",
+                col.className
               )}
               style={col.width ? { width: col.width } : undefined}
               aria-sort={
