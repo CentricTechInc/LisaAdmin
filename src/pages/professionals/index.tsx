@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { GreetingHeader } from "@/components/layout/GreetingHeader";
@@ -8,6 +8,8 @@ import { EyeIcon } from "@/components/ui/EyeIcon";
 import { TrashIcon } from "@/components/ui/TrashIcon";
 import { Input } from "@/components/ui/Input";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { DataTable } from "@/components/table/DataTable";
+import { Column } from "@/components/table/types";
 
 type Professional = {
   id: number;
@@ -56,11 +58,6 @@ export default function ProfessionalsPage() {
     return true;
   });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProfessionals.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentProfessionals = filteredProfessionals.slice(startIndex, startIndex + pageSize);
-
   const handleBlockToggle = (id: number) => {
     setProfessionals(professionals.map(p => 
       p.id === id ? { ...p, status: p.status === "Blocked" ? "Active" : "Blocked" } : p
@@ -73,6 +70,79 @@ export default function ProfessionalsPage() {
     }
   };
 
+  const columns: Column<Professional>[] = useMemo(() => [
+    { id: "name", header: "Name", field: "name", sortable: true },
+    { id: "email", header: "Email", field: "email", sortable: true },
+    { id: "phone", header: "Phone", field: "phone", sortable: true },
+    { id: "category", header: "Category", field: "category", sortable: true },
+    {
+      id: "status",
+      header: "Status",
+      sortable: true,
+      accessor: (item) => (
+        <span className={cn(
+            "px-3 py-1 rounded-md text-xs font-semibold",
+            item.status === "Rejected" ? "bg-[#FFEAEA] text-[#FF4460]" :
+            item.status === "Blocked" ? "bg-gray-100 text-gray-600" :
+            item.status === "Pending" ? "bg-yellow-100 text-yellow-600" :
+            "hidden"
+        )}>
+            {item.status === "Active" ? "" : item.status}
+        </span>
+      ),
+    },
+    {
+      id: "action",
+      header: "Action",
+      accessor: (item) => (
+        <div className="flex items-center gap-2">
+            <button 
+                onClick={() => router.push({ 
+                pathname: '/professionals/profile', 
+                query: item.status === 'Pending' ? { status: 'pending' } : 
+                        item.status === 'Rejected' ? { status: 'rejected' } : {} 
+                })}
+                className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500"
+                aria-label="View details"
+            >
+                <EyeIcon className="w-5 h-5" />
+            </button>
+            {activeTab === "Approved" && (
+                <>
+                <button
+                    onClick={() => handleBlockToggle(item.id)}
+                    className={cn(
+                    "h-8 px-4 rounded text-xs font-medium transition-colors min-w-17.5",
+                    item.status === "Active"
+                        ? "bg-red-50 text-red-600 hover:bg-red-100"
+                        : "bg-green-50 text-green-600 hover:bg-green-100"
+                    )}
+                >
+                    {item.status === "Active" ? "Block" : "Unblock"}
+                </button>
+                <button
+                    onClick={() => handleDelete(item.id)}
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
+                    aria-label="Delete"
+                >
+                    <TrashIcon className="w-5 h-5" />
+                </button>
+                </>
+            )}
+            {activeTab === "Rejected / Block" && (
+                <button
+                    onClick={() => handleDelete(item.id)}
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
+                    aria-label="Delete"
+                >
+                    <TrashIcon className="w-5 h-5" />
+                </button>
+            )}
+        </div>
+      ),
+    },
+  ], [activeTab, router]);
+
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
       <Sidebar activeId="professionals" />
@@ -80,7 +150,7 @@ export default function ProfessionalsPage() {
         <div className="mx-auto w-full flex flex-col gap-2">
           <GreetingHeader userName="Alison" />
           
-          <div className="rounded-xl bg-white p-6 shadow-sm min-h-[600px]">
+          <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Professionals</h2>
@@ -133,143 +203,16 @@ export default function ProfessionalsPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-left text-sm text-gray-600">
-                <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold">
-                  <tr>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Name <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Email <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Phone <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Category <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Status <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Action <span className="text-[10px]">↕</span></div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {currentProfessionals.length > 0 ? (
-                    currentProfessionals.map((professional) => (
-                      <tr key={professional.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 font-medium text-gray-900">{professional.name}</td>
-                        <td className="px-6 py-4">{professional.email}</td>
-                        <td className="px-6 py-4">{professional.phone}</td>
-                        <td className="px-6 py-4">{professional.category}</td>
-                        <td className="px-6 py-4">
-                            <span className={cn(
-                                "px-3 py-1 rounded-md text-xs font-semibold",
-                                professional.status === "Rejected" ? "bg-[#FFEAEA] text-[#FF4460]" :
-                                professional.status === "Blocked" ? "bg-gray-100 text-gray-600" :
-                                professional.status === "Pending" ? "bg-yellow-100 text-yellow-600" :
-                                "hidden" // Active doesn't show badge in mockup for approved tab, but let's see. Mockup for "Approved" tab isn't shown, but usually active doesn't need a badge or maybe green.
-                            )}>
-                                {professional.status === "Active" ? "" : professional.status}
-                            </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <button 
-                              onClick={() => router.push({ 
-                                pathname: '/professionals/profile', 
-                                query: professional.status === 'Pending' ? { status: 'pending' } : 
-                                       professional.status === 'Rejected' ? { status: 'rejected' } : {} 
-                              })}
-                              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500"
-                              aria-label="View details"
-                            >
-                              <EyeIcon className="w-5 h-5" />
-                            </button>
-                            {activeTab === "Approved" && (
-                              <>
-                                <button
-                                  onClick={() => handleBlockToggle(professional.id)}
-                                  className={cn(
-                                    "h-8 px-4 rounded text-xs font-medium transition-colors min-w-[70px]",
-                                    professional.status === "Active"
-                                      ? "bg-red-50 text-red-600 hover:bg-red-100"
-                                      : "bg-green-50 text-green-600 hover:bg-green-100"
-                                  )}
-                                >
-                                  {professional.status === "Active" ? "Block" : "Unblock"}
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(professional.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
-                                    aria-label="Delete"
-                                >
-                                    <TrashIcon className="w-5 h-5" />
-                                </button>
-                              </>
-                            )}
-                            {activeTab === "Rejected / Block" && (
-                                <button
-                                    onClick={() => handleDelete(professional.id)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
-                                    aria-label="Delete"
-                                >
-                                    <TrashIcon className="w-5 h-5" />
-                                </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-4 text-center">
-                        No professionals found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div className="text-sm text-gray-600">
-                Showing {startIndex + 1} to {Math.min(startIndex + pageSize, filteredProfessionals.length)} of {filteredProfessionals.length} entries
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="rounded border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={cn(
-                      "rounded border px-3 py-1 text-sm",
-                      currentPage === page
-                        ? "border-[#FF4460] bg-[#FF4460] text-white"
-                        : "border-gray-200 hover:bg-gray-50"
-                    )}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="rounded border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="rounded-lg p-6  border border-gray-200 overflow-hidden">
+              <DataTable
+                columns={columns}
+                data={filteredProfessionals}
+                page={currentPage}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                selectable={false}
+                showColumnToggle={false}
+              />
             </div>
           </div>
         </div>

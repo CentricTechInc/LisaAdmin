@@ -30,6 +30,7 @@ const subCategoriesData = [
   {
     id: 1,
     name: "Hair Wash & Blow-Dry/Styling",
+    category: "Hair",
     price: 48.50,
     serviceFor: "For All",
     image: "hair-wash.png",
@@ -38,6 +39,7 @@ const subCategoriesData = [
   {
     id: 2,
     name: "Skincare",
+    category: "Skincare",
     price: 72.30,
     serviceFor: "For All",
     image: "skincare-sub.png",
@@ -46,6 +48,7 @@ const subCategoriesData = [
   {
     id: 3,
     name: "Makeup",
+    category: "Makeup",
     price: 59.99,
     serviceFor: "For All",
     image: "makeup-sub.png",
@@ -54,6 +57,7 @@ const subCategoriesData = [
   {
     id: 4,
     name: "Nail",
+    category: "Nail",
     price: 39.75,
     serviceFor: "For All",
     image: "nail-sub.png",
@@ -98,6 +102,7 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<typeof categoriesData[0] | null>(null);
   const [editingSubCategory, setEditingSubCategory] = useState<typeof subCategoriesData[0] | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("All");
 
   const handleEditCategory = (category: typeof categoriesData[0]) => {
     setEditingCategory(category);
@@ -161,6 +166,7 @@ export default function CategoriesPage() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
+    const category = formData.get("category") as string;
     const price = parseFloat(formData.get("price") as string) || 0;
     const serviceFor = formData.get("serviceFor") as string;
     const description = formData.get("description") as string;
@@ -168,7 +174,7 @@ export default function CategoriesPage() {
     if (editingSubCategory) {
       setSubCategories(subCategories.map((sub) => 
         sub.id === editingSubCategory.id 
-          ? { ...sub, name, price, serviceFor, description, ...(selectedImage ? { image: selectedImage } : {}) } 
+          ? { ...sub, name, category, price, serviceFor, description, ...(selectedImage ? { image: selectedImage } : {}) } 
           : sub
       ));
     } else {
@@ -177,6 +183,7 @@ export default function CategoriesPage() {
         {
           id: Math.max(...subCategories.map((s) => s.id)) + 1,
           name,
+          category,
           price,
           serviceFor,
           image: selectedImage || "avatar.png",
@@ -259,6 +266,11 @@ export default function CategoriesPage() {
       field: "name",
     },
     {
+      id: "category",
+      header: "Category",
+      field: "category",
+    },
+    {
       id: "price",
       header: "Price",
       accessor: (row) => `$${row.price.toFixed(2)}`,
@@ -296,6 +308,11 @@ export default function CategoriesPage() {
     },
   ];
 
+  const filteredSubCategories = subCategories.filter((sub) => {
+    if (categoryFilter !== "All" && sub.category !== categoryFilter) return false;
+    return true;
+  });
+
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]">
       <Sidebar activeId="categories" />
@@ -313,15 +330,31 @@ export default function CategoriesPage() {
             </Button>
           </div>
 
-          <div className="w-fit">
-            <SegmentedControl
-              options={[
-                { id: "categories", label: "Categories" },
-                { id: "sub-categories", label: "Sub Categories" },
-              ]}
-              value={activeTab}
-              onChange={setActiveTab}
-            />
+          <div className="flex items-center justify-between">
+            <div className="w-fit">
+              <SegmentedControl
+                options={[
+                  { id: "categories", label: "Categories" },
+                  { id: "sub-categories", label: "Sub Categories" },
+                ]}
+                value={activeTab}
+                onChange={setActiveTab}
+              />
+            </div>
+
+            {activeTab === "sub-categories" && (
+              <div className="w-64">
+                <Select
+                  options={[
+                    { label: "All Categories", value: "All" },
+                    ...categories.map((c) => ({ label: c.name, value: c.name })),
+                  ]}
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="bg-white"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -350,7 +383,7 @@ export default function CategoriesPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+          <div className="bg-white rounded-lg p-6  shadow-sm border border-gray-100">
             {activeTab === "categories" ? (
               <DataTable
                 key="categories-table"
@@ -364,7 +397,7 @@ export default function CategoriesPage() {
                <DataTable
                 key="sub-categories-table"
                 columns={subCategoryColumns}
-                data={subCategories}
+                data={filteredSubCategories}
                 pageSize={10}
                 selectable={false}
                 showColumnToggle={false}
@@ -469,9 +502,13 @@ export default function CategoriesPage() {
                 <Select 
                     name="category"
                     options={[
-                        { label: "Hair", value: "hair" },
-                        { label: "Skincare", value: "skincare" },
+                        { label: "Hair", value: "Hair" },
+                        { label: "Skincare", value: "Skincare" },
+                        { label: "Makeup", value: "Makeup" },
+                        { label: "Nail", value: "Nail" },
+                        { label: "Massage/Spa", value: "Massage/Spa" },
                     ]}
+                    defaultValue={editingSubCategory ? editingSubCategory.category : "Hair"}
                 />
             </div>
 

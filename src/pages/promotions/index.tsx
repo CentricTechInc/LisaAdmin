@@ -283,18 +283,6 @@ export default function PromotionsPage() {
     if (activeTab === "coupon") return "+ Add Coupon";
     return "+ Add Push Notification";
   };
-
-  const currentTotal = activeTab === "banner" ? banners.length : activeTab === "coupon" ? coupons.length : pushNotifications.length;
-  const totalPages = Math.ceil(currentTotal / pageSize);
-  const startEntry = currentTotal === 0 ? 0 : (page - 1) * pageSize + 1;
-  const endEntry = Math.min(page * pageSize, currentTotal);
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
       <Sidebar activeId="promotions" />
@@ -338,7 +326,7 @@ export default function PromotionsPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 overflow-hidden">
                {activeTab === "banner" && (
                  <DataTable 
                    columns={bannerColumns} 
@@ -373,44 +361,6 @@ export default function PromotionsPage() {
                  />
                )}
             </div>
-            
-            {currentTotal > 0 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-gray-500">
-                  Showing {startEntry} to {endEntry} of {currentTotal} entries
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
-                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                  >
-                    Previous
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => handlePageChange(p)}
-                      className={`px-3 py-1 text-sm border rounded ${
-                        page === p
-                          ? "bg-[#FF4460] text-white border-[#FF4460]"
-                          : "hover:bg-gray-50 bg-white"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
       </main>

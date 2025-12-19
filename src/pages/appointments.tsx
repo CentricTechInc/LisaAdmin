@@ -152,7 +152,7 @@ export default function AppointmentsPage() {
       id: "action",
       header: "Action",
       accessor: (row) => (
-        <button 
+        <button
           className="hover:opacity-80 transition-opacity"
           onClick={() => router.push(`/appointment-detail?source=Appointments&status=${activeTab}`)}
         >
@@ -258,7 +258,7 @@ export default function AppointmentsPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-lg p-6  shadow-sm border border-gray-100 overflow-hidden">
               <DataTable
                 columns={columns}
                 data={filteredData}
@@ -266,36 +266,9 @@ export default function AppointmentsPage() {
                 pageSize={pageSize}
                 selectable={false}
                 showColumnToggle={false}
-                // We handle pagination UI outside
+              // We handle pagination UI outside
               />
             </div>
-
-            {totalItems > 0 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-gray-500">
-                  Showing {startEntry} to {endEntry} of {totalItems} entries
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
-                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1 text-sm rounded-full bg-[#FF4460] text-white">
-                    {page}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page === totalPages}
-                    className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>

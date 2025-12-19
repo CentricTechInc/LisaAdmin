@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
+import { DataTable } from "@/components/table/DataTable";
+import { Column } from "@/components/table/types";
+import { EyeIcon } from "@/components/ui/EyeIcon";
 
 type Customer = {
   id: number;
@@ -29,8 +32,6 @@ const initialCustomers: Customer[] = [
   { id: 11, name: "Jennifer Garcia", email: "jennifer@mail.com", age: 27, gender: "Female", status: "Active" },
 ];
 
-import { EyeIcon } from "@/components/ui/EyeIcon";
-
 export default function CustomersPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,16 +45,44 @@ export default function CustomersPage() {
     customer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Pagination
-  const totalPages = Math.ceil(filteredCustomers.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentCustomers = filteredCustomers.slice(startIndex, startIndex + pageSize);
-
   const handleBlockToggle = (id: number) => {
     setCustomers(customers.map(c => 
       c.id === id ? { ...c, status: c.status === "Blocked" ? "Active" : "Blocked" } : c
     ));
   };
+
+  const columns: Column<Customer>[] = useMemo(() => [
+    { id: "name", header: "Name", field: "name", sortable: true },
+    { id: "email", header: "Email", field: "email", sortable: true },
+    { id: "age", header: "Age", field: "age", sortable: true },
+    { id: "gender", header: "Gender", field: "gender", sortable: true },
+    {
+      id: "action",
+      header: "Action",
+      accessor: (item) => (
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => router.push('/customers/profile')}
+            className="group flex items-center justify-center transition-transform hover:scale-105 focus:outline-none"
+            aria-label="View details"
+          >
+            <EyeIcon className="w-9 h-9" />
+          </button>
+          <button
+            onClick={() => handleBlockToggle(item.id)}
+            className={cn(
+              "h-8 px-4 rounded text-xs font-medium transition-colors",
+              item.status === "Active"
+                ? "bg-red-50 text-red-600 hover:bg-red-100"
+                : "bg-green-50 text-green-600 hover:bg-green-100"
+            )}
+          >
+            {item.status === "Active" ? "Block" : "Unblock"}
+          </button>
+        </div>
+      ),
+    },
+  ], [router]);
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
@@ -62,7 +91,7 @@ export default function CustomersPage() {
         <div className="mx-auto w-full flex flex-col gap-3">
           <GreetingHeader userName="Alison" />
           
-          <div className="rounded-xl bg-white p-6 shadow-sm min-h-[600px]">
+          <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Customers</h2>
@@ -106,105 +135,16 @@ export default function CustomersPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-left text-sm text-gray-600">
-                <thead className="bg-gray-50 text-xs uppercase text-gray-700 font-semibold">
-                  <tr>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Name <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Email <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Age <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Gender <span className="text-[10px]">↕</span></div>
-                    </th>
-                    <th className="px-6 py-3 cursor-pointer hover:bg-gray-100">
-                      <div className="flex items-center gap-1">Action <span className="text-[10px]">↕</span></div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {currentCustomers.length > 0 ? (
-                    currentCustomers.map((customer) => (
-                      <tr key={customer.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 font-medium text-gray-900">{customer.name}</td>
-                        <td className="px-6 py-4">{customer.email}</td>
-                        <td className="px-6 py-4">{customer.age}</td>
-                        <td className="px-6 py-4">{customer.gender}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <button 
-                              onClick={() => router.push('/customers/profile')}
-                              className="group flex items-center justify-center transition-transform hover:scale-105 focus:outline-none"
-                              aria-label="View details"
-                            >
-                              <EyeIcon className="w-9 h-9" />
-                            </button>
-                            <button
-                              onClick={() => handleBlockToggle(customer.id)}
-                              className={cn(
-                                "h-8 px-4 rounded text-xs font-medium transition-colors",
-                                customer.status === "Active"
-                                  ? "bg-red-50 text-red-600 hover:bg-red-100"
-                                  : "bg-green-50 text-green-600 hover:bg-green-100"
-                              )}
-                            >
-                              {customer.status === "Active" ? "Block" : "Unblock"}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-4 text-center">
-                        No customers found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div className="text-sm text-gray-600">
-                Showing {startIndex + 1} to {Math.min(startIndex + pageSize, filteredCustomers.length)} of {filteredCustomers.length} entries
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="rounded border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={cn(
-                      "rounded border px-3 py-1 text-sm",
-                      currentPage === page
-                        ? "border-[#FF4460] bg-[#FF4460] text-white"
-                        : "border-gray-200 hover:bg-gray-50"
-                    )}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="rounded border border-gray-200 px-3 py-1 text-sm disabled:opacity-50 hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="rounded-lg border p-6  border-gray-200 overflow-hidden">
+              <DataTable
+                columns={columns}
+                data={filteredCustomers}
+                page={currentPage}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                selectable={false}
+                showColumnToggle={false}
+              />
             </div>
           </div>
         </div>

@@ -60,15 +60,35 @@ export function DataTable<T>({
   const [sort, setSort] = React.useState<SortState | null>(initialSort ?? null);
   const [selected, setSelected] = React.useState<Set<number>>(new Set());
   const [expanded, setExpanded] = React.useState<Set<number>>(new Set());
+  const [currentPage, setCurrentPage] = React.useState(page);
 
   React.useEffect(() => setColumns(incomingColumns), [incomingColumns]);
+  
+  // Sync page prop if controlled
+  React.useEffect(() => {
+     if (page !== undefined) setCurrentPage(page);
+  }, [page]);
 
   const filtered = React.useMemo(() => filterRows<T>(data, columns, globalFilter), [data, columns, globalFilter]);
+  
+  // Reset page when filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [globalFilter, data.length]);
+
   const sorted = React.useMemo(() => sortRows<T>(filtered, columns, sort), [filtered, columns, sort]);
   const total = sorted.length;
-  const start = (page - 1) * pageSize;
+  const totalPages = Math.ceil(total / pageSize);
+  
+  const start = (currentPage - 1) * pageSize;
   const end = Math.min(start + pageSize, total);
   const pageRows = sorted.slice(start, end);
+
+  const handlePageChange = (p: number) => {
+    if (p < 1 || p > totalPages) return;
+    setCurrentPage(p);
+    onPageChange?.(p);
+  };
 
   const onToggleSort = (columnId: string) => {
     setSort((prev) => {
@@ -137,27 +157,68 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-sm border bg-slate-100">
-      <table role="table" className={cn("w-full text-sm")}>
-        <TableHeader<T>
-          columns={columns}
-          sort={sort}
-          onToggleSort={onToggleSort}
-          onToggleVisibility={onToggleVisibility}
-          showColumnToggle={showColumnToggle}
-        />
-        <TableBody<T>
-          columns={columns}
-          rows={pageRows}
-          selectable={selectable}
-          selected={selected}
-          onToggleRow={onToggleRow}
-          showExtraColumn={showColumnToggle || selectable}
-          expanded={expanded}
-          onToggleExpand={onToggleExpand}
-          renderSubComponent={renderSubComponent}
-        />
-      </table>
+    <div className="flex flex-col gap-4">
+      <div className="overflow-x-auto rounded-sm border bg-slate-100">
+        <table role="table" className={cn("w-full text-sm")}>
+          <TableHeader<T>
+            columns={columns}
+            sort={sort}
+            onToggleSort={onToggleSort}
+            onToggleVisibility={onToggleVisibility}
+            showColumnToggle={showColumnToggle}
+          />
+          <TableBody<T>
+            columns={columns}
+            rows={pageRows}
+            selectable={selectable}
+            selected={selected}
+            onToggleRow={onToggleRow}
+            showExtraColumn={showColumnToggle || selectable}
+            expanded={expanded}
+            onToggleExpand={onToggleExpand}
+            renderSubComponent={renderSubComponent}
+          />
+        </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-700">
+          Showing {start + 1} to {end} of {total} entries
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border border-gray-200 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+             <button
+               key={p}
+               onClick={() => handlePageChange(p)}
+               className={cn(
+                 "px-3 py-1 rounded text-sm font-medium",
+                 currentPage === p
+                   ? "bg-[#FF4460] text-white border border-[#FF4460]"
+                   : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+               )}
+             >
+               {p}
+             </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded border border-gray-200 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
