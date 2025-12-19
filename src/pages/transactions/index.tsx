@@ -267,7 +267,7 @@ export default function TransactionsPage() {
             </div>
 
             {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+            <div className="flex  p-6  flex-col sm:flex-row justify-between items-center gap-4 ">
               <div className="flex items-center gap-3">
                 <FilterPillBar items={filterItems} />
               </div>

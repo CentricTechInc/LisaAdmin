@@ -84,7 +84,7 @@ export default function CustomerProfile() {
                         </div>
                     </div>
                         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        <p className="text-xs text-gray-400 max-w-[200px] text-center md:text-right">
+                        <p className="text-xs text-gray-400 max-w-50 text-center md:text-right">
                             If you want to &quot;Block or Unblock&quot; the user, tap here
                         </p>
                         <Button 
@@ -161,7 +161,7 @@ export default function CustomerProfile() {
                     <h3 className="text-lg font-bold mb-4 text-[#13000A]">
                         Total Appointments Booked <span className="text-[#FF4460]">(24)</span>
                     </h3>
-                    <div className="overflow-hidden rounded-lg border border-gray-100">
+                    <div className="overflow-hidden  p-6  rounded-lg border border-gray-100">
                         <DataTable 
                             columns={columns}
                             data={appointments}

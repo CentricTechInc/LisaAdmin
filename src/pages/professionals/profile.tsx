@@ -124,7 +124,7 @@ export default function ProfessionalProfile() {
                                         </div>
                                     </div>
                                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                                        <p className="text-xs text-gray-400 max-w-[200px] text-center md:text-right">
+                                        <p className="text-xs text-gray-400 max-w-50 text-center md:text-right">
                                             If you want to &quot;Block or Unblock&quot; the user, tap here
                                         </p>
                                         <Button
@@ -201,7 +201,7 @@ export default function ProfessionalProfile() {
                                     <h3 className="text-lg font-bold mb-4 text-[#13000A]">
                                         Total Appointments Booked <span className="text-[#FF4460]">(24)</span>
                                     </h3>
-                                    <div className="overflow-hidden rounded-lg border border-gray-100">
+                                    <div className="overflow-hidden  p-6  rounded-lg border border-gray-100">
                                         <DataTable
                                             columns={columns}
                                             data={appointments}
@@ -279,13 +279,13 @@ export default function ProfessionalProfile() {
                                         <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Availability Schedule</h3>
                                         <div className="flex items-center gap-2 text-sm text-gray-500">
                                             <span>From</span>
-                                            <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-[100px] justify-between">
+                                            <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
                                                 <span className="font-bold text-gray-900">08:30</span>
                                                 <span className="font-bold text-[#FF4460]">AM</span>
                                             </div>
                                             <span>—</span>
                                             <span>To</span>
-                                            <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-[100px] justify-between">
+                                            <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
                                                 <span className="font-bold text-gray-900">09:30</span>
                                                 <span className="font-bold text-[#FF4460]">PM</span>
                                             </div>
@@ -299,13 +299,13 @@ export default function ProfessionalProfile() {
                                     <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Break Time</h3>
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
                                         <span>From</span>
-                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-[100px] justify-between">
+                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
                                             <span className="font-bold text-gray-900">12:30</span>
                                             <span className="font-bold text-[#FF4460]">PM</span>
                                         </div>
                                         <span>—</span>
                                         <span>To</span>
-                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-[100px] justify-between">
+                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
                                             <span className="font-bold text-gray-900">01:30</span>
                                             <span className="font-bold text-[#FF4460]">PM</span>
                                         </div>
