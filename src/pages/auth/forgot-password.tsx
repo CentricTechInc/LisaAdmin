@@ -4,16 +4,18 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { FormInput } from "@/components/ui/FormInput";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/router";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
-  const { forgotPassword, isLoading,error } = useAuth();
+  const { forgotPassword, isLoading, error, success } = useAuth();
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
-
+console.log(success,"<----------success")
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setMessage({ type: "error", text: "Please enter your email address" });
+      setMessage({ type: "error", text: error || "Please enter your email address" });
       return;
     }
 
@@ -22,6 +24,13 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword(email);
       setMessage({ type: "success", text: "Reset link has been sent to your email address." });
+      
+      // Redirect to OTP page after a short delay or immediately
+      // Passing email as query param so OTP page can use it
+      setTimeout(() => {
+        router.push(`/auth/otp?email=${encodeURIComponent(email)}`);
+      }, 1500);
+      
     } catch (err: any) {
       // axios.ts interceptor already processes the error and returns a clean message
       setMessage({ type: "error", text: error || "Failed to send reset link." });
@@ -43,13 +52,12 @@ export default function ForgotPasswordPage() {
       >
         {message && (
           <div
-            className={`p-3 text-sm border rounded-lg whitespace-pre-wrap ${
-              message.type === "success"
+            className={`p-3 text-sm border rounded-lg whitespace-pre-wrap ${message.type === "success"
                 ? "bg-green-500/20 border-green-500 text-white"
                 : "bg-red-500/20 border-red-500 text-white"
-            }`}
+              }`}
           >
-            {message.text}
+            {success}
           </div>
         )}
         <FormInput

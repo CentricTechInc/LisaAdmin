@@ -25,7 +25,9 @@ interface AuthContextType {
   login: (email: string, password: string, fcm_token: string) => Promise<void>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
+  verifyOtp: (email: string, otp: number) => Promise<void>;
   error: string | null;
+  success: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string, fcm_token: string) => {
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       // Adjust the endpoint as per your actual API
       const response = await api.post<ApiResponse<any>>("/auth/login", { email, password, fcm_token });
@@ -70,7 +74,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Set axios default header for future requests
       api.defaults.headers.common["Authorization"] = `Bearer ${response.data.data.data.token}`;
 
-      setUser(user);
+      setUser(response.data.data.data as any);
+      setSuccess(response.data.data.message || "Login successful");
       router.push("/dashboard");
     } catch (err) {
       const axiosError = err as any;
@@ -104,8 +109,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const forgotPassword = async (email: string) => {
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
     try {
-      await api.get(`/auth/forgot-password/${email}`);
+      const response = await api.get<ApiResponse<any>>(`/auth/forgot-password/${email}`);
+      setSuccess(response.data.data.message || "Reset link sent.");
     } catch (err) {
       const axiosError = err as any;
       
@@ -116,7 +123,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else if (typeof axiosError?.data?.message === 'string') {
         message = axiosError.data.message;
       }
-      console.log(message, "------------------")
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOtp = async (email: string, otp: number) => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await api.post<ApiResponse<any>>(`/auth/verify-otp/${email}`, { otp });
+      setSuccess(response.data.data.message || "OTP Verified Successfully.");
+      router.push("/auth/reset-password");
+    } catch (err) {
+      const axiosError = err as any;
+      
+      let message = axiosError.message || "Verification failed";
+      
+      if (axiosError?.data?.errors && Array.isArray(axiosError.data.errors)) {
+        message = axiosError.data.errors.join("\n");
+      } else if (typeof axiosError?.data?.message === 'string') {
+        message = axiosError.data.message;
+      }
       setError(message);
       throw err;
     } finally {
@@ -125,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, forgotPassword, error }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, forgotPassword, verifyOtp, error, success }}>
       {children}
     </AuthContext.Provider>
   );

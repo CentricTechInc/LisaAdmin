@@ -2,6 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 function OtpBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
@@ -18,12 +19,37 @@ function OtpBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
 export default function OtpPage() {
   const router = useRouter();
   const [codes, setCodes] = React.useState(["", "", "", ""]);
+  const { verifyOtp, isLoading, error, success } = useAuth();
+  const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const handleChange = (index: number, value: string) => {
     if (value && !/^[0-9]$/.test(value)) return;
     const next = [...codes];
     next[index] = value;
     setCodes(next);
+  };
+
+  const handleVerify = async () => {
+    const otp = codes.join("");
+    if (otp.length !== 4) {
+      setMessage({ type: "error", text: "Please enter a valid 4-digit OTP." });
+      return;
+    }
+
+    const email = router.query.email as string;
+    if (!email) {
+      setMessage({ type: "error", text: "Email address is missing. Please try again from forgot password page." });
+      return;
+    }
+
+    setMessage(null);
+    try {
+      await verifyOtp(email, parseInt(otp));
+      setMessage({ type: "success", text: success || "OTP Verified Successfully." });
+    } catch (err: any) {
+      // Error is already handled in context, but we can set local message too
+      setMessage({ type: "error", text: error || "Verification failed." });
+    }
   };
 
   return (
@@ -34,6 +60,17 @@ export default function OtpPage() {
           Enter your OTP code here
         </p>
       </div>
+
+      {message && (
+        <div
+          className={`mb-4 p-3 text-sm border rounded-lg whitespace-pre-wrap ${message.type === "success"
+              ? "bg-green-500/20 border-green-500 text-white"
+              : "bg-red-500/20 border-red-500 text-white"
+            }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       <div className="mb-6 flex justify-center gap-3">
         {codes.map((code, i) => (
@@ -61,9 +98,10 @@ export default function OtpPage() {
         shape="pill"
         size="lg"
         className="w-full text-base"
-        onClick={() => router.push("/auth/reset-password")}
+        onClick={handleVerify}
+        disabled={isLoading}
       >
-        Verify
+        {isLoading ? "Verifying..." : "Verify"}
       </Button>
     </AuthLayout>
   );
