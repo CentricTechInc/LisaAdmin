@@ -27,7 +27,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
       </div>
       <div
         className={cn(
-          "flex w-full items-center justify-center bg-[#13000A] px-6 py-10 text-white md:w-[480px] md:rounded-l-[48px]",
+          "flex w-full items-center justify-center bg-[#13000A] px-6 py-10 text-white md:w-[600px] md:rounded-l-[48px] relative z-10 md:-ml-[48px]",
           className
         )}
       >
