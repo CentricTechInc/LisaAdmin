@@ -45,31 +45,26 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F9FAFB] overflow-hidden">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0 h-full">
-         <div className="p-4 md:p-6 h-full flex flex-col box-border">
-            <h1 className="text-2xl font-bold mb-6 text-black">Support</h1>
-            <div className="flex flex-1 gap-6 min-h-0">
-               <div className="w-80 shrink-0 hidden md:flex flex-col h-full">
-                  <ChatSidebar 
-                    users={USERS} 
-                    activeUserId={activeUser?.id} 
-                    onSelectUser={setActiveUser}
-                    className="h-full border border-gray-100 shadow-sm" 
-                  />
-               </div>
-               <div className="flex-1 h-full min-w-0 flex flex-col">
-                  <ChatWindow 
-                    activeUser={activeUser} 
-                    messages={messages[activeUser?.id || ''] || []} 
-                    onSendMessage={handleSendMessage}
-                    className="h-full border border-gray-100 shadow-sm"
-                  />
-               </div>
+    <div className="h-full flex flex-col box-border">
+        <h1 className="text-2xl font-bold mb-6 text-black">Support</h1>
+        <div className="flex flex-1 gap-6 min-h-0">
+            <div className="w-80 shrink-0 hidden md:flex flex-col h-full">
+                <ChatSidebar 
+                users={USERS} 
+                activeUserId={activeUser?.id} 
+                onSelectUser={setActiveUser}
+                className="h-full border border-gray-100 shadow-sm" 
+                />
             </div>
-         </div>
-      </main>
+            <div className="flex-1 h-full min-w-0 flex flex-col">
+                <ChatWindow 
+                activeUser={activeUser} 
+                messages={messages[activeUser?.id || ''] || []} 
+                onSendMessage={handleSendMessage}
+                className="h-full border border-gray-100 shadow-sm"
+                />
+            </div>
+        </div>
     </div>
   );
 }

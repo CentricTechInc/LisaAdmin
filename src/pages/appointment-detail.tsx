@@ -1,8 +1,6 @@
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { AppointmentDetailCard, AppointmentDetailData } from "@/components/ui/AppointmentDetailCard";
 
 const APPOINTMENT_DATA: AppointmentDetailData = {
@@ -71,23 +69,18 @@ export default function AppointmentDetail() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]">
+    <div className="w-full flex flex-col gap-6">
       <Head>
         <title>Appointment Detail | Lisa Admin</title>
       </Head>
-      <Sidebar />
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
-          <AppointmentDetailCard
+      
+      <AppointmentDetailCard
             data={data}
             onBack={() => {
               if (typeof window !== "undefined" && window.history.length > 1) router.back();
               else router.push(`/${activeSidebarId}`);
             }}
           />
-        </div>
-      </main>
     </div>
   );
 }

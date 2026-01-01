@@ -1,7 +1,6 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
@@ -284,14 +283,12 @@ export default function PromotionsPage() {
     return "+ Add Push Notification";
   };
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar />
-      <main className="flex-1 p-2 sm:p-6 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
-
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <>
+      <Head>
+        <title>Promotions | Lisa Admin</title>
+      </Head>
+      <div className="w-full flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-xl font-bold text-[#13000A]">Promotions</h2>
               <Button variant="brand" onClick={handleAddClick}>
                 {getAddButtonText()}
@@ -361,9 +358,7 @@ export default function PromotionsPage() {
                  />
                )}
             </div>
-          </div>
-        </div>
-      </main>
+    </div>
 
       <Modal isOpen={!!addModal} onClose={() => setAddModal(null)} className="max-w-3xl">
         <div className="flex items-start justify-between gap-4">
@@ -818,19 +813,19 @@ export default function PromotionsPage() {
             </div>
             <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
               <div className="text-gray-500">Message</div>
-              <div className="font-medium text-gray-900">{selected.item.message}</div>
+              <div className="font-medium text-gray-900">{(selected as any).item.message}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Notify To</div>
-              <div className="font-medium text-gray-900">{selected.item.notifyTo}</div>
+              <div className="font-medium text-gray-900">{(selected as any).item.notifyTo}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Date</div>
-              <div className="font-medium text-gray-900">{selected.item.date}</div>
+              <div className="font-medium text-gray-900">{(selected as any).item.date}</div>
             </div>
           </div>
         ) : null}
       </Modal>
-    </div>
+    </>
   );
 }

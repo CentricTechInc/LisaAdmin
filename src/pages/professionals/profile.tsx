@@ -3,8 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { Button } from "@/components/ui/Button";
 import { FormInput } from "@/components/ui/FormInput";
 import { DataTable } from "@/components/table/DataTable";
@@ -69,15 +67,11 @@ export default function ProfessionalProfile() {
     ];
 
     return (
-        <div className="flex min-h-screen bg-[#F9FAFB]">
+        <>
             <Head>
                 <title>Professional Profile | Lisa Admin</title>
             </Head>
-            <Sidebar />
-            <main className="flex-1 p-6 overflow-y-auto">
-                <div className="w-full flex flex-col gap-6">
-                    <GreetingHeader userName="Alison" />
-
+            <div className="w-full flex flex-col gap-6">
                     <div className="flex flex-col gap-6">
                         {/* Header */}
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -343,9 +337,7 @@ export default function ProfessionalProfile() {
                         )}
                     </div>
                 </div>
-            </main>
-
-            {/* Reject Modal */}
+                {/* Reject Modal */}
             <Modal
                 isOpen={isRejectModalOpen}
                 onClose={() => setIsRejectModalOpen(false)}
@@ -372,6 +364,6 @@ export default function ProfessionalProfile() {
                     </div>
                 </div>
             </Modal>
-        </div>
+        </>
     );
 }

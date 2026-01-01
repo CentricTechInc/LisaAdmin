@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { Input } from "@/components/ui/Input";
 import { FilterPillBar, type FilterPillItem } from "@/components/ui/FilterPillBar";
 import { EyeIcon } from "@/components/ui/EyeIcon";
@@ -235,16 +233,12 @@ export default function TransactionsPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]">
+    <div className="w-full flex flex-col gap-6">
       <Head>
         <title>Transactions | Lisa Admin</title>
       </Head>
-      <Sidebar />
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
-
-          <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
+      
+      <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
             {/* Header Section */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
               <h2 className="text-xl font-bold text-[#13000A]">Transactions</h2>
@@ -301,8 +295,6 @@ export default function TransactionsPage() {
                 showColumnToggle={false}
             />
           </div>
-        </div>
-      </main>
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/table/DataTable";
@@ -195,13 +193,8 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar />
-      <main className="flex-1 p-2 sm:p-6 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
-
-          <div className="flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <h2 className="text-xl font-bold text-[#13000A]">Appointments</h2>
@@ -268,10 +261,8 @@ export default function AppointmentsPage() {
                 showColumnToggle={false}
               // We handle pagination UI outside
               />
-            </div>
-          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

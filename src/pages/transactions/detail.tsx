@@ -2,8 +2,6 @@ import React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { AppImage } from "@/components/ui/AppImage";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -44,16 +42,12 @@ export default function TransactionDetailPage() {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]">
+    <div className="w-full flex flex-col gap-6">
       <Head>
         <title>Transaction Detail | Lisa Admin</title>
       </Head>
-      <Sidebar />
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
-
-          {/* Header */}
+      
+      {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -212,8 +206,6 @@ export default function TransactionDetailPage() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
     </div>
   );
 }

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/table/DataTable";
@@ -314,11 +312,8 @@ export default function CategoriesPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]">
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto p-4">
-        <div className="flex flex-col gap-6">
-          <GreetingHeader userName="Alison" />
+    <>
+    <div className="flex flex-col gap-6">
           
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
@@ -409,9 +404,8 @@ export default function CategoriesPage() {
                 )}
               />
             )}
-          </div>
+  </div>
         </div>
-      </main>
 
       {/* Add/Edit Category Modal */}
       <Modal isOpen={isCategoryModalOpen} onClose={handleCloseCategoryModal}>
@@ -440,7 +434,7 @@ export default function CategoriesPage() {
               name="name"
               label="Category Name" 
               placeholder="Grooming" 
-              defaultValue={editingCategory ? editingCategory.name : ""}
+              defaultValue={editingCategory?.name || ""}
             />
             
             <div className="flex flex-col gap-2">
@@ -453,7 +447,7 @@ export default function CategoriesPage() {
                         { label: "Kid", value: "kid" },
                         { label: "For All", value: "all" },
                     ]}
-                    defaultValue={editingCategory?.serviceFor === "For All" ? "all" : editingCategory?.serviceFor.toLowerCase()}
+                    defaultValue={editingCategory?.serviceFor === "For All" ? "all" : (editingCategory?.serviceFor || "").toLowerCase()}
                 />
             </div>
           </div>
@@ -494,7 +488,7 @@ export default function CategoriesPage() {
                 label="Sub Service Name" 
                 placeholder="Hair Wash & Blow-Dry/Styling" 
                 wrapperClassName="col-span-1" 
-                defaultValue={editingSubCategory ? editingSubCategory.name : ""}
+                defaultValue={editingSubCategory?.name || ""}
             />
             
              <div className="flex flex-col gap-2 col-span-1">
@@ -517,7 +511,7 @@ export default function CategoriesPage() {
                 label="Price" 
                 placeholder="$48.50" 
                 wrapperClassName="col-span-1" 
-                defaultValue={editingSubCategory ? editingSubCategory.price.toString() : ""}
+                defaultValue={editingSubCategory?.price?.toString() || ""}
             />
              <div className="flex flex-col gap-2 col-span-1">
                 <label className="text-sm text-gray-600">Service For</label>
@@ -535,7 +529,7 @@ export default function CategoriesPage() {
             name="description"
             label="Description" 
             placeholder="At Bloom & Blade salon..." 
-            defaultValue={editingSubCategory ? editingSubCategory.description : ""}
+            defaultValue={editingSubCategory?.description || ""}
           />
 
           <div className="flex justify-end">
@@ -545,6 +539,6 @@ export default function CategoriesPage() {
           </div>
         </form>
       </Modal>
-    </div>
+      </>
   );
 }

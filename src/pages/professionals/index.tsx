@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { EyeIcon } from "@/components/ui/EyeIcon";
@@ -144,13 +142,8 @@ export default function ProfessionalsPage() {
   ], [activeTab, router]);
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar />
-      <main className="flex-1 p-2 overflow-y-auto">
-        <div className="mx-auto w-full flex flex-col gap-2">
-          <GreetingHeader userName="Alison" />
-          
-          <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
+    <div className="mx-auto w-full flex flex-col gap-2">
+      <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Professionals</h2>
@@ -214,9 +207,7 @@ export default function ProfessionalsPage() {
                 showColumnToggle={false}
               />
             </div>
-          </div>
         </div>
-      </main>
     </div>
   );
 }

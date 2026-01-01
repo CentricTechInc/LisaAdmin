@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/router";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/Input";
@@ -85,70 +83,63 @@ export default function CustomersPage() {
   ], [router]);
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar />
-      <main className="flex-1 p-2 overflow-y-auto">
-        <div className="mx-auto w-full flex flex-col gap-3">
-          <GreetingHeader userName="Alison" />
-          
-          <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
-            {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Customers</h2>
-              <div className="w-full sm:w-64">
-                <Input
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="rounded-lg border-gray-200 bg-white focus-visible:ring-black focus-visible:border-black"
-                  leftSlot={
-                    <Image
-                      src="/icons/search-normal.svg"
-                      alt="Search"
-                      width={20}
-                      height={20}
-                      className="text-gray-400"
-                    />
-                  }
+    <div className="mx-auto w-full flex flex-col gap-3">
+      <div className="rounded-xl bg-white p-6 shadow-sm min-h-150">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Customers</h2>
+          <div className="w-full sm:w-64">
+            <Input
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-lg border-gray-200 bg-white focus-visible:ring-black focus-visible:border-black"
+              leftSlot={
+                <Image
+                  src="/icons/search-normal.svg"
+                  alt="Search"
+                  width={20}
+                  height={20}
+                  className="text-gray-400"
                 />
-              </div>
-            </div>
-
-            {/* Show Entries */}
-            <div className="mb-4 flex justify-end">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>Show</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="rounded border border-gray-200 bg-white px-2 py-1 outline-none focus:border-black"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-                <span>entries</span>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="rounded-lg border p-6  border-gray-200 overflow-hidden">
-              <DataTable
-                columns={columns}
-                data={filteredCustomers}
-                page={currentPage}
-                pageSize={pageSize}
-                onPageChange={setCurrentPage}
-                selectable={false}
-                showColumnToggle={false}
-              />
-            </div>
+              }
+            />
           </div>
         </div>
-      </main>
+
+        {/* Show Entries */}
+        <div className="mb-4 flex justify-end">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="rounded border border-gray-200 bg-white px-2 py-1 outline-none focus:border-black"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span>entries</span>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-lg border p-6  border-gray-200 overflow-hidden">
+          <DataTable
+            columns={columns}
+            data={filteredCustomers}
+            page={currentPage}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            selectable={false}
+            showColumnToggle={false}
+          />
+        </div>
+      </div>
     </div>
   );
 }

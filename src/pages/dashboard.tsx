@@ -1,6 +1,4 @@
 import React from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { GreetingHeader } from "@/components/layout/GreetingHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import {
   DemographicDonutCard,
@@ -54,52 +52,44 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar />
-      <main className="flex-1 p-2 overflow-y-auto">
-        <div className="w-full flex flex-col gap-6">
-          {/* Header */}
-          <GreetingHeader userName="Alison" />
+    <div className="w-full flex flex-col gap-6">
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Total Customers" value={939} className="h-32" />
+        <StatCard label="Total Professionals" value={235} className="h-32" />
+        <StatCard label="Active Bookings" value={50} className="h-32" />
+        <StatCard label="Total Revenue" value="$15154" className="h-32" />
+      </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Total Customers" value={939} className="h-32" />
-            <StatCard label="Total Professionals" value={235} className="h-32" />
-            <StatCard label="Active Bookings" value={50} className="h-32" />
-            <StatCard label="Total Revenue" value="$15154" className="h-32" />
-          </div>
+      {/* Bar Chart Section */}
+      <div className="w-full">
+        <AppointmentsBarChartCard
+          title="Number Of Appointments"
+          rangeLabel={rangeLabel}
+          onRangeChange={setRangeLabel}
+          labels={appointmentLabels}
+          series={appointmentSeries}
+          className="min-h-100"
+        />
+      </div>
 
-          {/* Bar Chart Section */}
-          <div className="w-full">
-            <AppointmentsBarChartCard
-              title="Number Of Appointments"
-              rangeLabel={rangeLabel}
-              onRangeChange={setRangeLabel}
-              labels={appointmentLabels}
-              series={appointmentSeries}
-              className="min-h-100"
-            />
-          </div>
-
-          {/* Donut Charts Row */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <DemographicDonutCard
-              title="Customer Demographics"
-              totalLabel="Total Customer"
-              totalValue={939}
-              segments={customerSegments}
-              className="min-h-87.5"
-            />
-            <DemographicDonutCard
-              title="Professional Demographics"
-              totalLabel="Total Professionals"
-              totalValue={235}
-              segments={professionalSegments}
-              className="min-h-87.5"
-            />
-          </div>
-        </div>
-      </main>
+      {/* Donut Charts Row */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <DemographicDonutCard
+          title="Customer Demographics"
+          totalLabel="Total Customer"
+          totalValue={939}
+          segments={customerSegments}
+          className="min-h-87.5"
+        />
+        <DemographicDonutCard
+          title="Professional Demographics"
+          totalLabel="Total Professionals"
+          totalValue={235}
+          segments={professionalSegments}
+          className="min-h-87.5"
+        />
+      </div>
     </div>
   );
 }
