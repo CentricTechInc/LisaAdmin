@@ -1,17 +1,27 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { FormInput } from "@/components/ui/FormInput";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login, isLoading, error } = useAuth();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+     const data= await login(email, password);
+     console.log(data,"frontent ka error!")
+    } catch (err) {
+      console.error("Login failed", err);
+    }
+  };
 
   return (
     <AuthLayout>
@@ -24,11 +34,14 @@ export default function LoginPage() {
 
       <form
         className="space-y-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          router.push("/dashboard");
-        }}
+        onSubmit={handleSubmit}
       >
+        {error && (
+          <div className="p-3 text-sm text-white bg-red-500/20 border border-red-500 rounded-lg whitespace-pre-wrap">
+            {error}
+          </div>
+        )}
+        
         <FormInput
           label="Email*"
           labelClassName="text-white"
@@ -86,11 +99,11 @@ export default function LoginPage() {
           shape="pill"
           size="lg"
           className="mt-4 w-full text-base"
+          disabled={isLoading}
         >
-          Log in
+          {isLoading ? "Logging in..." : "Log in"}
         </Button>
       </form>
     </AuthLayout>
   );
 }
-

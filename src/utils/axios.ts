@@ -53,14 +53,25 @@ api.interceptors.response.use(
   },
   (error: AxiosError): Promise<never> => {
     const status = error.response?.status;
-    const data = error.response?.data;
+    // Try to get the actual error message from backend response
+    const data = error.response?.data as any;
 
     let message = "Unexpected error. Please try again.";
 
-    if (status === 400) {
-      message = "Request is invalid. Please check your input.";
+    if (data?.message) {
+      if (Array.isArray(data.message)) {
+        message = data.message.join(", ");
+      } else {
+        message = data.message;
+      }
+    } else if (data?.error) {
+      message = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+    } else if (typeof data === 'string') {
+      message = data;
+    } else if (status === 400) {
+      message = error.response?.statusText || "Request is invalid. Please check your input.";
     } else if (status === 500) {
-      message = "Server error. Please try again later.";
+      message = error.response?.statusText || "Server error. Please try again later.";
     } else if (status) {
       message = error.response?.statusText || `Request failed with status ${status}`;
     } else if (error.message === "Network Error") {
