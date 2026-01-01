@@ -49,7 +49,7 @@ export default function CustomerProfile() {
       <Head>
         <title>Customer Profile | Lisa Admin</title>
       </Head>
-      <Sidebar activeId="customers" />
+      <Sidebar />
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="w-full flex flex-col gap-6">
             <GreetingHeader userName="Alison" />

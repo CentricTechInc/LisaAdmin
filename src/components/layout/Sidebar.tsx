@@ -1,7 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/Logo";
 
 type SidebarItem = {
   id: string;
@@ -11,10 +13,8 @@ type SidebarItem = {
 };
 
 export type SidebarProps = {
-  activeId?: string;
-  onItemSelect?: (id: string) => void;
-  onLogout?: () => void;
   className?: string;
+  onLogout?: () => void;
 };
 
 const mainItems: SidebarItem[] = [
@@ -29,13 +29,18 @@ const mainItems: SidebarItem[] = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  activeId = "appointments",
-  onItemSelect,
-  onLogout,
   className,
+  onLogout,
 }) => {
+  const router = useRouter();
+  const currentPath = router.pathname;
+
   const renderItem = (item: SidebarItem) => {
-    const isActive = item.id === activeId;
+    // Check if the current path starts with the item's href
+    // We handle the case where href is exactly the current path or a sub-path
+    // But we need to be careful with similar prefixes if any
+    const isActive = item.href ? currentPath.startsWith(item.href) : false;
+
     const content = (
       <div
         className={cn(
@@ -63,7 +68,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Link
           key={item.id}
           href={item.href}
-          onClick={() => onItemSelect?.(item.id)}
           className="block"
         >
           {content}
@@ -72,32 +76,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
 
     return (
-      <button
-        key={item.id}
-        type="button"
-        onClick={() => onItemSelect?.(item.id)}
-        className="block w-full text-left"
-      >
+      <div key={item.id} className="block w-full text-left">
         {content}
-      </button>
+      </div>
     );
   };
 
   return (
     <aside
       className={cn(
-        "flex h-screen w-60 flex-col border-r border-(--color-sidebar-border) bg-(--color-sidebar) px-4 py-6",
+        "sticky top-0 flex h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-(--color-sidebar-border) bg-(--color-sidebar) px-4 pt-6 pb-24",
         className
       )}
     >
       <div className="mb-8 px-2 w-full justify-center items-center flex">
-        <Image
-          src="/icons/Lisa.svg"
-          alt="Lisa logo"
-          width={96}
-          height={32}
-          className="h-8 w-auto"
-        />
+        <Logo />
       </div>
       <nav className="flex flex-1 flex-col gap-2">
         {mainItems.map((item) => renderItem(item))}

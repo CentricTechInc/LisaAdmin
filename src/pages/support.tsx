@@ -46,7 +46,7 @@ export default function SupportPage() {
 
   return (
     <div className="flex h-screen bg-[#F9FAFB] overflow-hidden">
-      <Sidebar activeId="support" />
+      <Sidebar />
       <main className="flex-1 flex flex-col min-w-0 h-full">
          <div className="p-4 md:p-6 h-full flex flex-col box-border">
             <h1 className="text-2xl font-bold mb-6 text-black">Support</h1>

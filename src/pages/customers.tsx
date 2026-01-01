@@ -86,7 +86,7 @@ export default function CustomersPage() {
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar activeId="customers" />
+      <Sidebar />
       <main className="flex-1 p-2 overflow-y-auto">
         <div className="mx-auto w-full flex flex-col gap-3">
           <GreetingHeader userName="Alison" />

@@ -145,7 +145,7 @@ export default function ProfessionalsPage() {
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar activeId="professionals" />
+      <Sidebar />
       <main className="flex-1 p-2 overflow-y-auto">
         <div className="mx-auto w-full flex flex-col gap-2">
           <GreetingHeader userName="Alison" />

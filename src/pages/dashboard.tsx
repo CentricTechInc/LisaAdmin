@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/AppointmentsBarChartCard";
 
 export default function DashboardPage() {
+  const [rangeLabel, setRangeLabel] = React.useState("Yearly");
+
   // Data for Bar Chart
   const appointmentLabels = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
@@ -53,7 +55,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]" suppressHydrationWarning>
-      <Sidebar activeId="dashboard" />
+      <Sidebar />
       <main className="flex-1 p-2 overflow-y-auto">
         <div className="w-full flex flex-col gap-6">
           {/* Header */}
@@ -71,10 +73,11 @@ export default function DashboardPage() {
           <div className="w-full">
             <AppointmentsBarChartCard
               title="Number Of Appointments"
-              rangeLabel="Year"
+              rangeLabel={rangeLabel}
+              onRangeChange={setRangeLabel}
               labels={appointmentLabels}
               series={appointmentSeries}
-              className="min-h-[400px]"
+              className="min-h-100"
             />
           </div>
 
@@ -85,14 +88,14 @@ export default function DashboardPage() {
               totalLabel="Total Customer"
               totalValue={939}
               segments={customerSegments}
-              className="min-h-[350px]"
+              className="min-h-87.5"
             />
             <DemographicDonutCard
               title="Professional Demographics"
               totalLabel="Total Professionals"
               totalValue={235}
               segments={professionalSegments}
-              className="min-h-[350px]"
+              className="min-h-87.5"
             />
           </div>
         </div>

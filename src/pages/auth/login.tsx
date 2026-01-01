@@ -1,12 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { FormInput } from "@/components/ui/FormInput";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
@@ -24,6 +26,7 @@ export default function LoginPage() {
         className="space-y-5"
         onSubmit={(e) => {
           e.preventDefault();
+          router.push("/dashboard");
         }}
       >
         <FormInput

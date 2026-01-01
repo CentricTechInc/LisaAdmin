@@ -73,7 +73,7 @@ export default function ProfessionalProfile() {
             <Head>
                 <title>Professional Profile | Lisa Admin</title>
             </Head>
-            <Sidebar activeId="professionals" />
+            <Sidebar />
             <main className="flex-1 p-6 overflow-y-auto">
                 <div className="w-full flex flex-col gap-6">
                     <GreetingHeader userName="Alison" />
@@ -355,7 +355,7 @@ export default function ProfessionalProfile() {
                     <h2 className="text-2xl font-bold text-[#13000A]">Reason of Rejection</h2>
                     <FormTextarea
                         wrapperClassName="w-full"
-                        className="min-h-[200px] resize-none border-gray-200 rounded-xl"
+                        className="min-h-5 resize-none border-gray-200 rounded-xl"
                         placeholder="Type reason..."
                         defaultValue="At Bloom & Blade salon, we strive to provide outstanding service at reasonable prices since our inception in 2003 in Celina, Delaware. Our passionate team is dedicated to ensuring that each visit is enjoyable, leaving you feeling rejuvenated and beautiful. We aim to foster a friendly environment where every client is appreciated."
                     />

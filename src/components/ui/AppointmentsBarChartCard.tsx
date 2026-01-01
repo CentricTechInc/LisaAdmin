@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from "chart.js";
 import type { ChartData, ChartOptions } from "chart.js";
 import { cn } from "@/lib/utils";
+import { Dropdown } from "@/components/ui/Dropdown";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -20,6 +21,7 @@ export type BarSeries = {
 export type AppointmentsBarChartCardProps = {
   title: string;
   rangeLabel: string;
+  onRangeChange?: (range: string) => void;
   labels: string[];
   series: BarSeries[];
   className?: string;
@@ -28,6 +30,7 @@ export type AppointmentsBarChartCardProps = {
 export const AppointmentsBarChartCard: React.FC<AppointmentsBarChartCardProps> = ({
   title,
   rangeLabel,
+  onRangeChange,
   labels,
   series,
   className,
@@ -104,13 +107,23 @@ export const AppointmentsBarChartCard: React.FC<AppointmentsBarChartCardProps> =
         <div className="text-sm text-black font-semibold">
           {title}
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-1 rounded-full px-3 py-1 text-xs text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_70%,transparent)]"
-        >
-          <span>{rangeLabel}</span>
-          <span className="text-[0.6rem]">▾</span>
-        </button>
+        <Dropdown
+          align="right"
+          trigger={
+            <button
+              type="button"
+              className="flex items-center gap-1 rounded-full px-3 py-1 text-xs text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_70%,transparent)]"
+            >
+              <span>{rangeLabel}</span>
+              <span className="text-[0.6rem]">▾</span>
+            </button>
+          }
+          items={[
+            { id: "daily", label: "Daily", onSelect: () => onRangeChange?.("Daily") },
+            { id: "weekly", label: "Weekly", onSelect: () => onRangeChange?.("Weekly") },
+            { id: "yearly", label: "Yearly", onSelect: () => onRangeChange?.("Yearly") },
+          ]}
+        />
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-4 text-xs">

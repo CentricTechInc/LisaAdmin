@@ -315,7 +315,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex min-h-screen bg-[#F9FAFB]">
-      <Sidebar activeId="categories" />
+      <Sidebar />
       <main className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col gap-6">
           <GreetingHeader userName="Alison" />
