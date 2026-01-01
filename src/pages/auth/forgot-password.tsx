@@ -3,9 +3,30 @@ import Link from "next/link";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { FormInput } from "@/components/ui/FormInput";
 import { Button } from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = React.useState("");
+  const { forgotPassword, isLoading,error } = useAuth();
+  const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setMessage({ type: "error", text: "Please enter your email address" });
+      return;
+    }
+
+    setMessage(null);
+
+    try {
+      await forgotPassword(email);
+      setMessage({ type: "success", text: "Reset link has been sent to your email address." });
+    } catch (err: any) {
+      // axios.ts interceptor already processes the error and returns a clean message
+      setMessage({ type: "error", text: error || "Failed to send reset link." });
+    }
+  };
 
   return (
     <AuthLayout>
@@ -18,12 +39,19 @@ export default function ForgotPasswordPage() {
 
       <form
         className="space-y-5"
-        onSubmit={(e) => {
-          e.preventDefault();
-          // Handle password reset logic here
-          console.log("Reset password for:", email);
-        }}
+        onSubmit={handleSubmit}
       >
+        {message && (
+          <div
+            className={`p-3 text-sm border rounded-lg whitespace-pre-wrap ${
+              message.type === "success"
+                ? "bg-green-500/20 border-green-500 text-white"
+                : "bg-red-500/20 border-red-500 text-white"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
         <FormInput
           label="Email*"
           labelClassName="text-white"
@@ -41,8 +69,9 @@ export default function ForgotPasswordPage() {
           shape="pill"
           size="lg"
           className="mt-4 w-full text-base"
+          disabled={isLoading}
         >
-          Send Reset Link
+          {isLoading ? "Sending..." : "Send Reset Link"}
         </Button>
 
         <div className="mt-6 text-center">

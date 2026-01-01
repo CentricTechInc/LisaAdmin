@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter } from "next/router";
 import api, { ApiResponse } from "@/utils/axios";
 import { AxiosError } from "axios";
+import Cookies from "js-cookie";
 
 // Define types for User and AuthState
 interface User {
@@ -13,7 +14,7 @@ interface User {
 }
 
 interface LoginResponse {
-  user: User;
+  data: User;
   token: string;
 }
 
@@ -21,8 +22,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, fcm_token: string) => Promise<void>;
   logout: () => void;
+  forgotPassword: (email: string) => Promise<void>;
   error: string | null;
 }
 
@@ -36,30 +38,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Check for stored token and user on mount
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const token = Cookies.get("token");
+    const storedUser = Cookies.get("user");
 
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      } catch (e) {
+        console.error("Failed to parse user from cookies", e);
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, fcm_token: string) => {
     setIsLoading(true);
     setError(null);
     try {
       // Adjust the endpoint as per your actual API
-      const response = await api.post<ApiResponse<LoginResponse>>("/auth/login", { email, password });
+      const response = await api.post<ApiResponse<any>>("/auth/login", { email, password, fcm_token });
       
-      const { user, token } = response.data.data; // Now response.data is ApiResponse<LoginResponse>, so .data is valid
-
-      // Store token and user
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Store token and user in Cookies (expire in 7 days)
+      Cookies.set("token", response.data.data.data.token, { expires: 7 });
+      Cookies.set("user", JSON.stringify(response.data.data.data), { expires: 7 });
+      
+      // Also keep in localStorage for backup if needed (optional, but good for redundancy)
+      localStorage.setItem("token", response.data.data.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.data.data));
 
       // Set axios default header for future requests
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${response.data.data.data.token}`;
 
       setUser(user);
       router.push("/dashboard");
@@ -83,6 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    Cookies.remove("token");
+    Cookies.remove("user");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     delete api.defaults.headers.common["Authorization"];
@@ -90,8 +101,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/auth/login");
   };
 
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await api.get(`/auth/forgot-password/${email}`);
+    } catch (err) {
+      const axiosError = err as any;
+      
+      let message = axiosError.message || "Request failed";
+      
+      if (axiosError?.data?.errors && Array.isArray(axiosError.data.errors)) {
+        message = axiosError.data.errors.join("\n");
+      } else if (typeof axiosError?.data?.message === 'string') {
+        message = axiosError.data.message;
+      }
+      console.log(message, "------------------")
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, error }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, forgotPassword, error }}>
       {children}
     </AuthContext.Provider>
   );

@@ -16,7 +16,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-     const data= await login(email, password);
+     const data= await login(email, password,"fcm_token");
      console.log(data,"frontent ka error!")
     } catch (err) {
       console.error("Login failed", err);

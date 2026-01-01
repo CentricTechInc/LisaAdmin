@@ -1,18 +1,27 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SplashScreen() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
 
   React.useEffect(() => {
-    // Redirect to login after 3 seconds
+    if (isLoading) return;
+
+    if (isAuthenticated) {
+      router.push("/dashboard");
+      return;
+    }
+
+    // Redirect to login after 3 seconds if not authenticated
     const timer = setTimeout(() => {
       router.push("/auth/login");
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, isLoading, isAuthenticated]);
 
   return (
     <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-linear-to-br from-white via-gray-50 to-gray-200">
