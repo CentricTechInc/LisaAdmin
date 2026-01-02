@@ -57,7 +57,7 @@ console.log(success,"<----------success")
                 : "bg-red-500/20 border-red-500 text-white"
               }`}
           >
-            {success}
+            {message.type === "success" ? success : error}
           </div>
         )}
         <FormInput

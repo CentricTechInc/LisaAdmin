@@ -4,9 +4,10 @@ import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/contexts/AuthContext";
 
-function OtpBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
+const OtpBox = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>((props, ref) => {
   return (
     <input
+      ref={ref}
       type="text"
       inputMode="numeric"
       maxLength={1}
@@ -14,19 +15,54 @@ function OtpBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
       {...props}
     />
   );
-}
+});
+OtpBox.displayName = "OtpBox";
 
 export default function OtpPage() {
   const router = useRouter();
   const [codes, setCodes] = React.useState(["", "", "", ""]);
   const { verifyOtp, regenerateOtp, isLoading, error, success } = useAuth();
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
+  const inputs = React.useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (index: number, value: string) => {
     if (value && !/^[0-9]$/.test(value)) return;
     const next = [...codes];
     next[index] = value;
     setCodes(next);
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      inputs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !codes[index] && index > 0) {
+      inputs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+    if (!pastedData) return;
+
+    const nextCodes = [...codes];
+    let lastFilledIndex = 0;
+
+    pastedData.split("").slice(0, 4).forEach((char, i) => {
+      if (/[0-9]/.test(char)) {
+        nextCodes[i] = char;
+        lastFilledIndex = i;
+      }
+    });
+
+    setCodes(nextCodes);
+    
+    // Focus the input after the last filled one, or the last one if full
+    const focusIndex = Math.min(lastFilledIndex + (pastedData.length === 4 ? 0 : 1), 3);
+    inputs.current[focusIndex]?.focus();
   };
 
   const handleVerify = async () => {
@@ -83,11 +119,11 @@ export default function OtpPage() {
       {message && (
         <div
           className={`mb-4 p-3 text-sm border rounded-lg whitespace-pre-wrap ${message.type === "success"
-              ? "bg-green-500/20 border-green-500 text-white"
-              : "bg-red-500/20 border-red-500 text-white"
+            ? "bg-green-500/20 border-green-500 text-white"
+            : "bg-red-500/20 border-red-500 text-white"
             }`}
         >
-          {message.text}
+          {message.type === "success" ? success : error}
         </div>
       )}
 
@@ -95,8 +131,11 @@ export default function OtpPage() {
         {codes.map((code, i) => (
           <OtpBox
             key={i}
+            ref={(el) => { inputs.current[i] = el; }}
             value={code}
             onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            onPaste={handlePaste}
           />
         ))}
       </div>
