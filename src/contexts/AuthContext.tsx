@@ -26,6 +26,8 @@ interface AuthContextType {
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: number) => Promise<void>;
+  regenerateOtp: (email: string) => Promise<void>;
+  resetPassword: (email: string, password: string, confirm_password: string) => Promise<void>;
   error: string | null;
   success: string | null;
 }
@@ -137,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await api.post<ApiResponse<any>>(`/auth/verify-otp/${email}`, { otp });
       setSuccess(response.data.data.message || "OTP Verified Successfully.");
-      router.push("/auth/reset-password");
+      router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`);
     } catch (err) {
       const axiosError = err as any;
       
@@ -147,16 +149,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         message = axiosError.data.errors.join("\n");
       } else if (typeof axiosError?.data?.message === 'string') {
         message = axiosError.data.message;
+      } else if (axiosError?.response?.data?.message) {
+         message = axiosError.response.data.message;
       }
+
       setError(message);
-      throw err;
+      throw { message }; // Re-throw object with message property
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const regenerateOtp = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await api.get<ApiResponse<any>>(`/auth/regenerate-otp/${email}`);
+      setSuccess(response.data.data.message || "OTP resent successfully.");
+    } catch (err) {
+      const axiosError = err as any;
+      
+      let message = axiosError.message || "Resend failed";
+      
+      if (axiosError?.data?.errors && Array.isArray(axiosError.data.errors)) {
+        message = axiosError.data.errors.join("\n");
+      } else if (typeof axiosError?.data?.message === 'string') {
+        message = axiosError.data.message;
+      } else if (axiosError?.response?.data?.message) {
+         message = axiosError.response.data.message;
+      }
+      
+      setError(message);
+      throw { message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string, password: string, confirm_password: string) => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await api.post<ApiResponse<any>>(`/auth/reset-password/${email}`, { 
+        password, 
+        confirm_password 
+      });
+      setSuccess(response.data.data.message || "Password reset successfully.");
+      router.push("/auth/login");
+    } catch (err) {
+      const axiosError = err as any;
+      
+      let message = axiosError.message || "Reset password failed";
+      
+      if (axiosError?.data?.errors && Array.isArray(axiosError.data.errors)) {
+        message = axiosError.data.errors.join("\n");
+      } else if (typeof axiosError?.data?.message === 'string') {
+        message = axiosError.data.message;
+      } else if (axiosError?.response?.data?.message) {
+         message = axiosError.response.data.message;
+      }
+      
+      setError(message);
+      throw { message };
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, forgotPassword, verifyOtp, error, success }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, forgotPassword, verifyOtp, regenerateOtp, resetPassword, error, success }}>
       {children}
     </AuthContext.Provider>
   );

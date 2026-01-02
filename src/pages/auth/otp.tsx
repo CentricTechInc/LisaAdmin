@@ -19,7 +19,7 @@ function OtpBox(props: React.InputHTMLAttributes<HTMLInputElement>) {
 export default function OtpPage() {
   const router = useRouter();
   const [codes, setCodes] = React.useState(["", "", "", ""]);
-  const { verifyOtp, isLoading, error, success } = useAuth();
+  const { verifyOtp, regenerateOtp, isLoading, error, success } = useAuth();
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const handleChange = (index: number, value: string) => {
@@ -48,7 +48,26 @@ export default function OtpPage() {
       setMessage({ type: "success", text: success || "OTP Verified Successfully." });
     } catch (err: any) {
       // Error is already handled in context, but we can set local message too
-      setMessage({ type: "error", text: error || "Verification failed." });
+      // The error object from axios interceptor might be a string or an object with message
+      const errorMessage = err.message || (typeof err === 'string' ? err : "Verification failed.");
+      setMessage({ type: "error", text: errorMessage });
+    }
+  };
+
+  const handleResend = async () => {
+    const email = router.query.email as string;
+    if (!email) {
+      setMessage({ type: "error", text: "Email address is missing." });
+      return;
+    }
+
+    setMessage(null);
+    try {
+      await regenerateOtp(email);
+      setMessage({ type: "success", text: "OTP resent successfully." });
+    } catch (err: any) {
+      const errorMessage = err.message || (typeof err === 'string' ? err : "Resend failed.");
+      setMessage({ type: "error", text: errorMessage });
     }
   };
 
@@ -86,7 +105,9 @@ export default function OtpPage() {
         <span>Didn&apos;t receive the OTP? </span>
         <button
           type="button"
-          className="text-[color-mix(in_oklab,#FF4460_100%,transparent)] hover:underline"
+          onClick={handleResend}
+          disabled={isLoading}
+          className="text-[color-mix(in_oklab,#FF4460_100%,transparent)] hover:underline disabled:opacity-50"
         >
           Resend
         </button>
