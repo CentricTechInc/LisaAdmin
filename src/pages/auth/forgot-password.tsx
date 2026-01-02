@@ -62,7 +62,7 @@ console.log(success,"<----------success")
         )}
         <FormInput
           label="Email*"
-          labelClassName="text-white"
+          labelClassName="!text-white"
           type="email"
           placeholder="joe.doe@gmail.com"
           value={email}

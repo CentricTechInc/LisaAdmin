@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
       >
         <FormInput
           label="New Password*"
-          labelClassName="text-white"
+          labelClassName="!text-white"
           type={showPassword ? "text" : "password"}
           placeholder="New Password"
           value={password}
@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
 
         <FormInput
           label="Confirm Password*"
-          labelClassName="text-white"
+          labelClassName="!text-white"
           type={showConfirmPassword ? "text" : "password"}
           placeholder="Confirm Password"
           value={confirmPassword}

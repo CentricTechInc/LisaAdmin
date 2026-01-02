@@ -44,7 +44,7 @@ export default function LoginPage() {
         
         <FormInput
           label="Email*"
-          labelClassName="text-white"
+          labelClassName="!text-white"
           type="email"
           placeholder="joe.doe@gmail.com"
           value={email}
@@ -55,7 +55,7 @@ export default function LoginPage() {
 
         <FormInput
           label="Password*"
-          labelClassName="text-white"
+          labelClassName="!text-white"
           type={showPassword ? "text" : "password"}
           placeholder="Password"
           value={password}
