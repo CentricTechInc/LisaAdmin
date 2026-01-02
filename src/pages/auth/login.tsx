@@ -12,11 +12,12 @@ export default function LoginPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-     const data= await login(email, password,"fcm_token");
+     const data= await login(email, password,"fcm_token", rememberMe);
      console.log(data,"frontent ka error!")
     } catch (err) {
       console.error("Login failed", err);
@@ -83,6 +84,8 @@ export default function LoginPage() {
             <Checkbox
               label="Remember me"
               className="text-white"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
             />
           </div>
           <Link

@@ -22,7 +22,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, fcm_token: string) => Promise<void>;
+  login: (email: string, password: string, fcm_token: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: number) => Promise<void>;
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, fcm_token: string) => {
+  const login = async (email: string, password: string, fcm_token: string, rememberMe?: boolean) => {
     setIsLoading(true);
     setError(null);
     setSuccess(null);
@@ -65,9 +65,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Adjust the endpoint as per your actual API
       const response = await api.post<ApiResponse<any>>("/auth/login", { email, password, fcm_token });
       
-      // Store token and user in Cookies (expire in 7 days)
-      Cookies.set("token", response.data.data.data.token, { expires: 7 });
-      Cookies.set("user", JSON.stringify(response.data.data.data), { expires: 7 });
+      // Store token and user in Cookies (expire in 7 days if rememberMe is true, else 1 day)
+      const expiryDays = rememberMe ? 7 : 1;
+      Cookies.set("token", response.data.data.data.token, { expires: expiryDays });
+      Cookies.set("user", JSON.stringify(response.data.data.data), { expires: expiryDays });
       
       // Also keep in localStorage for backup if needed (optional, but good for redundancy)
       localStorage.setItem("token", response.data.data.data.token);
