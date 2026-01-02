@@ -4,6 +4,8 @@ import { Bell } from "lucide-react";
 import { Dropdown, type DropdownItem } from "@/components/ui/Dropdown";
 import { cn } from "@/lib/utils";
 
+import { AdminProfileModal } from "@/components/modals/AdminProfileModal";
+
 export type GreetingHeaderProps = {
   userName: string;
   subtitle?: string;
@@ -21,6 +23,8 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
   onLogoutClick,
   avatarSrc = "/images/avatar.png",
 }) => {
+  const [isProfileModalOpen, setIsProfileModalOpen] = React.useState(false);
+
   const initials = userName
     .split(" ")
     .filter((part) => part.length > 0)
@@ -33,6 +37,7 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
       id: "profile",
       label: "Profile",
       onSelect: () => {
+        setIsProfileModalOpen(true);
         onProfileClick?.();
       },
     },
@@ -46,46 +51,52 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
   ];
 
   return (
-    <div
-      className={cn(
-        "flex w-full items-center justify-between rounded-xl bg-(--color-dark-bg) px-6 py-4 text-white",
-        className
-      )}
-    >
-      <div className="flex flex-col gap-1">
-        <p className="text-base font-semibold">Hi, {userName}</p>
-        {subtitle ? (
-          <p className="text-sm text-[color-mix(in_oklab,white_70%,transparent)]">{subtitle}</p>
-        ) : null}
+    <>
+      <div
+        className={cn(
+          "flex w-full items-center justify-between rounded-xl bg-(--color-dark-bg) px-6 py-4 text-white",
+          className
+        )}
+      >
+        <div className="flex flex-col gap-1">
+          <p className="text-base font-semibold">Hi, {userName}</p>
+          {subtitle ? (
+            <p className="text-sm text-[color-mix(in_oklab,white_70%,transparent)]">{subtitle}</p>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)]">
+            <Bell className="h-5 w-5" />
+          </button>
+          <Dropdown
+            align="right"
+            items={menuItems}
+            trigger={
+              <div className="flex items-center gap-2 rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)] px-3 py-2">
+                {avatarSrc ? (
+                  <Image
+                    src={avatarSrc}
+                    alt={userName}
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--color-dark-bg)_65%,white)] text-sm font-medium">
+                    {initials || userName[0]?.toUpperCase()}
+                  </div>
+                )}
+                <p className="text-sm font-medium">{userName}</p>
+              </div>
+            }
+          />
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)]">
-          <Bell className="h-5 w-5" />
-        </button>
-        <Dropdown
-          align="right"
-          items={menuItems}
-          trigger={
-            <div className="flex items-center gap-2 rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)] px-3 py-2">
-              {avatarSrc ? (
-                <Image
-                  src={avatarSrc}
-                  alt={userName}
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--color-dark-bg)_65%,white)] text-sm font-medium">
-                  {initials || userName[0]?.toUpperCase()}
-                </div>
-              )}
-              <p className="text-sm font-medium">{userName}</p>
-            </div>
-          }
-        />
-      </div>
-    </div>
+      <AdminProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+    </>
   );
 };
 
