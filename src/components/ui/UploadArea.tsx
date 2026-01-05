@@ -2,9 +2,11 @@ import React, { useRef } from 'react';
 
 interface UploadAreaProps {
   onFileSelect: (file: File) => void;
+  className?: string;
+  label?: string | null;
 }
 
-export const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
+export const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect, className, label = "Upload Your Image" }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -19,8 +21,8 @@ export const UploadArea: React.FC<UploadAreaProps> = ({ onFileSelect }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm text-gray-600">Upload Your Image</label>
+    <div className={`flex flex-col gap-2 ${className || ''}`}>
+      {label && <label className="text-sm text-gray-600">{label}</label>}
       <div 
         onClick={handleClick}
         className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-8 cursor-pointer hover:bg-gray-50 transition-colors"

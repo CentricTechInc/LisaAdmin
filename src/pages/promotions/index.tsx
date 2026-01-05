@@ -167,20 +167,21 @@ export default function PromotionsPage() {
   };
 
   const bannerColumns: Column<Banner>[] = [
-    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center" },
-    { id: "title", header: "Title", field: "title" },
-    { id: "startDate", header: "Start Date", field: "startDate" },
-    { id: "endDate", header: "End Date", field: "endDate" },
+    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
+    { id: "title", header: "Title", field: "title", sortable: true },
+    { id: "startDate", header: "Start Date", field: "startDate", sortable: true },
+    { id: "endDate", header: "End Date", field: "endDate", sortable: true },
     { 
       id: "image", 
       header: "Banner Image", 
       accessor: (row) => (
-        <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-gray-100">
-          <AppImage imageName={row.image} alt={row.title} fill />
+        <div className="relative h-15 w-16 overflow-hidden rounded-xl bg-gray-100">
+          <AppImage imageName={row.image} alt={row.title} fill className="object-cover" rounded={false} />
         </div>
       ),
+      sortable: true,
     },
-    { id: "promotionFor", header: "Promotion For", field: "promotionFor" },
+    { id: "promotionFor", header: "Promotion For", field: "promotionFor", sortable: true },
     {
       id: "action",
       header: "Action",
@@ -209,13 +210,13 @@ export default function PromotionsPage() {
   ];
 
   const couponColumns: Column<Coupon>[] = [
-    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center" },
-    { id: "title", header: "Title", field: "title" },
-    { id: "code", header: "Code", field: "code" },
-    { id: "discountValue", header: "Discount Value", field: "discountValue" },
-    { id: "startDate", header: "Start Date", field: "startDate" },
-    { id: "endDate", header: "End Date", field: "endDate" },
-    { id: "userLimit", header: "User Limit", field: "userLimit" },
+    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
+    { id: "title", header: "Title", field: "title", sortable: true },
+    { id: "code", header: "Code", field: "code", sortable: true },
+    { id: "discountValue", header: "Discount Value", field: "discountValue", sortable: true },
+    { id: "startDate", header: "Start Date", field: "startDate", sortable: true },
+    { id: "endDate", header: "End Date", field: "endDate", sortable: true },
+    { id: "userLimit", header: "User Limit", field: "userLimit", sortable: true },
     {
       id: "action",
       header: "Action",
@@ -244,10 +245,10 @@ export default function PromotionsPage() {
   ];
 
   const pushNotificationColumns: Column<PushNotification>[] = [
-    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center" },
-    { id: "title", header: "Title", field: "title" },
-    { id: "message", header: "Message", field: "message" },
-    { id: "notifyTo", header: "Notify To", field: "notifyTo" },
+    { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
+    { id: "title", header: "Title", field: "title", sortable: true },
+    { id: "message", header: "Message", field: "message", sortable: true },
+    { id: "notifyTo", header: "Notify To", field: "notifyTo", sortable: true },
     {
       id: "action",
       header: "Action",

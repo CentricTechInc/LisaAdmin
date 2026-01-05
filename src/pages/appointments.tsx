@@ -124,27 +124,32 @@ export default function AppointmentsPage() {
       header: "S No",
       accessor: (_, index) => (page - 1) * pageSize + index + 1,
       className: "w-16 text-center font-medium",
+      sortable: true,
     },
     {
       id: "customerName",
       header: "Customer Name",
       field: "customerName",
       className: "font-medium",
+      sortable: true,
     },
     {
       id: "service",
       header: "Service",
       field: "service",
+      sortable: true,
     },
     {
       id: "dateTime",
       header: "Date/Time",
       field: "dateTime",
+      sortable: true,
     },
     {
       id: "professional",
       header: "Professional",
       field: "professional",
+      sortable: true,
     },
     {
       id: "action",
@@ -158,6 +163,7 @@ export default function AppointmentsPage() {
         </button>
       ),
       className: "w-20 text-center",
+      sortable: true,
     },
   ];
 

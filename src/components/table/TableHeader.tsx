@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Column, SortState } from "./types";
 
@@ -31,12 +32,31 @@ export function TableHeader<T>({ columns, sort, onToggleSort, onToggleVisibility
               onClick={() => (col.sortable ? onToggleSort(col.id) : undefined)}
             >
               <span className="inline-flex items-center gap-2">
-                {col.header}
                 {col.sortable ? (
                   <span aria-hidden="true" className="text-xs">
-                    {sort && sort.columnId === col.id ? (sort.direction === "asc" ? "▲" : "▼") : "↕"}
+                    {sort && sort.columnId === col.id ? (
+                      sort.direction === "asc" ? (
+                        <Image 
+                          src="/images/DownIcon.png" 
+                          alt="asc" 
+                          width={10} 
+                          height={10} 
+                          className="rotate-180"
+                        />
+                      ) : (
+                        <Image 
+                          src="/images/DownIcon.png" 
+                          alt="desc" 
+                          width={10} 
+                          height={10} 
+                        />
+                      )
+                    ) : (
+                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} />
+                    )}
                   </span>
                 ) : null}
+                {col.header}
               </span>
             </th>
           )

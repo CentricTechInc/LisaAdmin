@@ -99,18 +99,13 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
               className="flex items-center justify-center w-10 h-10 bg-white rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
               aria-label="Back"
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
+              <Image
+                src="/icons/BackButton.png" // Assuming this icon exists, otherwise I'll need to check or use a generic one
+                alt="Back"
+                width={20}
+                height={20}
+                className="" // If arrow-left points left, this is fine. Wait, usually arrow-left points left.
+              />
             </Link>
           )}
           <h1 className="text-2xl font-bold text-[#13000A]">Detail</h1>
@@ -197,24 +192,24 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
             <table className="w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-500 font-medium">
                 <tr>
-                  <th className="px-6 py-3">
+                  <th className="px-6 py-3 w-[10%]">
                     <div className="flex items-center gap-1">
-                      S No <span className="text-[10px]">↕</span>
+                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} /> S No
                     </div>
                   </th>
-                  <th className="px-6 py-3">
+                  <th className="px-6 py-3 w-[40%]">
                     <div className="flex items-center gap-1">
-                      Service Name <span className="text-[10px]">↕</span>
+                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} /> Service Name
                     </div>
                   </th>
-                  <th className="px-6 py-3">
+                  <th className="px-6 py-3 w-[30%]">
                     <div className="flex items-center gap-1">
-                      Date/Time <span className="text-[10px]">↕</span>
+                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} /> Date/Time
                     </div>
                   </th>
-                  <th className="px-6 py-3 text-right">
+                  <th className="px-6 py-3 text-right w-[20%]">
                     <div className="flex items-center justify-end gap-1">
-                      Amount <span className="text-[10px]">↕</span>
+                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} /> Amount
                     </div>
                   </th>
                 </tr>
@@ -269,7 +264,7 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
             </div>
 
             {/* Totals */}
-            <div className="w-full md:w-1/3 border border-gray-200 rounded-b-lg border-t-0 -mt-px bg-white">
+            <div className="w-full md:w-1/2 border border-gray-200 rounded-b-lg border-t-0 -mt-px bg-white">
               <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-white">
                 <span className="font-semibold text-gray-900">Sub Total</span>
                 <span className="font-semibold text-gray-900">

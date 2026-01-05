@@ -198,16 +198,19 @@ export default function CategoriesPage() {
       id: "sr_no",
       header: "Sr. No.",
       accessor: (_, index) => index + 1,
+      sortable: true,
     },
     {
       id: "name",
       header: "Category Name",
       field: "name",
+      sortable: true,
     },
     {
       id: "serviceFor",
       header: "Service For",
       field: "serviceFor",
+      sortable: true,
     },
     {
       id: "image",
@@ -217,6 +220,7 @@ export default function CategoriesPage() {
            <AppImage imageName={row.image} alt={row.name} fill />
         </div>
       ),
+      sortable: true,
     },
     {
       id: "action",
@@ -234,6 +238,7 @@ export default function CategoriesPage() {
           </button>
         </div>
       ),
+      sortable: true,
     },
   ];
 
@@ -257,26 +262,31 @@ export default function CategoriesPage() {
             {index + 1}
         </div>
       ),
+      sortable: true,
     },
     {
       id: "name",
       header: "Sub Service Name",
       field: "name",
+      sortable: true,
     },
     {
       id: "category",
       header: "Category",
       field: "category",
+      sortable: true,
     },
     {
       id: "price",
       header: "Price",
       accessor: (row) => `$${row.price.toFixed(2)}`,
+      sortable: true,
     },
     {
       id: "serviceFor",
       header: "Service For",
       field: "serviceFor",
+      sortable: true,
     },
     {
       id: "image",
@@ -286,6 +296,7 @@ export default function CategoriesPage() {
           <AppImage imageName={row.image} alt={row.name} fill />
         </div>
       ),
+      sortable: true,
     },
     {
       id: "action",
@@ -303,6 +314,7 @@ export default function CategoriesPage() {
           </button>
         </div>
       ),
+      sortable: true,
     },
   ];
 
@@ -411,36 +423,43 @@ export default function CategoriesPage() {
       <Modal isOpen={isCategoryModalOpen} onClose={handleCloseCategoryModal}>
         <form onSubmit={handleSaveCategory} className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">{editingCategory ? "Edit Category" : "Add Category"}</h2>
-            <button type="button" onClick={handleCloseCategoryModal} className="text-gray-500 hover:text-gray-700">
-              ✕
+            <h2 className="text-xl font-bold text-[#13000A]">{editingCategory ? "Edit Category" : "Add Category"}</h2>
+            <button type="button" onClick={handleCloseCategoryModal} className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 hover:bg-gray-50 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
             </button>
           </div>
           
-          <div className="flex flex-col items-center gap-4">
-            {(editingCategory || selectedImage) && (
-              <ImageUploadPreview 
-                imageName={selectedImage || editingCategory?.image || "avatar.png"}
-                alt="Category Preview"
-                onFileSelect={handleFileSelect}
-              />
-            )}
-            
-            {!editingCategory && !selectedImage && <UploadArea onFileSelect={handleFileSelect} />}
+          <div className="flex flex-col gap-2">
+             <label className="text-sm text-gray-600">Upload Your The Image</label>
+             <div className="flex flex-col items-center gap-4">
+                {(editingCategory || selectedImage) && (
+                  <ImageUploadPreview 
+                    imageName={selectedImage || editingCategory?.image || "avatar.png"}
+                    alt="Category Preview"
+                    onFileSelect={handleFileSelect}
+                  />
+                )}
+                
+                {!editingCategory && !selectedImage && <UploadArea onFileSelect={handleFileSelect} label={null} className="w-full" />}
+             </div>
           </div>
           
-          <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <FormInput 
               name="name"
               label="Category Name" 
               placeholder="Grooming" 
               defaultValue={editingCategory?.name || ""}
+              wrapperClassName="col-span-1"
             />
             
-            <div className="flex flex-col gap-2">
-                <label className="text-sm text-gray-600">Service For</label>
+            <div className="flex flex-col gap-2 col-span-1">
+                <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Service For</label>
                 <Select 
                     name="serviceFor"
+                    className="h-10 w-full rounded-[1.25rem] border border-[color-mix(in_oklab,var(--color-muted)_60%,transparent)] bg-white px-4 text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] focus:border-[#FF4460] focus:outline-none"
                     options={[
                         { label: "Man", value: "man" },
                         { label: "Woman", value: "woman" },
@@ -464,73 +483,68 @@ export default function CategoriesPage() {
       <Modal isOpen={isSubCategoryModalOpen} onClose={handleCloseSubCategoryModal}>
         <form onSubmit={handleSaveSubCategory} className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">{editingSubCategory ? "Edit Sub Categories" : "Add Sub Categories"}</h2>
-            <button type="button" onClick={handleCloseSubCategoryModal} className="text-gray-500 hover:text-gray-700">
-              ✕
+            <h2 className="text-xl font-bold text-gray-900">{editingSubCategory ? "Edit Sub Categories" : "Add Sub Categories"}</h2>
+            <button type="button" onClick={handleCloseSubCategoryModal} className="rounded-full border border-gray-200 p-2 hover:bg-gray-50">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
             </button>
           </div>
           
-          <div className="flex flex-col items-center gap-4">
-            {(editingSubCategory || selectedImage) && (
-              <ImageUploadPreview 
-                imageName={selectedImage || editingSubCategory?.image || "avatar.png"}
-                alt="Sub Category Preview"
-                onFileSelect={handleFileSelect}
-              />
-            )}
-            
-            {!editingSubCategory && !selectedImage && <UploadArea onFileSelect={handleFileSelect} />}
+          <div className="flex flex-col gap-2">
+             <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Upload Your The Image</label>
+             <div className="flex flex-col items-center gap-4">
+                {(editingSubCategory || selectedImage) && (
+                  <ImageUploadPreview 
+                    imageName={selectedImage || editingSubCategory?.image || "avatar.png"}
+                    alt="Sub Category Preview"
+                    onFileSelect={handleFileSelect}
+                  />
+                )}
+                
+                {!editingSubCategory && !selectedImage && <UploadArea onFileSelect={handleFileSelect} label={null} className="w-full" />}
+             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             <FormInput 
                 name="name"
-                label="Sub Service Name" 
+                label="Sub Category Name" 
                 placeholder="Hair Wash & Blow-Dry/Styling" 
-                wrapperClassName="col-span-1" 
+                wrapperClassName="w-full" 
                 defaultValue={editingSubCategory?.name || ""}
             />
             
-             <div className="flex flex-col gap-2 col-span-1">
-                <label className="text-sm text-gray-600">Category</label>
-                <Select 
-                    name="category"
-                    options={[
-                        { label: "Hair", value: "Hair" },
-                        { label: "Skincare", value: "Skincare" },
-                        { label: "Makeup", value: "Makeup" },
-                        { label: "Nail", value: "Nail" },
-                        { label: "Massage/Spa", value: "Massage/Spa" },
-                    ]}
-                    defaultValue={editingSubCategory ? editingSubCategory.category : "Hair"}
-                />
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-2 col-span-1">
+                    <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Category</label>
+                    <Select 
+                        name="category"
+                        className="h-10 w-full rounded-[1.25rem] border border-[color-mix(in_oklab,var(--color-muted)_60%,transparent)] bg-white px-4 text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] focus:border-[#FF4460] focus:outline-none"
+                        options={[
+                            { label: "Hair", value: "Hair" },
+                            { label: "Skincare", value: "Skincare" },
+                            { label: "Makeup", value: "Makeup" },
+                            { label: "Nail", value: "Nail" },
+                            { label: "Massage/Spa", value: "Massage/Spa" },
+                        ]}
+                        defaultValue={editingSubCategory ? editingSubCategory.category : "Hair"}
+                    />
+                </div>
 
-            <FormInput 
-                name="price"
-                label="Price" 
-                placeholder="$48.50" 
-                wrapperClassName="col-span-1" 
-                defaultValue={editingSubCategory?.price?.toString() || ""}
-            />
-             <div className="flex flex-col gap-2 col-span-1">
-                <label className="text-sm text-gray-600">Service For</label>
-                <Select 
-                    name="serviceFor"
-                    options={[
-                        { label: "For All", value: "all" },
-                    ]}
-                    defaultValue={editingSubCategory?.serviceFor === "For All" ? "all" : "all"}
-                />
+                 <div className="flex flex-col gap-2 col-span-1">
+                    <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Service For</label>
+                    <Select 
+                        name="serviceFor"
+                        className="h-10 w-full rounded-[1.25rem] border border-[color-mix(in_oklab,var(--color-muted)_60%,transparent)] bg-white px-4 text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] focus:border-[#FF4460] focus:outline-none"
+                        options={[
+                            { label: "For All", value: "all" },
+                        ]}
+                        defaultValue={editingSubCategory?.serviceFor === "For All" ? "all" : "all"}
+                    />
+                </div>
             </div>
           </div>
-          
-          <FormTextarea 
-            name="description"
-            label="Description" 
-            placeholder="At Bloom & Blade salon..." 
-            defaultValue={editingSubCategory?.description || ""}
-          />
 
           <div className="flex justify-end">
             <Button variant="brand" type="submit">

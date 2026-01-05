@@ -190,31 +190,37 @@ export default function TransactionsPage() {
       id: "sr_no",
       header: "Sr.",
       accessor: (_, index) => (currentPage - 1) * pageSize + index + 1,
+      sortable: true,
     },
     {
       id: "from",
       header: "From",
       field: "from",
+      sortable: true,
     },
     {
       id: "to",
       header: "To",
       field: "to",
+      sortable: true,
     },
     {
       id: "amount",
       header: "Amount",
       field: "amount",
+      sortable: true,
     },
     {
       id: "dateTime",
       header: "Date/Time",
       field: "dateTime",
+      sortable: true,
     },
     {
       id: "status",
       header: "Status",
       accessor: (row) => getStatusBadge(row.status),
+      sortable: true,
     },
     {
       id: "action",
@@ -229,6 +235,7 @@ export default function TransactionsPage() {
             </button>
         </div>
       ),
+      sortable: true,
     },
   ];
 

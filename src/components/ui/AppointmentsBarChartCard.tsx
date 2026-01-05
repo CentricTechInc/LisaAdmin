@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from "chart.js";
 import type { ChartData, ChartOptions } from "chart.js";
@@ -115,7 +116,12 @@ export const AppointmentsBarChartCard: React.FC<AppointmentsBarChartCardProps> =
               className="flex items-center gap-1 rounded-full px-3 py-1 text-xs text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] hover:bg-[color-mix(in_oklab,var(--color-muted)_70%,transparent)]"
             >
               <span>{rangeLabel}</span>
-              <span className="text-[0.6rem]">▾</span>
+              <Image 
+                src="/images/DownIcon.png" 
+                alt="dropdown" 
+                width={10} 
+                height={10} 
+              />
             </button>
           }
           items={[

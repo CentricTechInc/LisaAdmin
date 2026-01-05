@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Dropdown, type DropdownItem } from "@/components/ui/Dropdown";
 
@@ -41,7 +42,12 @@ export const FilterPillBar: React.FC<FilterPillBarProps> = ({
                 )}
               >
                 <span>{item.label}</span>
-                <span className="text-[0.6rem]">▾</span>
+                <Image 
+                  src="/images/DownIcon.png" 
+                  alt="dropdown" 
+                  width={10} 
+                  height={10} 
+                />
               </div>
             }
           />

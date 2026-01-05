@@ -52,14 +52,14 @@ export default function TransactionDetailPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.back()}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                className="flex h-10 w-10 items-center justify-center  hover:bg-gray-50 transition-colors"
               >
                 <Image
-                  src="/icons/arrow-left.svg" // Assuming this icon exists, otherwise I'll need to check or use a generic one
+                  src="/icons/BackButton.png" // Assuming this icon exists, otherwise I'll need to check or use a generic one
                   alt="Back"
-                  width={20}
-                  height={20}
-                  className="rotate-180" // If arrow-left points left, this is fine. Wait, usually arrow-left points left.
+                  width={80}
+                  height={80}
+                  className="" // If arrow-left points left, this is fine. Wait, usually arrow-left points left.
                 />
               </button>
               <h1 className="text-2xl font-bold text-[#13000A]">Transactions Detail</h1>
