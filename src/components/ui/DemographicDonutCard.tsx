@@ -62,7 +62,7 @@ export const DemographicDonutCard: React.FC<DemographicDonutCardProps> = ({
               typeof context.raw === "number"
                 ? context.raw
                 : Number(context.raw ?? 0);
-            return `${label}: ${value}`;
+            return `${value}`;
           },
         },
       },
@@ -104,7 +104,7 @@ export const DemographicDonutCard: React.FC<DemographicDonutCardProps> = ({
                 style={{ backgroundColor: s.color }}
               />
               <span className="text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)]">
-              {s.value}
+                {s.value}
               </span>
             </div>
           ))}

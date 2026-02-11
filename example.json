@@ -1,0 +1,101 @@
+{
+  "status": true,
+  "data": {
+    "stats": {
+      "totalCustomers": 7,
+      "totalProfessionals": 36,
+      "activeBookings": 3,
+      "totalRevenue": 35.65
+    },
+    "charts": {
+      "monthlyStats": [
+        {
+          "month": "Jan",
+          "customerSpending": 35.65,
+          "professionalEarning": 28.52,
+          "platformEarning": 7.13
+        },
+        {
+          "month": "Feb",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Mar",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Apr",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "May",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Jun",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Jul",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Aug",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Sep",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Oct",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Nov",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        },
+        {
+          "month": "Dec",
+          "customerSpending": 0,
+          "professionalEarning": 0,
+          "platformEarning": 0
+        }
+      ],
+      "customerDemographics": {
+        "total": 7,
+        "breakdown": {
+          "male": 0,
+          "female": 0
+        }
+      },
+      "professionalDemographics": {
+        "total": 36,
+        "breakdown": {
+          "salon": 36,
+          "individual": 0
+        }
+      }
+    }
+  }
+}
