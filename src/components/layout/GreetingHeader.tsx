@@ -5,6 +5,7 @@ import { Dropdown, type DropdownItem } from "@/components/ui/Dropdown";
 import { cn } from "@/lib/utils";
 
 import { AdminProfileModal } from "@/components/modals/AdminProfileModal";
+import { NotificationDropdown } from "@/components/ui/NotificationDropdown";
 
 export type GreetingHeaderProps = {
   userName: string;
@@ -65,9 +66,7 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
           ) : null}
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)]">
-            <Bell className="h-5 w-5" />
-          </button>
+          <NotificationDropdown />
           <Dropdown
             align="right"
             items={menuItems}
