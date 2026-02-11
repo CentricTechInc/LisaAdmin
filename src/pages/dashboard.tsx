@@ -19,7 +19,8 @@ interface DashboardStats {
 }
 
 interface MonthlyStat {
-  month: string;
+  month?: string;
+  label?: string;
   customerSpending: number;
   professionalEarning: number;
   platformEarning: number;
@@ -54,7 +55,10 @@ export default function DashboardPage() {
       try {
         const year = 2026; // Default to 2026 as per user request
         const response = await api.get('/admin/dashboard/stats', {
-          params: { year }
+          params: { 
+            year,
+            filter: rangeLabel.toLowerCase()
+          }
         });
         
         // response.data is the ApiResponse wrapper
@@ -70,24 +74,16 @@ export default function DashboardPage() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [rangeLabel]);
 
   // Prepare Chart Data
-  const appointmentLabels = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  ];
-
-  const monthlyStats = data?.charts.monthlyStats || [];
-
-  // Helper to get data array ensuring 12 months order matches labels if needed, 
-  // but assuming API returns sorted Jan-Dec or we just map index.
-  // The API example shows "month": "Jan", etc. so we can map directly if they are in order.
-  // We'll assume the API returns them in order Jan-Dec.
+  const chartData = data?.charts.monthlyStats || [];
   
+  // Dynamically generate labels from the data (use 'month' or 'label' property)
+  const appointmentLabels = chartData.map(d => d.month || d.label || "");
+
   const getSeriesData = (key: keyof MonthlyStat) => {
-    if (!data) return new Array(12).fill(0);
-    return data.charts.monthlyStats.map(stat => Number(stat[key]) || 0);
+    return chartData.map(stat => Number(stat[key]) || 0);
   };
 
   const appointmentSeries: BarSeries[] = [
@@ -113,7 +109,7 @@ export default function DashboardPage() {
 
   // Prepare Customer Demographics
   const customerTotal = data?.charts.customerDemographics.total || 0;
-  const customerBreakdown = data?.charts.customerDemographics.breakdown || { male: 0, female: 0 };
+  const customerBreakdown = data?.charts.customerDemographics.breakdown || { male: 0, female: 0, other: 0 };
   
   const customerSegments: DemographicSegment[] = [
     { 
@@ -127,6 +123,12 @@ export default function DashboardPage() {
       label: `Female: ${customerBreakdown["female"] || 0}`, 
       value: customerBreakdown["female"] || 0, 
       color: "#FFD1DB" 
+    },
+    { 
+      id: "other", 
+      label: `Other: ${customerBreakdown["other"] || 0}`, 
+      value: customerBreakdown["other"] || 0, 
+      color: "#E0E0E0" 
     },
   ];
 

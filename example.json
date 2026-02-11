@@ -1,101 +1,197 @@
 {
-  "status": true,
-  "data": {
-    "stats": {
-      "totalCustomers": 7,
-      "totalProfessionals": 36,
-      "activeBookings": 3,
-      "totalRevenue": 35.65
-    },
-    "charts": {
-      "monthlyStats": [
-        {
-          "month": "Jan",
-          "customerSpending": 35.65,
-          "professionalEarning": 28.52,
-          "platformEarning": 7.13
+    "status": true,
+    "data": {
+        "stats": {
+            "totalCustomers": 7,
+            "totalProfessionals": 36,
+            "activeBookings": 3,
+            "totalRevenue": 35.65
         },
-        {
-          "month": "Feb",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Mar",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Apr",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "May",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Jun",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Jul",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Aug",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Sep",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Oct",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Nov",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
-        },
-        {
-          "month": "Dec",
-          "customerSpending": 0,
-          "professionalEarning": 0,
-          "platformEarning": 0
+        "charts": {
+            "monthlyStats": [
+                {
+                    "label": "1",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "2",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "3",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "4",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "5",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "6",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "7",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "8",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "9",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "10",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "11",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "12",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "13",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "14",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "15",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "16",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "17",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "18",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "19",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "20",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "21",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "22",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "23",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "24",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "25",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "26",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "27",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                },
+                {
+                    "label": "28",
+                    "customerSpending": 0,
+                    "professionalEarning": 0,
+                    "platformEarning": 0
+                }
+            ],
+            "customerDemographics": {
+                "total": 7,
+                "breakdown": {
+                    "male": 0,
+                    "female": 0
+                }
+            },
+            "professionalDemographics": {
+                "total": 36,
+                "breakdown": {
+                    "salon": 36,
+                    "individual": 0
+                }
+            }
         }
-      ],
-      "customerDemographics": {
-        "total": 7,
-        "breakdown": {
-          "male": 0,
-          "female": 0
-        }
-      },
-      "professionalDemographics": {
-        "total": 36,
-        "breakdown": {
-          "salon": 36,
-          "individual": 0
-        }
-      }
     }
-  }
 }
