@@ -1,197 +1,79 @@
 {
     "status": true,
+    "message": "success",
     "data": {
-        "stats": {
-            "totalCustomers": 7,
-            "totalProfessionals": 36,
-            "activeBookings": 3,
-            "totalRevenue": 35.65
-        },
-        "charts": {
-            "monthlyStats": [
-                {
-                    "label": "1",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
+        "count": 2,
+        "rows": [
+            {
+                "appointment_date": "20 Jan 2026",
+                "id": 16,
+                "user_id": 44,
+                "salon_id": 21,
+                "slot_id": 101,
+                "appointment_time": "10:30:00",
+                "package_id": 1,
+                "coupon_id": null,
+                "notes": "Test appointment",
+                "total_price": "35.65",
+                "status": "Previous",
+                "slot_type": "Morning",
+                "salon": {
+                    "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
+                    "id": 21,
+                    "bussiness_name": "Raven & Rose",
+                    "street_address": "abc",
+                    "city": "Bol"
                 },
-                {
-                    "label": "2",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "3",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "4",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "5",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "6",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "7",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "8",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "9",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "10",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "11",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "12",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "13",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "14",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "15",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "16",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "17",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "18",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "19",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "20",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "21",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "22",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "23",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "24",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "25",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "26",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "27",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                },
-                {
-                    "label": "28",
-                    "customerSpending": 0,
-                    "professionalEarning": 0,
-                    "platformEarning": 0
-                }
-            ],
-            "customerDemographics": {
-                "total": 7,
-                "breakdown": {
-                    "male": 0,
-                    "female": 0
-                }
+                "appointmentServices": [
+                    {
+                        "id": 6,
+                        "appointment_id": 16,
+                        "service_id": 9,
+                        "salon_id": 21,
+                        "service": {
+                            "id": 9,
+                            "name": "Spa & Relaxation Aroma Therapy",
+                            "price": "27.00",
+                            "description": "Service descriptors, profile description."
+                        }
+                    }
+                ]
             },
-            "professionalDemographics": {
-                "total": 36,
-                "breakdown": {
-                    "salon": 36,
-                    "individual": 0
-                }
+            {
+                "appointment_date": "15 Feb 2026",
+                "id": 15,
+                "user_id": 44,
+                "salon_id": 21,
+                "slot_id": 101,
+                "appointment_time": "10:30:00",
+                "package_id": 1,
+                "coupon_id": null,
+                "notes": "Test appointment",
+                "total_price": "60.00",
+                "status": "Previous",
+                "slot_type": "Morning",
+                "salon": {
+                    "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
+                    "id": 21,
+                    "bussiness_name": "Raven & Rose",
+                    "street_address": "abc",
+                    "city": "Bol"
+                },
+                "appointmentServices": [
+                    {
+                        "id": 5,
+                        "appointment_id": 15,
+                        "service_id": 19,
+                        "salon_id": 21,
+                        "service": {
+                            "id": 19,
+                            "name": "Engagement Makeup",
+                            "price": "31.00",
+                            "description": "Descriptors."
+                        }
+                    }
+                ]
             }
-        }
+        ]
     }
 }

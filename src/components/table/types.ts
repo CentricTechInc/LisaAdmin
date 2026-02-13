@@ -27,4 +27,6 @@ export type DataTableProps<T> = {
   onRetry?: () => void
   showColumnToggle?: boolean
   renderSubComponent?: (row: T) => React.ReactNode
+  manualPagination?: boolean
+  totalCount?: number
 }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -6,61 +6,114 @@ import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/table/DataTable";
 import { Column } from "@/components/table/types";
 import { EyeIcon } from "@/components/ui/EyeIcon";
+import api from "@/utils/axios";
 
 type Customer = {
   id: number;
-  name: string;
-  email: string;
-  age: number;
-  gender: "Male" | "Female";
+  user_id: number;
+  picture: string;
+  name: string; // business_name mapped to name
+  address: string; // street_address + city + country
   status: "Active" | "Blocked";
 };
-
-const initialCustomers: Customer[] = [
-  { id: 1, name: "Eleanor", email: "eleanor@mail.com", age: 25, gender: "Male", status: "Active" },
-  { id: 2, name: "Meet Alex", email: "m.alex@mail.com", age: 19, gender: "Female", status: "Blocked" },
-  { id: 3, name: "Emily Johnson", email: "emily@mail.com", age: 32, gender: "Female", status: "Active" },
-  { id: 4, name: "Michael Brown", email: "michael@mail.com", age: 45, gender: "Male", status: "Active" },
-  { id: 5, name: "Sarah Wilson", email: "sarah@mail.com", age: 28, gender: "Female", status: "Active" },
-  { id: 6, name: "David Miller", email: "david@mail.com", age: 35, gender: "Male", status: "Blocked" },
-  { id: 7, name: "Jessica Taylor", email: "jessica@mail.com", age: 22, gender: "Female", status: "Active" },
-  { id: 8, name: "James Anderson", email: "james@mail.com", age: 40, gender: "Male", status: "Active" },
-  { id: 9, name: "Laura Martinez", email: "laura@mail.com", age: 31, gender: "Female", status: "Blocked" },
-  { id: 10, name: "Robert Thomas", email: "robert@mail.com", age: 50, gender: "Male", status: "Active" },
-  { id: 11, name: "Jennifer Garcia", email: "jennifer@mail.com", age: 27, gender: "Female", status: "Active" },
-];
 
 export default function CustomersPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [totalCustomers, setTotalCustomers] = useState(0);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/customer/salon-listing/${currentPage}?pageLimit=${pageSize}`);
+
+        const serverResponse = response.data.data as any;
+
+        if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
+          const mappedData: Customer[] = serverResponse.data.data.map((item: any) => ({
+            id: item.id,
+            user_id: item.user_id,
+            picture: item.picture || "/images/avatar.png",
+            name: item.bussiness_name || "Unknown",
+            address: [
+              item.street_address,
+              item.city,
+              item.state,
+              item.zipcode,
+              item.country
+            ].filter(Boolean).join(", "),
+            status: "Active" // Default status as API doesn't provide it yet
+          }));
+          setCustomers(mappedData);
+          // Try to get total count from response
+          setTotalCustomers(serverResponse.data.total || 0);
+        } else {
+          console.warn("Unexpected API response structure:", serverResponse);
+          setCustomers([]);
+          setTotalCustomers(0);
+        }
+      } catch (error) {
+        console.error("Failed to fetch customers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomers();
+  }, [currentPage, pageSize]);
 
   // Filter
   const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleBlockToggle = (id: number) => {
-    setCustomers(customers.map(c => 
+    setCustomers(customers.map(c =>
       c.id === id ? { ...c, status: c.status === "Blocked" ? "Active" : "Blocked" } : c
     ));
   };
 
   const columns: Column<Customer>[] = useMemo(() => [
-    { id: "name", header: "Name", field: "name", sortable: true },
-    { id: "email", header: "Email", field: "email", sortable: true },
-    { id: "age", header: "Age", field: "age", sortable: true },
-    { id: "gender", header: "Gender", field: "gender", sortable: true },
+    {
+      id: "picture",
+      header: "Picture",
+      accessor: (item) => (
+        <div onClick={() => console.log(item)} className="relative h-10 w-10 overflow-hidden rounded-full">
+          <img
+            src={item?.picture}
+            alt={item?.name}
+            className="object-cover"
+          />
+        </div>
+      ),
+    },
+    { id: "name", header: "Business Name", field: "name", sortable: true },
+    { id: "address", header: "Address", field: "address", sortable: true },
+    {
+      id: "status",
+      header: "Status",
+      sortable: true,
+      accessor: (item) => (
+        <span className={cn(
+          "px-3 py-1 rounded-md text-xs font-semibold",
+          item.status === "Blocked" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
+        )}>
+          {item.status}
+        </span>
+      ),
+    },
     {
       id: "action",
       header: "Action",
       accessor: (item) => (
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => router.push('/customers/profile')}
+          <button
+            onClick={() => router.push(`/customers/profile?user_id=${item?.user_id}`)}
             className="group flex items-center justify-center transition-transform hover:scale-105 focus:outline-none"
             aria-label="View details"
           >
@@ -119,6 +172,8 @@ export default function CustomersPage() {
               }}
               className="rounded border border-gray-200 bg-white px-2 py-1 outline-none focus:border-black"
             >
+              <option value={2}>2</option>
+              <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={50}>50</option>
@@ -137,6 +192,8 @@ export default function CustomersPage() {
             onPageChange={setCurrentPage}
             selectable={false}
             showColumnToggle={false}
+            manualPagination={true}
+            totalCount={totalCustomers}
           />
         </div>
       </div>

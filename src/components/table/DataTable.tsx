@@ -55,6 +55,8 @@ export function DataTable<T>({
   onRetry,
   showColumnToggle = true,
   renderSubComponent,
+  manualPagination = false,
+  totalCount = 0,
 }: DataTableProps<T>) {
   const [columns, setColumns] = React.useState<Column<T>[]>(incomingColumns);
   const [sort, setSort] = React.useState<SortState | null>(initialSort ?? null);
@@ -73,16 +75,18 @@ export function DataTable<T>({
   
   // Reset page when filter changes
   React.useEffect(() => {
-    setCurrentPage(1);
-  }, [globalFilter, data.length]);
+    if (!manualPagination) {
+      setCurrentPage(1);
+    }
+  }, [globalFilter, data.length, manualPagination]);
 
   const sorted = React.useMemo(() => sortRows<T>(filtered, columns, sort), [filtered, columns, sort]);
-  const total = sorted.length;
+  const total = manualPagination ? totalCount : sorted.length;
   const totalPages = Math.ceil(total / pageSize);
   
   const start = (currentPage - 1) * pageSize;
   const end = Math.min(start + pageSize, total);
-  const pageRows = sorted.slice(start, end);
+  const pageRows = manualPagination ? sorted : sorted.slice(start, end);
 
   const handlePageChange = (p: number) => {
     if (p < 1 || p > totalPages) return;

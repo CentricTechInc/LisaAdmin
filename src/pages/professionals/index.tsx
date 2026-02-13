@@ -160,7 +160,7 @@ export default function ProfessionalsPage() {
                       width={20}
                       height={20}
                       className="text-gray-400"
-                    />
+                      />
                   }
                 />
               </div>
