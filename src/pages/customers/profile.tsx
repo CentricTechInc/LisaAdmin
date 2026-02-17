@@ -137,7 +137,7 @@ export default function CustomerProfile() {
             id: "action",
             header: "Action",
             accessor: (row) => (
-                <Link href="/appointment-detail?source=customers" className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
+                <Link href={`/appointment-detail?source=customers&id=${row.id}&user_id=${user_id}`} className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors w-9 h-9">
                     <EyeIcon className="w-9 h-9" />
                 </Link>
             ),

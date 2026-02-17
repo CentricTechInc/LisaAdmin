@@ -1,79 +1,37 @@
 {
     "status": true,
-    "message": "success",
+    "message": "Appointment details retrieved successfully",
     "data": {
-        "count": 2,
-        "rows": [
+        "id": 16,
+        "status": "Previous",
+        "date_time": "20 Jan 2026",
+        "notes": "Lorem ipsum...",
+        "customer": {
+            "name": "John Clark",
+            "email": "salon@yopmail.com",
+            "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
+        },
+        "professional": {
+            "name": "string",
+            "email": "dev1@yopmail.com",
+            "phone": "111111111",
+            "address": "string, string",
+            "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
+        },
+        "services": [
             {
-                "appointment_date": "20 Jan 2026",
-                "id": 16,
-                "user_id": 44,
-                "salon_id": 21,
-                "slot_id": 101,
-                "appointment_time": "10:30:00",
-                "package_id": 1,
-                "coupon_id": null,
-                "notes": "Test appointment",
-                "total_price": "35.65",
-                "status": "Previous",
-                "slot_type": "Morning",
-                "salon": {
-                    "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
-                    "id": 21,
-                    "bussiness_name": "Raven & Rose",
-                    "street_address": "abc",
-                    "city": "Bol"
-                },
-                "appointmentServices": [
-                    {
-                        "id": 6,
-                        "appointment_id": 16,
-                        "service_id": 9,
-                        "salon_id": 21,
-                        "service": {
-                            "id": 9,
-                            "name": "Spa & Relaxation Aroma Therapy",
-                            "price": "27.00",
-                            "description": "Service descriptors, profile description."
-                        }
-                    }
-                ]
-            },
-            {
-                "appointment_date": "15 Feb 2026",
-                "id": 15,
-                "user_id": 44,
-                "salon_id": 21,
-                "slot_id": 101,
-                "appointment_time": "10:30:00",
-                "package_id": 1,
-                "coupon_id": null,
-                "notes": "Test appointment",
-                "total_price": "60.00",
-                "status": "Previous",
-                "slot_type": "Morning",
-                "salon": {
-                    "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
-                    "id": 21,
-                    "bussiness_name": "Raven & Rose",
-                    "street_address": "abc",
-                    "city": "Bol"
-                },
-                "appointmentServices": [
-                    {
-                        "id": 5,
-                        "appointment_id": 15,
-                        "service_id": 19,
-                        "salon_id": 21,
-                        "service": {
-                            "id": 19,
-                            "name": "Engagement Makeup",
-                            "price": "31.00",
-                            "description": "Descriptors."
-                        }
-                    }
-                ]
+                "name": "Spa & Relaxation Aroma Therapy",
+                "price": "27.00",
+                "date": "20 Jan 2026"
             }
-        ]
+        ],
+        "payment": {
+            "sub_total": 35.65,
+            "platform_fee": "5.35",
+            "grand_total": "30.30",
+            "method": "Bank Account",
+            "last_digits": "2345"
+        },
+        "review": null
     }
 }

@@ -56,7 +56,10 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
   className,
 }) => {
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+    // Safely convert status to string and lowercase
+    const normalizedStatus = String(status || "").toLowerCase();
+    
+    switch (normalizedStatus) {
       case "completed":
         return "bg-[#E6F6EC] text-[#039855]";
       case "pending":
