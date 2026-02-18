@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/Input";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { DataTable } from "@/components/table/DataTable";
 import { Column } from "@/components/table/types";
+import api from "@/utils/axios";
+import Modal from "@/components/ui/Modal";
 
 type Professional = {
   id: number;
+  user_id: number;
   name: string;
   email: string;
   phone: string;
@@ -18,53 +21,142 @@ type Professional = {
   status: "Active" | "Blocked" | "Rejected" | "Pending";
 };
 
-const initialProfessionals: Professional[] = [
-  { id: 1, name: "Alison Williams", email: "alisonwilliams@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Rejected" },
-  { id: 2, name: "Meet Alex", email: "m.alex@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Blocked" },
-  { id: 3, name: "Emily Johnson", email: "emily@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Blocked" },
-  { id: 4, name: "Michael Brown", email: "michael@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
-  { id: 5, name: "Sarah Wilson", email: "sarah@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Pending" },
-  { id: 6, name: "David Miller", email: "david@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Pending" },
-  { id: 7, name: "Jessica Taylor", email: "jessica@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Active" },
-  { id: 8, name: "James Anderson", email: "james@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
-  { id: 9, name: "Laura Martinez", email: "laura@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Blocked" },
-  { id: 10, name: "Robert Thomas", email: "robert@mail.com", phone: "(631) 273-2740", category: "Salons", status: "Active" },
-  { id: 11, name: "Jennifer Garcia", email: "jennifer@mail.com", phone: "(631) 273-2740", category: "Individual Service Providers", status: "Active" },
-];
-
 export default function ProfessionalsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [professionals, setProfessionals] = useState<Professional[]>(initialProfessionals);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [totalItems, setTotalItems] = useState(0);
   const [activeTab, setActiveTab] = useState("Approved");
+  
+  // Delete Modal State
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Block Modal State
+  const [blockId, setBlockId] = useState<number | null>(null);
+  const [blockStatus, setBlockStatus] = useState<"Block" | "Active" | null>(null);
+  const [isBlocking, setIsBlocking] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [blockError, setBlockError] = useState<string | null>(null);
 
   const tabs = ["Approved", "Pending Requests", "Rejected / Block"];
 
-  // Filter
-  const filteredProfessionals = professionals.filter((professional) => {
-    const matchesSearch = professional.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    professional.email.toLowerCase().includes(searchQuery.toLowerCase());
+  const fetchProfessionals = async () => {
+    try {
+      setLoading(true);
+      
+      // Map tab to status param
+      let statusParam = "Approved";
+      if (activeTab === "Pending Requests") statusParam = "Pending";
+      if (activeTab === "Rejected / Block") statusParam = "Rejected";
 
-    if (!matchesSearch) return false;
+      const response = await api.get('/admin/getAllProfessionals', {
+        params: {
+          page: currentPage,
+          limit: pageSize,
+          status: statusParam,
+          search: searchQuery // Assuming API supports search, if not we might need to filter client side but let's pass it
+        }
+      });
 
-    if (activeTab === "Approved") return professional.status === "Active";
-    if (activeTab === "Pending Requests") return professional.status === "Pending";
-    if (activeTab === "Rejected / Block") return professional.status === "Blocked" || professional.status === "Rejected";
-
-    return true;
-  });
-
-  const handleBlockToggle = (id: number) => {
-    setProfessionals(professionals.map(p => 
-      p.id === id ? { ...p, status: p.status === "Blocked" ? "Active" : "Blocked" } : p
-    ));
+      // Based on example.json structure
+      // response.data is the ApiResponse wrapper from axios interceptor
+      // response.data.data is the actual backend response body
+      const backendResponse = response.data.data;
+      
+      if (backendResponse?.data?.items) {
+         const items = backendResponse.data.items.map((item: any) => ({
+            id: Number(item.id),
+            user_id: Number(item.user_id ?? item.userId ?? item.id),
+            name: item.name || "Unknown",
+            email: item.email || "",
+            phone: item.phone || "",
+            category: item.category || "Salons",
+            status: item.status || "Active"
+         }));
+         
+         setProfessionals(items);
+         setTotalItems(backendResponse.data.meta?.total || 0);
+      } else {
+         setProfessionals([]);
+         setTotalItems(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch professionals:", error);
+      setProfessionals([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this professional?")) {
-      setProfessionals(professionals.filter(p => p.id !== id));
+  useEffect(() => {
+    fetchProfessionals();
+  }, [currentPage, pageSize, activeTab, searchQuery]);
+
+  const handleBlockClick = useCallback((id: number, currentStatus: string) => {
+    setBlockId(id);
+    setBlockStatus(currentStatus === "Active" ? "Block" : "Active");
+    setBlockReason("");
+    setBlockError(null);
+  }, []);
+
+  const handleConfirmBlock = async () => {
+    if (!blockId || !blockStatus) return;
+
+    // Reason is mandatory for blocking
+    if (blockStatus === "Block" && !blockReason.trim()) {
+        setBlockError("Please provide a reason for blocking.");
+        return;
+    }
+    
+    try {
+        setIsBlocking(true);
+        setBlockError(null);
+        
+        await api.put(`/admin/updateProfessionalStatus/${blockId}`, {
+            status: blockStatus,
+            reason: blockReason || "Unblocked by admin"
+        });
+
+        // Refresh the list
+        fetchProfessionals();
+        setBlockId(null);
+        setBlockStatus(null);
+    } catch (error: any) {
+        console.error("Failed to update professional status:", error);
+        setBlockError(error?.message || "Failed to update status");
+    } finally {
+        setIsBlocking(false);
+    }
+  };
+
+  const handleDeleteClick = useCallback((id: number) => {
+    console.log("Delete clicked for ID:", id);
+    setDeleteId(id);
+    setDeleteError(null);
+  }, []);
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    
+    try {
+        console.log("Attempting to delete ID:", deleteId);
+        setIsDeleting(true);
+        setDeleteError(null);
+        await api.delete(`/admin/deleteProfessional/${deleteId}`);
+        console.log("Delete successful");
+        // Refresh the list
+        fetchProfessionals();
+        setDeleteId(null);
+    } catch (error: any) {
+        console.error("Failed to delete professional:", error);
+        setDeleteError(error?.message || "Failed to delete professional");
+    } finally {
+        setIsDeleting(false);
     }
   };
 
@@ -74,32 +166,20 @@ export default function ProfessionalsPage() {
     { id: "phone", header: "Phone", field: "phone", sortable: true },
     { id: "category", header: "Category", field: "category", sortable: true },
     {
-      id: "status",
-      header: "Status",
-      sortable: true,
-      accessor: (item) => (
-        <span className={cn(
-            "px-3 py-1 rounded-md text-xs font-semibold",
-            item.status === "Rejected" ? "bg-[#FFEAEA] text-[#FF4460]" :
-            item.status === "Blocked" ? "bg-gray-100 text-gray-600" :
-            item.status === "Pending" ? "bg-yellow-100 text-yellow-600" :
-            "hidden"
-        )}>
-            {item.status === "Active" ? "" : item.status}
-        </span>
-      ),
-    },
-    {
       id: "action",
       header: "Action",
       accessor: (item) => (
         <div className="flex items-center gap-2">
             <button 
-                onClick={() => router.push({ 
-                pathname: '/professionals/profile', 
-                query: item.status === 'Pending' ? { status: 'pending' } : 
-                        item.status === 'Rejected' ? { status: 'rejected' } : {} 
-                })}
+                onClick={() => router.push(
+                  `/professionals/profile?id=${item.id}&user_id=${item.user_id}${
+                    item.status === "Pending"
+                      ? "&status=pending"
+                      : item.status === "Rejected"
+                      ? "&status=rejected"
+                      : ""
+                  }`
+                )}
                 className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500"
                 aria-label="View details"
             >
@@ -108,7 +188,7 @@ export default function ProfessionalsPage() {
             {activeTab === "Approved" && (
                 <>
                 <button
-                    onClick={() => handleBlockToggle(item.id)}
+                    onClick={() => handleBlockClick(item.id, item.status)}
                     className={cn(
                     "h-8 px-4 rounded text-xs font-medium transition-colors min-w-17.5",
                     item.status === "Active"
@@ -119,7 +199,7 @@ export default function ProfessionalsPage() {
                     {item.status === "Active" ? "Block" : "Unblock"}
                 </button>
                 <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDeleteClick(item.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
                     aria-label="Delete"
                 >
@@ -129,7 +209,7 @@ export default function ProfessionalsPage() {
             )}
             {activeTab === "Rejected / Block" && (
                 <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDeleteClick(item.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-red-50 text-red-400 hover:text-red-600"
                     aria-label="Delete"
                 >
@@ -139,7 +219,7 @@ export default function ProfessionalsPage() {
         </div>
       ),
     },
-  ], [activeTab, router]);
+  ], [activeTab, router, handleDeleteClick, handleBlockClick]);
 
   return (
     <div className="mx-auto w-full flex flex-col gap-2">
@@ -172,7 +252,10 @@ export default function ProfessionalsPage() {
                     <SegmentedControl
                         options={tabs.map((tab) => ({ id: tab, label: tab }))}
                         value={activeTab}
-                        onChange={setActiveTab}
+                        onChange={(val) => {
+                            setActiveTab(val);
+                            setCurrentPage(1); // Reset page on tab change
+                        }}
                         className="bg-gray-100/50 rounded-lg p-1 w-auto"
                     />
                 </div>
@@ -199,15 +282,130 @@ export default function ProfessionalsPage() {
             <div className="rounded-lg p-6  border border-gray-200 overflow-hidden">
               <DataTable
                 columns={columns}
-                data={filteredProfessionals}
+                data={professionals}
                 page={currentPage}
                 pageSize={pageSize}
                 onPageChange={setCurrentPage}
                 selectable={false}
                 showColumnToggle={false}
+                loading={loading}
+                manualPagination={true}
+                totalCount={totalItems}
               />
             </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+            isOpen={deleteId !== null}
+            onClose={() => setDeleteId(null)}
+            className="max-w-md p-6 text-center"
+        >
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+                    <TrashIcon className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Delete Professional?</h3>
+                <p className="text-gray-500">
+                    Are you sure you want to delete this professional? This action cannot be undone.
+                </p>
+                {deleteError && (
+                    <div className="text-red-600 bg-red-50 px-3 py-2 rounded-md text-sm w-full">
+                        {deleteError}
+                    </div>
+                )}
+                <div className="flex items-center gap-3 w-full mt-4">
+                    <button
+                        onClick={() => setDeleteId(null)}
+                        className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+                        disabled={isDeleting}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleConfirmDelete}
+                        className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? "Deleting..." : "Delete"}
+                    </button>
+                </div>
+            </div>
+        </Modal>
+
+        {/* Block Confirmation Modal */}
+        <Modal
+            isOpen={blockId !== null}
+            onClose={() => {
+                setBlockId(null);
+                setBlockStatus(null);
+                setBlockReason("");
+                setBlockError(null);
+            }}
+            className="max-w-md p-6 text-center"
+        >
+            <div className="flex flex-col items-center gap-4">
+                <div className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center",
+                    blockStatus === "Block" ? "bg-red-50 text-red-500" : "bg-green-50 text-green-500"
+                )}>
+                    <EyeIcon className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                    {blockStatus === "Block" ? "Block Professional?" : "Unblock Professional?"}
+                </h3>
+                <p className="text-gray-500">
+                    {blockStatus === "Block" 
+                        ? "Are you sure you want to block this professional? They will not be able to access their account." 
+                        : "Are you sure you want to unblock this professional?"}
+                </p>
+                
+                {blockStatus === "Block" && (
+                    <div className="w-full text-left">
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Reason for blocking <span className="text-red-500">*</span></label>
+                        <textarea
+                            value={blockReason}
+                            onChange={(e) => setBlockReason(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-black focus:border-black min-h-20"
+                            placeholder="Enter reason..."
+                        />
+                    </div>
+                )}
+
+                {blockError && (
+                    <div className="text-red-600 bg-red-50 px-3 py-2 rounded-md text-sm w-full">
+                        {blockError}
+                    </div>
+                )}
+
+                <div className="flex items-center gap-3 w-full mt-4">
+                    <button
+                        onClick={() => {
+                            setBlockId(null);
+                            setBlockStatus(null);
+                            setBlockReason("");
+                            setBlockError(null);
+                        }}
+                        className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+                        disabled={isBlocking}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleConfirmBlock}
+                        className={cn(
+                            "flex-1 px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 flex items-center justify-center gap-2",
+                            blockStatus === "Block" ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+                        )}
+                        disabled={isBlocking}
+                    >
+                        {isBlocking 
+                            ? (blockStatus === "Block" ? "Blocking..." : "Unblocking...") 
+                            : (blockStatus === "Block" ? "Block" : "Unblock")}
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </div>
   );
 }

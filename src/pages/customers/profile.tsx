@@ -60,6 +60,7 @@ export default function CustomerProfile() {
     const [customer, setCustomer] = useState<CustomerProfileData | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [totalAppointments, setTotalAppointments] = useState<number>(0);
+    const [isBlocking, setIsBlocking] = useState(false);
 
     // Fetch Customer Data
     useEffect(() => {
@@ -127,6 +128,23 @@ export default function CustomerProfile() {
         fetchData();
     }, [router.isReady, user_id]);
 
+    const handleBlockToggle = async () => {
+        if (!customer) return;
+        const nextStatus = customer.status === "Blocked" ? "Active" : "Blocked";
+        try {
+            setIsBlocking(true);
+            await api.put(`/admin/updateProfessionalStatus/${user_id}`, {
+                status: nextStatus,
+                reason: nextStatus === "Blocked" ? "Blocked by admin" : "Unblocked by admin"
+            });
+            setCustomer({ ...customer, status: nextStatus });
+        } catch (error) {
+            console.error("Failed to update customer status:", error);
+        } finally {
+            setIsBlocking(false);
+        }
+    };
+
     const columns: Column<Appointment>[] = [
         { id: "sNo", field: "sNo", header: "S No", sortable: true },
         { id: "service", field: "service", header: "Service", sortable: true },
@@ -189,8 +207,12 @@ export default function CustomerProfile() {
                     </p>
                     <Button
                         className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
+                        onClick={handleBlockToggle}
+                        disabled={isBlocking || !customer}
                     >
-                        {customer?.status === "Blocked" ? "Unblock" : "Block"}
+                        {isBlocking
+                            ? customer?.status === "Blocked" ? "Unblocking..." : "Blocking..."
+                            : customer?.status === "Blocked" ? "Unblock" : "Block"}
                     </Button>
                 </div>
             </div>

@@ -64,6 +64,8 @@ api.interceptors.response.use(
       } else {
         message = data.message;
       }
+    } else if (data?.errors && Array.isArray(data.errors)) {
+      message = data.errors.join(", ");
     } else if (data?.error) {
       message = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
     } else if (typeof data === 'string') {

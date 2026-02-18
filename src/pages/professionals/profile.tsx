@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,12 +9,12 @@ import { DataTable } from "@/components/table/DataTable";
 import { EyeIcon } from "@/components/ui/EyeIcon";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Column } from "@/components/table/types";
-import { useState } from "react";
 import { FormTextarea } from "@/components/ui/FormTextarea";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { DaySelector } from "@/components/ui/DaySelector";
 import { Modal } from "@/components/ui/Modal";
+import api from "@/utils/axios";
 
 // Types
 type Appointment = {
@@ -26,11 +26,106 @@ type Appointment = {
     amount: string;
 };
 
-// Dummy Data
-const appointments: Appointment[] = [
-    { id: 1, sNo: 1, service: "Nail", dateTime: "12 November, 09:00 AM", professional: "Salon", amount: "$18.50" },
-    { id: 2, sNo: 2, service: "Facial", dateTime: "12 November, 09:00 AM", professional: "Individual Service Providers", amount: "$30.00" },
-];
+type APIAppointment = {
+    id: number;
+    appointment_date: string;
+    appointment_time: string;
+    total_price: string;
+    salon: {
+        bussiness_name: string;
+    };
+    appointmentServices: {
+        service: {
+            name: string;
+        };
+    }[];
+};
+
+type SalonService = {
+    name: string;
+};
+
+type WeeklySchedule = {
+    day_of_week: string;
+    is_open: boolean;
+    start_time: string | null;
+    end_time: string | null;
+};
+
+type BreakTime = {
+    has_break: boolean;
+    break_start_time: string | null;
+    break_end_time: string | null;
+};
+
+type BankDetail = {
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+    isCurrent?: boolean;
+};
+
+type SalonProfileData = {
+    id: number;
+    businessName: string;
+    email: string;
+    phone: string;
+    age: number | string;
+    gender: string;
+    profileImage: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    licenseType: string;
+    licenseNumber: string;
+    issuingState: string;
+    totalExperience: number | string;
+    totalProfessionals: number | string;
+    bio: string;
+    certificateUrl: string;
+    accountHolderName: string;
+    bankName: string;
+    accountNumber: string;
+    services: string[];
+    scheduleStart: string | null;
+    scheduleEnd: string | null;
+    breakStart: string | null;
+    breakEnd: string | null;
+};
+
+const getFileName = (url?: string) => {
+    if (!url) return "";
+    const cleanUrl = url.split("?")[0];
+    return cleanUrl.substring(cleanUrl.lastIndexOf("/") + 1) || cleanUrl;
+};
+
+const defaultServices = ["Hairstyling", "Nail", "Hair color", "Body Glowing", "Retouch", "Facial", "Spa", "Eyebrows", "Makeup", "Corner lashes"];
+
+const to12Hour = (time?: string | null) => {
+    if (!time) return { time: "--:--", period: "--" };
+    const [hStr, mStr] = time.split(":");
+    const hours = Number(hStr);
+    if (Number.isNaN(hours)) return { time: "--:--", period: "--" };
+    const period = hours >= 12 ? "PM" : "AM";
+    const normalizedHours = hours % 12 || 12;
+    const minutes = mStr ?? "00";
+    return { time: `${String(normalizedHours).padStart(2, "0")}:${minutes}`, period };
+};
+
+const toDayId = (day?: string) => {
+    if (!day) return "";
+    const key = day.toLowerCase();
+    if (key.startsWith("mon")) return "mon";
+    if (key.startsWith("tue")) return "tue";
+    if (key.startsWith("wed")) return "wed";
+    if (key.startsWith("thu")) return "thu";
+    if (key.startsWith("fri")) return "fri";
+    if (key.startsWith("sat")) return "sat";
+    if (key.startsWith("sun")) return "sun";
+    return "";
+};
 
 export default function ProfessionalProfile() {
     const router = useRouter();
@@ -38,11 +133,93 @@ export default function ProfessionalProfile() {
     const isRejected = router.query.status === 'rejected';
     const [activeTab, setActiveTab] = useState("personal");
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-    const [selectedDays, setSelectedDays] = useState<string[]>(["mon", "tue", "wed", "thu", "fri"]);
-    const [selectedServices, setSelectedServices] = useState<string[]>([
-        "Hairstyling", "Nail", "Hair color", "Body Glowing", "Retouch",
-        "Facial", "Spa", "Eyebrows", "Makeup", "Corner lashes"
-    ]);
+    const [selectedDays, setSelectedDays] = useState<string[]>([]);
+    const salonId = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id;
+    const userId = Array.isArray(router.query.user_id) ? router.query.user_id[0] : router.query.user_id;
+    const [selectedServices, setSelectedServices] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [salon, setSalon] = useState<SalonProfileData | null>(null);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [totalAppointments, setTotalAppointments] = useState(0);
+
+    useEffect(() => {
+        if (!router.isReady) return;
+        if (!salonId && !userId) return;
+
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const salonResponse = salonId ? await api.get(`/admin/get-salon-by-id/${salonId}`) : null;
+                const appointmentsResponse = userId ? await api.get(`/appointment/details/${userId}?page=1`) : null;
+
+                const salonData = salonResponse?.data?.data?.data || {};
+                const userData = salonData?.user || salonData?.user_data || {};
+                const bankDetails: BankDetail[] = Array.isArray(userData?.salonBankDetail) ? userData.salonBankDetail : [];
+                const currentBank = bankDetails.find((detail) => detail.isCurrent) || bankDetails[0];
+                const services: SalonService[] = Array.isArray(salonData?.services) ? salonData.services : [];
+                const serviceNames = services.map((service) => service?.name).filter(Boolean) as string[];
+                const weeklySchedules: WeeklySchedule[] = Array.isArray(salonData?.weeklySchedules) ? salonData.weeklySchedules : [];
+                const openSchedules = weeklySchedules.filter((schedule) => schedule.is_open);
+                const selectedScheduleDays = openSchedules.map((schedule) => toDayId(schedule.day_of_week)).filter(Boolean) as string[];
+                const primarySchedule = openSchedules[0] || weeklySchedules[0];
+                const breakTime: BreakTime = salonData?.breakTime || {};
+                const fallbackName = `${userData?.first_name || ""} ${userData?.last_name || ""}`.trim();
+
+                setSalon({
+                    id: salonData?.id || 0,
+                    businessName: salonData?.bussiness_name || salonData?.business_name || fallbackName || "Unknown",
+                    email: userData?.email || "",
+                    phone: userData?.phone_number || "",
+                    age: userData?.age ?? "N/A",
+                    gender: userData?.gender || "N/A",
+                    profileImage: salonData?.picture || userData?.picture || "/images/avatar.png",
+                    streetAddress: salonData?.street_address || "",
+                    city: salonData?.city || "",
+                    state: salonData?.state || "",
+                    zipCode: salonData?.zipcode ? String(salonData?.zipcode) : "",
+                    country: salonData?.country || "",
+                    licenseType: salonData?.license_type || "N/A",
+                    licenseNumber: salonData?.license_number || "N/A",
+                    issuingState: salonData?.issuing_state || "N/A",
+                    totalExperience: salonData?.total_experience ?? "N/A",
+                    totalProfessionals: salonData?.total_professionals ?? "N/A",
+                    bio: salonData?.professionol_bio || "",
+                    certificateUrl: salonData?.certificate || "",
+                    accountHolderName: currentBank?.account_holder_name || "",
+                    bankName: currentBank?.bank_name || "",
+                    accountNumber: currentBank?.account_number || "",
+                    services: serviceNames,
+                    scheduleStart: primarySchedule?.start_time ?? null,
+                    scheduleEnd: primarySchedule?.end_time ?? null,
+                    breakStart: breakTime?.has_break ? breakTime?.break_start_time ?? null : null,
+                    breakEnd: breakTime?.has_break ? breakTime?.break_end_time ?? null : null
+                });
+                setSelectedServices(serviceNames);
+                setSelectedDays(selectedScheduleDays);
+
+                const appointmentsData = appointmentsResponse?.data?.data?.data?.rows || [];
+                const appointmentsCount = appointmentsResponse?.data?.data?.data?.count || 0;
+                setTotalAppointments(appointmentsCount);
+
+                const formattedAppointments = appointmentsData.map((item: APIAppointment, index: number) => ({
+                    id: item.id,
+                    sNo: index + 1,
+                    service: item.appointmentServices?.map((s) => s.service.name).join(", ") || "Unknown Service",
+                    dateTime: `${item.appointment_date} ${item.appointment_time}`,
+                    professional: item.salon?.bussiness_name || "Unknown",
+                    amount: `$${item.total_price}`
+                }));
+
+                setAppointments(formattedAppointments);
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [router.isReady, salonId, userId]);
 
     const columns: Column<Appointment>[] = [
         { id: "sNo", field: "sNo", header: "S No", sortable: true },
@@ -53,7 +230,7 @@ export default function ProfessionalProfile() {
         {
             id: "action",
             header: "Action",
-            accessor: (_row) => (
+            accessor: () => (
                 <button
                     type="button"
                     onClick={() => router.push("/appointment-detail?source=professionals")}
@@ -65,6 +242,16 @@ export default function ProfessionalProfile() {
             ),
         },
     ];
+
+    if (loading) {
+        return <div className="p-6">Loading...</div>;
+    }
+
+    const scheduleStart = to12Hour(salon?.scheduleStart);
+    const scheduleEnd = to12Hour(salon?.scheduleEnd);
+    const breakStart = to12Hour(salon?.breakStart);
+    const breakEnd = to12Hour(salon?.breakEnd);
+    const availableServices = salon?.services?.length ? salon.services : defaultServices;
 
     return (
         <>
@@ -100,21 +287,16 @@ export default function ProfessionalProfile() {
                             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="w-24 h-24 relative rounded-2xl overflow-hidden bg-gray-200">
-                                        {/* Using a placeholder if avatar not found, but trying public/images/avatar.png as in Sidebar */}
                                         <Image
-                                            src="/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg"
-                                            alt="Eleanor"
+                                            src={salon?.profileImage || "/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg"}
+                                            alt={salon?.businessName || "Salon"}
                                             fill
                                             className="object-cover"
-                                            onError={(e) => {
-                                                // Fallback logic if needed, but Next/Image handles layout
-                                                // For now assume image exists or shows empty
-                                            }}
                                         />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-[#13000A]">Eleanor</h2>
-                                        <p className="text-gray-500">eleanor@mail.com</p>
+                                        <h2 className="text-2xl font-bold text-[#13000A]">{salon?.businessName || "Salon"}</h2>
+                                        <p className="text-gray-500">{salon?.email || "email@example.com"}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
@@ -133,19 +315,19 @@ export default function ProfessionalProfile() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                 <FormInput
                                     label="Age"
-                                    defaultValue="25"
+                                    value={String(salon?.age ?? "N/A")}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
                                 <FormInput
-                                    label="Gander"
-                                    defaultValue="Female"
+                                    label="Gender"
+                                    value={salon?.gender || "N/A"}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
                                 <FormInput
                                     label="Mobile Number*"
-                                    defaultValue="(631) 273-2740"
+                                    value={salon?.phone || ""}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12 pl-20!"
                                     leftSlot={
@@ -163,26 +345,26 @@ export default function ProfessionalProfile() {
                                 />
                                 <FormInput
                                     label="Street Address"
-                                    defaultValue="1158 Suffolk Ave #3"
+                                    value={salon?.streetAddress || ""}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
                                 <FormInput
                                     label="City"
-                                    defaultValue="Brentwood"
+                                    value={salon?.city || ""}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
                                 <FormInput
                                     label="State"
-                                    defaultValue="New York"
+                                    value={salon?.state || ""}
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
                                 <div className="md:col-span-2">
                                     <FormInput
                                         label="Zip Code"
-                                        defaultValue="11717"
+                                        value={salon?.zipCode || ""}
                                         wrapperClassName="w-full md:w-1/2 pr-0 md:pr-4"
                                         readOnly
                                         className="bg-white border-gray-200 rounded-xl h-12"
@@ -193,7 +375,7 @@ export default function ProfessionalProfile() {
                             {/* Table */}
                             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                                 <h3 className="text-lg font-bold mb-4 text-[#13000A]">
-                                    Total Appointments Booked <span className="text-[#FF4460]">(24)</span>
+                                    Total Appointments Booked <span className="text-[#FF4460]">({totalAppointments})</span>
                                 </h3>
                                 <div className="overflow-hidden  p-6  rounded-lg border border-gray-100">
                                     <DataTable
@@ -212,22 +394,22 @@ export default function ProfessionalProfile() {
                             <div className="flex flex-col gap-6">
                                 <h3 className="font-bold text-lg text-[#13000A]">License Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormInput label="License Type" defaultValue="Barber" className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FormInput label="License Number" defaultValue="ABC1289" className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FormInput label="Issuing State/Country" defaultValue="United States" className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FormInput label="Years Of Experience" defaultValue="05" className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FormInput label="How Many Professionals Are On Your Team?" defaultValue="07" className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="License Type" value={salon?.licenseType || "N/A"} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="License Number" value={salon?.licenseNumber || "N/A"} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="Issuing State/Country" value={salon?.issuingState || "N/A"} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="Years Of Experience" value={String(salon?.totalExperience ?? "N/A")} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="How Many Professionals Are On Your Team?" value={String(salon?.totalProfessionals ?? "N/A")} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
                                     <FileUpload
                                         label="License/Certificate"
-                                        fileName="License Photo.jpeg"
-                                        onDownload={() => { }}
-                                        onDelete={() => { }}
+                                        fileName={getFileName(salon?.certificateUrl) || "No file uploaded"}
+                                        onDownload={salon?.certificateUrl ? () => window.open(salon.certificateUrl, "_blank", "noopener,noreferrer") : undefined}
                                         className="h-12 border-gray-200"
                                     />
                                     <div className="md:col-span-2">
                                         <FormTextarea
                                             label="Bio/Headline"
-                                            defaultValue="Bloom & Blade salon, established in 2003 in Celina, Delaware, prides itself on delivering exceptional service at a fair price. Our dedicated team is committed to making every visit a delightful experience, ensuring that you leave feeling refreshed and beautiful. We believe in creating a welcoming atmosphere where every client feels valued."
+                                            value={salon?.bio || ""}
+                                            readOnly
                                             className="h-32 bg-white border-gray-200 rounded-xl resize-none"
                                         />
                                     </div>
@@ -238,10 +420,10 @@ export default function ProfessionalProfile() {
                             <div className="flex flex-col gap-6">
                                 <h3 className="font-bold text-lg text-[#13000A]">Account Detail</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormInput label="Account Holder Name" defaultValue="Bloom & Blade" className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FormInput label="Bank Name" defaultValue="Abc Bank Limited" className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="Account Holder Name" value={salon?.accountHolderName || ""} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
+                                    <FormInput label="Bank Name" value={salon?.bankName || ""} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
                                     <div className="md:col-span-2">
-                                        <FormInput label="Account Number" defaultValue="4123 4568 9785 2345" className="bg-white border-gray-200 rounded-xl h-12" />
+                                        <FormInput label="Account Number" value={salon?.accountNumber || ""} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
                                     </div>
                                 </div>
                             </div>
@@ -250,7 +432,7 @@ export default function ProfessionalProfile() {
                             <div className="flex flex-col gap-6">
                                 <h3 className="font-bold text-lg text-[#13000A]">Services</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-5 gap-y-4 gap-x-8">
-                                    {["Hairstyling", "Nail", "Hair color", "Body Glowing", "Retouch", "Facial", "Spa", "Eyebrows", "Makeup", "Corner lashes"].map((service) => (
+                                    {availableServices.map((service) => (
                                         <Checkbox
                                             key={service}
                                             label={service}
@@ -274,14 +456,14 @@ export default function ProfessionalProfile() {
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
                                         <span>From</span>
                                         <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                            <span className="font-bold text-gray-900">08:30</span>
-                                            <span className="font-bold text-[#FF4460]">AM</span>
+                                            <span className="font-bold text-gray-900">{scheduleStart.time}</span>
+                                            <span className="font-bold text-[#FF4460]">{scheduleStart.period}</span>
                                         </div>
                                         <span>—</span>
                                         <span>To</span>
                                         <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                            <span className="font-bold text-gray-900">09:30</span>
-                                            <span className="font-bold text-[#FF4460]">PM</span>
+                                            <span className="font-bold text-gray-900">{scheduleEnd.time}</span>
+                                            <span className="font-bold text-[#FF4460]">{scheduleEnd.period}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -294,14 +476,14 @@ export default function ProfessionalProfile() {
                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                     <span>From</span>
                                     <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                        <span className="font-bold text-gray-900">12:30</span>
-                                        <span className="font-bold text-[#FF4460]">PM</span>
+                                        <span className="font-bold text-gray-900">{breakStart.time}</span>
+                                        <span className="font-bold text-[#FF4460]">{breakStart.period}</span>
                                     </div>
                                     <span>—</span>
                                     <span>To</span>
                                     <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                        <span className="font-bold text-gray-900">01:30</span>
-                                        <span className="font-bold text-[#FF4460]">PM</span>
+                                        <span className="font-bold text-gray-900">{breakEnd.time}</span>
+                                        <span className="font-bold text-[#FF4460]">{breakEnd.period}</span>
                                     </div>
                                 </div>
                             </div>

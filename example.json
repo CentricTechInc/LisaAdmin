@@ -1,37 +1,124 @@
 {
     "status": true,
-    "message": "Appointment details retrieved successfully",
+    "message": "success",
     "data": {
-        "id": 16,
-        "status": "Previous",
-        "date_time": "20 Jan 2026",
-        "notes": "Lorem ipsum...",
-        "customer": {
-            "name": "John Clark",
+        "certificate": "http://localhost:8000/images/1770913673233-Capture.PNG",
+        "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
+        "id": 36,
+        "bussiness_name": "Guy Salon",
+        "street_address": "abc-123",
+        "city": "Gitega",
+        "state": "Gitega Province",
+        "zipcode": 1111,
+        "latitude": null,
+        "longitude": null,
+        "total_professionals": 3,
+        "license_type": "Hair Stylist",
+        "license_number": "123456",
+        "issuing_state": "Central African Republic",
+        "professionol_bio": "Iam a Hair Stylist",
+        "total_experience": 7,
+        "country": "Burundi",
+        "average_rating": "0.0",
+        "user": {
+            "picture": "http://localhost:8000/images/1770913673233-Capture.PNG",
+            "id": "44",
+            "first_name": "John",
+            "last_name": "Clark",
             "email": "salon@yopmail.com",
-            "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
-        },
-        "professional": {
-            "name": "string",
-            "email": "dev1@yopmail.com",
-            "phone": "111111111",
-            "address": "string, string",
-            "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
+            "phone_number": "12 345 6764",
+            "age": 27,
+            "gender": "Male",
+            "salonBankDetail": [
+                {
+                    "id": 31,
+                    "user_id": 44,
+                    "bank_name": "African Bank",
+                    "account_number": "12345678912345",
+                    "account_holder_name": "John Clark",
+                    "confirm_consent": true,
+                    "isCurrent": true
+                }
+            ]
         },
         "services": [
             {
-                "name": "Spa & Relaxation Aroma Therapy",
-                "price": "27.00",
-                "date": "20 Jan 2026"
+                "picture": "http://localhost:8000/images/1770653499996-scaled_1000000019.jpg",
+                "id": 43,
+                "category_id": 7,
+                "subcategory_id": 33,
+                "salon_id": 36,
+                "name": "hair wash",
+                "price": "25.00",
+                "service_for": "Male",
+                "description": "Premium Hair Wash Service.",
+                "deletedAt": null
             }
         ],
-        "payment": {
-            "sub_total": 35.65,
-            "platform_fee": "5.35",
-            "grand_total": "30.30",
-            "method": "Bank Account",
-            "last_digits": "2345"
-        },
-        "review": null
+        "weeklySchedules": [
+            {
+                "id": 214,
+                "salon_id": 36,
+                "day_of_week": "Sunday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 213,
+                "salon_id": 36,
+                "day_of_week": "Saturday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 212,
+                "salon_id": 36,
+                "day_of_week": "Friday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 211,
+                "salon_id": 36,
+                "day_of_week": "Thursday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 210,
+                "salon_id": 36,
+                "day_of_week": "Wednesday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 209,
+                "salon_id": 36,
+                "day_of_week": "Tuesday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 208,
+                "salon_id": 36,
+                "day_of_week": "Monday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            }
+        ],
+        "breakTime": {
+            "id": 27,
+            "salon_id": 36,
+            "has_break": true,
+            "break_start_time": "08:30:00",
+            "break_end_time": "21:30:00"
+        }
     }
 }
