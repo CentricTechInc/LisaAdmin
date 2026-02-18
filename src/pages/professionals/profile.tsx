@@ -230,15 +230,14 @@ export default function ProfessionalProfile() {
         {
             id: "action",
             header: "Action",
-            accessor: () => (
-                <button
-                    type="button"
-                    onClick={() => router.push("/appointment-detail?source=professionals")}
+            accessor: (row) => (
+                <Link
+                    href={`/appointment-detail?source=customers&id=${row.id}&user_id=${userId || ""}`}
                     className="flex items-center justify-center hover:bg-gray-100 rounded-md transition-colors"
                     aria-label="View appointment details"
                 >
                     <EyeIcon className="w-9 h-9" />
-                </button>
+                </Link>
             ),
         },
     ];
