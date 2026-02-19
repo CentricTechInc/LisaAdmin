@@ -39,7 +39,8 @@
                     "confirm_consent": true,
                     "isCurrent": true
                 }
-            ]
+            ],
+            "rejectionHistories": []
         },
         "services": [
             {
@@ -57,41 +58,9 @@
         ],
         "weeklySchedules": [
             {
-                "id": 214,
+                "id": 208,
                 "salon_id": 36,
-                "day_of_week": "Sunday",
-                "is_open": false,
-                "start_time": null,
-                "end_time": null
-            },
-            {
-                "id": 213,
-                "salon_id": 36,
-                "day_of_week": "Saturday",
-                "is_open": false,
-                "start_time": null,
-                "end_time": null
-            },
-            {
-                "id": 212,
-                "salon_id": 36,
-                "day_of_week": "Friday",
-                "is_open": true,
-                "start_time": "08:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 211,
-                "salon_id": 36,
-                "day_of_week": "Thursday",
-                "is_open": true,
-                "start_time": "08:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 210,
-                "salon_id": 36,
-                "day_of_week": "Wednesday",
+                "day_of_week": "Monday",
                 "is_open": true,
                 "start_time": "08:30:00",
                 "end_time": "17:00:00"
@@ -105,12 +74,44 @@
                 "end_time": "17:00:00"
             },
             {
-                "id": 208,
+                "id": 210,
                 "salon_id": 36,
-                "day_of_week": "Monday",
+                "day_of_week": "Wednesday",
                 "is_open": true,
                 "start_time": "08:30:00",
                 "end_time": "17:00:00"
+            },
+            {
+                "id": 211,
+                "salon_id": 36,
+                "day_of_week": "Thursday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 212,
+                "salon_id": 36,
+                "day_of_week": "Friday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 213,
+                "salon_id": 36,
+                "day_of_week": "Saturday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 214,
+                "salon_id": 36,
+                "day_of_week": "Sunday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
             }
         ],
         "breakTime": {

@@ -65,6 +65,13 @@ type BankDetail = {
     isCurrent?: boolean;
 };
 
+type RejectionHistory = {
+    id: number;
+    reason: string;
+    status: string;
+    created_at: string;
+};
+
 type SalonProfileData = {
     id: number;
     businessName: string;
@@ -95,6 +102,7 @@ type SalonProfileData = {
     scheduleEnd: string | null;
     breakStart: string | null;
     breakEnd: string | null;
+    rejectionHistories: RejectionHistory[];
 };
 
 const getFileName = (url?: string) => {
@@ -141,7 +149,7 @@ export default function ProfessionalProfile() {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [salon, setSalon] = useState<SalonProfileData | null>(null);
-    const isBlocked = router.query.status === 'blocked' || salon?.status === 'Block';
+    const isBlocked = router.query.status === 'blocked' || salon?.status === 'Block' || salon?.status === 'Blocked';
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [totalAppointments, setTotalAppointments] = useState(0);
     const [isStatusUpdating, setIsStatusUpdating] = useState(false);
@@ -173,7 +181,12 @@ export default function ProfessionalProfile() {
 
                 const rawStatus = userData?.status || salonData?.status || "Active";
                 const normalizedStatus = rawStatus === "Blocked" ? "Block" : rawStatus;
-                const fetchedRejectionReason = salonData?.reject_reason || salonData?.rejection_reason || salonData?.reason || "";
+                
+                const rejectionHistories = Array.isArray(userData?.rejectionHistories) ? userData.rejectionHistories : [];
+                const sortedHistories = [...rejectionHistories].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                const latestHistoryReason = sortedHistories.length > 0 ? sortedHistories[0].reason : "";
+                
+                const fetchedRejectionReason = salonData?.reject_reason || salonData?.rejection_reason || salonData?.reason || latestHistoryReason || "";
 
                 setSalon({
                     id: salonData?.id || 0,
@@ -204,7 +217,8 @@ export default function ProfessionalProfile() {
                     scheduleStart: primarySchedule?.start_time ?? null,
                     scheduleEnd: primarySchedule?.end_time ?? null,
                     breakStart: breakTime?.has_break ? breakTime?.break_start_time ?? null : null,
-                    breakEnd: breakTime?.has_break ? breakTime?.break_end_time ?? null : null
+                    breakEnd: breakTime?.has_break ? breakTime?.break_end_time ?? null : null,
+                    rejectionHistories: rejectionHistories,
                 });
                 setSelectedServices(serviceNames);
                 setSelectedDays(selectedScheduleDays);
@@ -250,7 +264,13 @@ export default function ProfessionalProfile() {
                     ? {
                           ...prev,
                           status,
-                          rejectionReason: (status === "Rejected" || status === "Block") ? reason : prev.rejectionReason
+                          rejectionReason: (status === "Rejected" || status === "Block") ? reason : prev.rejectionReason,
+                          rejectionHistories: [...prev.rejectionHistories, {
+                              id: Date.now(),
+                              reason: reason,
+                              status: status,
+                              created_at: new Date().toISOString()
+                          }]
                       }
                     : prev
             );
