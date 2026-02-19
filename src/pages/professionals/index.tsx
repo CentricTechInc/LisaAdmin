@@ -177,6 +177,8 @@ export default function ProfessionalsPage() {
                       ? "&status=pending"
                       : item.status === "Rejected"
                       ? "&status=rejected"
+                      : item.status === "Blocked"
+                      ? "&status=blocked"
                       : ""
                   }`
                 )}

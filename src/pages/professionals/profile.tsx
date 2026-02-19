@@ -73,6 +73,8 @@ type SalonProfileData = {
     age: number | string;
     gender: string;
     profileImage: string;
+    status: string;
+    rejectionReason: string;
     streetAddress: string;
     city: string;
     state: string;
@@ -139,8 +141,12 @@ export default function ProfessionalProfile() {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [salon, setSalon] = useState<SalonProfileData | null>(null);
+    const isBlocked = router.query.status === 'blocked' || salon?.status === 'Block';
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [totalAppointments, setTotalAppointments] = useState(0);
+    const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+    const [statusError, setStatusError] = useState<string | null>(null);
+    const [rejectReason, setRejectReason] = useState("");
 
     useEffect(() => {
         if (!router.isReady) return;
@@ -165,6 +171,10 @@ export default function ProfessionalProfile() {
                 const breakTime: BreakTime = salonData?.breakTime || {};
                 const fallbackName = `${userData?.first_name || ""} ${userData?.last_name || ""}`.trim();
 
+                const rawStatus = userData?.status || salonData?.status || "Active";
+                const normalizedStatus = rawStatus === "Blocked" ? "Block" : rawStatus;
+                const fetchedRejectionReason = salonData?.reject_reason || salonData?.rejection_reason || salonData?.reason || "";
+
                 setSalon({
                     id: salonData?.id || 0,
                     businessName: salonData?.bussiness_name || salonData?.business_name || fallbackName || "Unknown",
@@ -173,6 +183,8 @@ export default function ProfessionalProfile() {
                     age: userData?.age ?? "N/A",
                     gender: userData?.gender || "N/A",
                     profileImage: salonData?.picture || userData?.picture || "/images/avatar.png",
+                    status: normalizedStatus,
+                    rejectionReason: fetchedRejectionReason,
                     streetAddress: salonData?.street_address || "",
                     city: salonData?.city || "",
                     state: salonData?.state || "",
@@ -196,6 +208,7 @@ export default function ProfessionalProfile() {
                 });
                 setSelectedServices(serviceNames);
                 setSelectedDays(selectedScheduleDays);
+                setRejectReason(fetchedRejectionReason);
 
                 const appointmentsData = appointmentsResponse?.data?.data?.data?.rows || [];
                 const appointmentsCount = appointmentsResponse?.data?.data?.data?.count || 0;
@@ -220,6 +233,62 @@ export default function ProfessionalProfile() {
 
         fetchData();
     }, [router.isReady, salonId, userId]);
+
+    const resolveProfessionalId = salonId || userId;
+
+    const updateProfessionalStatus = async (status: string, reason: string) => {
+        if (!resolveProfessionalId) return false;
+        try {
+            setIsStatusUpdating(true);
+            setStatusError(null);
+            await api.put(`/admin/updateProfessionalStatus/${resolveProfessionalId}`, {
+                status,
+                reason
+            });
+            setSalon((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          status,
+                          rejectionReason: (status === "Rejected" || status === "Block") ? reason : prev.rejectionReason
+                      }
+                    : prev
+            );
+            return true;
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Failed to update status";
+            setStatusError(message);
+            return false;
+        } finally {
+            setIsStatusUpdating(false);
+        }
+    };
+
+    const handleBlockToggle = async () => {
+        if (!salon) return;
+        const nextStatus = salon.status === "Block" ? "Active" : "Block";
+        const reason = nextStatus === "Block" ? "Blocked by admin" : "Unblocked by admin";
+        await updateProfessionalStatus(nextStatus, reason);
+    };
+
+    const handleApprove = async () => {
+        const success = await updateProfessionalStatus("Approved", "Approved by admin");
+        if (success) {
+            router.back();
+        }
+    };
+
+    const handleRejectSubmit = async () => {
+        if (!rejectReason.trim()) {
+            setStatusError("Please provide a reason for rejection.");
+            return;
+        }
+        const success = await updateProfessionalStatus("Rejected", rejectReason.trim());
+        if (success) {
+            setIsRejectModalOpen(false);
+            router.back();
+        }
+    };
 
     const columns: Column<Appointment>[] = [
         { id: "sNo", field: "sNo", header: "S No", sortable: true },
@@ -304,11 +373,24 @@ export default function ProfessionalProfile() {
                                     </p>
                                     <Button
                                         className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
+                                        onClick={handleBlockToggle}
+                                        disabled={isStatusUpdating || !salon}
                                     >
-                                        Block
+                                        {isStatusUpdating
+                                            ? salon?.status === "Block"
+                                                ? "Unblocking..."
+                                                : "Blocking..."
+                                            : salon?.status === "Block"
+                                            ? "Unblock"
+                                            : "Block"}
                                     </Button>
                                 </div>
                             </div>
+                            {statusError && (
+                                <div className="text-red-600 bg-red-50 px-4 py-2 rounded-lg text-sm">
+                                    {statusError}
+                                </div>
+                            )}
 
                             {/* Form */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -372,20 +454,22 @@ export default function ProfessionalProfile() {
                             </div>
 
                             {/* Table */}
-                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                                <h3 className="text-lg font-bold mb-4 text-[#13000A]">
-                                    Total Appointments Booked <span className="text-[#FF4460]">({totalAppointments})</span>
-                                </h3>
-                                <div className="overflow-hidden  p-6  rounded-lg border border-gray-100">
-                                    <DataTable
-                                        columns={columns}
-                                        data={appointments}
-                                        pageSize={5}
-                                        selectable={false}
-                                        showColumnToggle={false}
-                                    />
+                            {!isPending && !isBlocked && (
+                                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                                    <h3 className="text-lg font-bold mb-4 text-[#13000A]">
+                                        Total Appointments Booked <span className="text-[#FF4460]">({totalAppointments})</span>
+                                    </h3>
+                                    <div className="overflow-hidden  p-6  rounded-lg border border-gray-100">
+                                        <DataTable
+                                            columns={columns}
+                                            data={appointments}
+                                            pageSize={5}
+                                            selectable={false}
+                                            showColumnToggle={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     ) : (
                         <div className="flex flex-col gap-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -495,24 +579,26 @@ export default function ProfessionalProfile() {
                             <Button
                                 className="bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 px-8"
                                 onClick={() => setIsRejectModalOpen(true)}
+                                disabled={isStatusUpdating}
                             >
                                 Reject
                             </Button>
                             <Button
                                 className="bg-[#00C853] hover:bg-[#00A844] text-white px-8 border-none"
-                                onClick={() => router.back()}
+                                onClick={handleApprove}
+                                disabled={isStatusUpdating}
                             >
-                                Approve
+                                {isStatusUpdating ? "Approving..." : "Approve"}
                             </Button>
                         </div>
                     )}
 
-                    {/* Reason of Rejection for Rejected Professionals */}
-                    {isRejected && activeTab === "personal" && (
+                    {/* Reason of Rejection for Rejected or Blocked Professionals */}
+                    {(isRejected || isBlocked) && activeTab === "personal" && (
                         <div className="flex flex-col gap-4 mt-8">
-                            <h3 className="text-xl font-bold text-[#13000A]">Reason of Rejection</h3>
+                            <h3 className="text-xl font-bold text-[#13000A]">Reason for Rejection</h3>
                             <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-500 text-sm leading-relaxed">
-                                At Bloom & Blade salon, we strive to provide outstanding service at reasonable prices since our inception in 2003 in Celina, Delaware. Our passionate team is dedicated to ensuring that each visit is enjoyable, leaving you feeling rejuvenated and beautiful. We aim to foster a friendly environment where every client is appreciated.
+                                {salon?.rejectionReason || "N/A"}
                             </div>
                         </div>
                     )}
@@ -530,17 +616,21 @@ export default function ProfessionalProfile() {
                         wrapperClassName="w-full"
                         className="min-h-5 resize-none border-gray-200 rounded-xl"
                         placeholder="Type reason..."
-                        defaultValue="At Bloom & Blade salon, we strive to provide outstanding service at reasonable prices since our inception in 2003 in Celina, Delaware. Our passionate team is dedicated to ensuring that each visit is enjoyable, leaving you feeling rejuvenated and beautiful. We aim to foster a friendly environment where every client is appreciated."
+                        value={rejectReason}
+                        onChange={(event) => setRejectReason(event.target.value)}
                     />
+                    {statusError && (
+                        <div className="text-red-600 bg-red-50 px-4 py-2 rounded-lg text-sm">
+                            {statusError}
+                        </div>
+                    )}
                     <div className="flex justify-end">
                         <Button
                             className="bg-[#FF4460] hover:bg-[#FF2E4D] text-white px-8 h-12 rounded-xl font-semibold border-none"
-                            onClick={() => {
-                                setIsRejectModalOpen(false);
-                                router.back();
-                            }}
+                            onClick={handleRejectSubmit}
+                            disabled={isStatusUpdating}
                         >
-                            Submit
+                            {isStatusUpdating ? "Submitting..." : "Submit"}
                         </Button>
                     </div>
                 </div>
