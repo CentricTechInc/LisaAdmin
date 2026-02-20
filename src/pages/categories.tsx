@@ -483,6 +483,20 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleDeleteSubCategory = async (subCategoryId: number) => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      await api.delete(`/subcategory/delete/${subCategoryId}`, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      setSubCategories((prev) => prev.filter((sub) => sub.id !== subCategoryId));
+    } catch (error) {
+      console.error("Failed to delete sub category:", error);
+    }
+  };
+
   const handleEditSubCategory = (subCategory: typeof subCategoriesData[0]) => {
     setEditingSubCategory(subCategory);
     setSelectedImage(null);
@@ -517,19 +531,65 @@ export default function CategoriesPage() {
     const matchedCategory = categories.find((cat) => cat.name === category);
 
     if (editingSubCategory) {
-      setSubCategories(subCategories.map((sub) =>
-        sub.id === editingSubCategory.id
-          ? {
-            ...sub,
-            name,
-            category,
-            price,
-            serviceFor: serviceForLabel,
-            description,
-            ...(selectedImage ? { image: selectedImage } : {}),
-          }
-          : sub
-      ));
+      try {
+        const payload = new FormData();
+        payload.append("name", name);
+        if (matchedCategory?.id !== undefined) {
+          payload.append("category_id", String(matchedCategory.id));
+        }
+        payload.append("service_for", serviceForLabel);
+        if (selectedFile) payload.append("image", selectedFile);
+
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const response = await api.put(`/subcategory/update/${editingSubCategory.id}`, payload, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+
+        const serverResponse = response.data.data as unknown;
+        const isRecord = (value: unknown): value is Record<string, unknown> =>
+          typeof value === "object" && value !== null;
+        const toStringValue = (value: unknown) =>
+          typeof value === "string" || typeof value === "number" ? String(value) : undefined;
+        const responseData = isRecord(serverResponse) ? serverResponse["data"] : undefined;
+        const updated = isRecord(responseData) ? responseData : undefined;
+
+        const updatedName = updated ? toStringValue(updated["name"]) : undefined;
+        const updatedServiceFor = updated ? toStringValue(updated["service_for"]) : undefined;
+        const updatedImage =
+          updated
+            ? toStringValue(updated["image"]) ??
+              toStringValue(updated["picture"]) ??
+              toStringValue(updated["icon"]) ??
+              toStringValue(updated["thumbnail"]) ??
+              toStringValue(updated["image_url"])
+            : undefined;
+        const updatedCategoryName =
+          updated
+            ? (isRecord(updated["category"]) ? toStringValue(updated["category"]["name"]) : undefined) ??
+              toStringValue(updated["category_name"]) ??
+              matchedCategory?.name
+            : matchedCategory?.name;
+
+        setSubCategories((prev) =>
+          prev.map((sub) =>
+            sub.id === editingSubCategory.id
+              ? {
+                  ...sub,
+                  name: updatedName ?? name,
+                  category: updatedCategoryName ?? category,
+                  price,
+                  serviceFor: updatedServiceFor ?? serviceForLabel,
+                  description,
+                  image: resolveSubCategoryImage(updatedImage ?? selectedImage ?? sub.image),
+                }
+              : sub
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update sub category:", error);
+      }
     } else {
       try {
         const payload = new FormData();
@@ -720,7 +780,10 @@ export default function CategoriesPage() {
           >
             <EditIcon className="h-5 w-5" />
           </button>
-          <button className="rounded p-1 hover:bg-red-50">
+          <button
+            className="rounded p-1 hover:bg-red-50"
+            onClick={() => handleDeleteSubCategory(row.id)}
+          >
             <TrashIcon className="h-5 w-5 text-red-500" />
           </button>
         </div>
