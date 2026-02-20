@@ -104,6 +104,17 @@ export default function CategoriesPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [isSavingSubCategory, setIsSavingSubCategory] = useState(false);
+  const [deleteCategoryId, setDeleteCategoryId] = useState<number | null>(null);
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
+  const [deleteSubCategoryId, setDeleteSubCategoryId] = useState<number | null>(null);
+  const [isDeletingSubCategory, setIsDeletingSubCategory] = useState(false);
+
+  const sortCategoriesDesc = (items: Array<typeof categoriesData[0]>) =>
+    [...items].sort((a, b) => b.id - a.id);
+  const sortSubCategoriesDesc = (items: Array<typeof subCategoriesData[0]>) =>
+    [...items].sort((a, b) => b.id - a.id);
 
   const resolveCategoryImage = (value?: string) => {
     if (!value) return "/images/avatar.png";
@@ -347,6 +358,8 @@ export default function CategoriesPage() {
 
   const handleSaveCategory = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSavingCategory) return;
+    setIsSavingCategory(true);
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
     const serviceFor = formData.get("serviceFor") as string;
@@ -453,20 +466,23 @@ export default function CategoriesPage() {
               toStringValue(created["image_url"])
             : undefined;
 
-        setCategories((prev) => [
-          ...prev,
-          {
-            id: createdId ?? Math.max(...prev.map((c) => c.id)) + 1,
-            name: createdName ?? name,
-            serviceFor: createdServiceFor ?? serviceForLabel,
-            image: resolveCategoryImage(createdImage ?? selectedImage ?? "/images/avatar.png"),
-          },
-        ]);
+        setCategories((prev) =>
+          sortCategoriesDesc([
+            ...prev,
+            {
+              id: createdId ?? Math.max(...prev.map((c) => c.id)) + 1,
+              name: createdName ?? name,
+              serviceFor: createdServiceFor ?? serviceForLabel,
+              image: resolveCategoryImage(createdImage ?? selectedImage ?? "/images/avatar.png"),
+            },
+          ])
+        );
       } catch (error) {
         console.error("Failed to create category:", error);
       }
     }
     handleCloseCategoryModal();
+    setIsSavingCategory(false);
   };
 
   const handleDeleteCategory = async (categoryId: number) => {
@@ -483,6 +499,14 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleConfirmDeleteCategory = async () => {
+    if (deleteCategoryId === null || isDeletingCategory) return;
+    setIsDeletingCategory(true);
+    await handleDeleteCategory(deleteCategoryId);
+    setDeleteCategoryId(null);
+    setIsDeletingCategory(false);
+  };
+
   const handleDeleteSubCategory = async (subCategoryId: number) => {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -495,6 +519,14 @@ export default function CategoriesPage() {
     } catch (error) {
       console.error("Failed to delete sub category:", error);
     }
+  };
+
+  const handleConfirmDeleteSubCategory = async () => {
+    if (deleteSubCategoryId === null || isDeletingSubCategory) return;
+    setIsDeletingSubCategory(true);
+    await handleDeleteSubCategory(deleteSubCategoryId);
+    setDeleteSubCategoryId(null);
+    setIsDeletingSubCategory(false);
   };
 
   const handleEditSubCategory = (subCategory: typeof subCategoriesData[0]) => {
@@ -511,6 +543,8 @@ export default function CategoriesPage() {
 
   const handleSaveSubCategory = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSavingSubCategory) return;
+    setIsSavingSubCategory(true);
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
     const category = formData.get("category") as string;
@@ -641,23 +675,26 @@ export default function CategoriesPage() {
               matchedCategory?.name
             : matchedCategory?.name;
 
-        setSubCategories((prev) => [
-          ...prev,
-          {
-            id: createdId ?? Math.max(...prev.map((s) => s.id)) + 1,
-            name: createdName ?? name,
-            category: createdCategoryName ?? category,
-            price,
-            serviceFor: createdServiceFor ?? serviceForLabel,
-            image: resolveSubCategoryImage(createdImage ?? selectedImage ?? "/images/avatar.png"),
-            description,
-          },
-        ]);
+        setSubCategories((prev) =>
+          sortSubCategoriesDesc([
+            ...prev,
+            {
+              id: createdId ?? Math.max(...prev.map((s) => s.id)) + 1,
+              name: createdName ?? name,
+              category: createdCategoryName ?? category,
+              price,
+              serviceFor: createdServiceFor ?? serviceForLabel,
+              image: resolveSubCategoryImage(createdImage ?? selectedImage ?? "/images/avatar.png"),
+              description,
+            },
+          ])
+        );
       } catch (error) {
         console.error("Failed to create sub category:", error);
       }
     }
     handleCloseSubCategoryModal();
+    setIsSavingSubCategory(false);
   };
 
   // Columns for Categories
@@ -703,7 +740,7 @@ export default function CategoriesPage() {
           </button>
           <button
             className="rounded p-1 hover:bg-red-50"
-            onClick={() => handleDeleteCategory(row.id)}
+            onClick={() => setDeleteCategoryId(row.id)}
           >
             <TrashIcon className="h-5 w-5 text-red-500" />
           </button>
@@ -782,7 +819,7 @@ export default function CategoriesPage() {
           </button>
           <button
             className="rounded p-1 hover:bg-red-50"
-            onClick={() => handleDeleteSubCategory(row.id)}
+            onClick={() => setDeleteSubCategoryId(row.id)}
           >
             <TrashIcon className="h-5 w-5 text-red-500" />
           </button>
@@ -952,8 +989,8 @@ export default function CategoriesPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button variant="brand" type="submit">
-              {editingCategory ? "Save" : "Add"}
+            <Button variant="brand" type="submit" disabled={isSavingCategory}>
+              {isSavingCategory ? "Saving..." : editingCategory ? "Save" : "Add"}
             </Button>
           </div>
         </form>
@@ -1026,11 +1063,73 @@ export default function CategoriesPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button variant="brand" type="submit">
-              {editingSubCategory ? "Save" : "Add"}
+            <Button variant="brand" type="submit" disabled={isSavingSubCategory}>
+              {isSavingSubCategory ? "Saving..." : editingSubCategory ? "Save" : "Add"}
             </Button>
           </div>
         </form>
+      </Modal>
+      <Modal
+        isOpen={deleteCategoryId !== null}
+        onClose={() => setDeleteCategoryId(null)}
+        className="max-w-md p-6 text-center"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+            <TrashIcon className="w-6 h-6" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">Delete Category?</h3>
+          <p className="text-gray-500">
+            Are you sure you want to delete this category? This action cannot be undone.
+          </p>
+          <div className="flex items-center gap-3 w-full mt-4">
+            <button
+              onClick={() => setDeleteCategoryId(null)}
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+              disabled={isDeletingCategory}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmDeleteCategory}
+              className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              disabled={isDeletingCategory}
+            >
+              {isDeletingCategory ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={deleteSubCategoryId !== null}
+        onClose={() => setDeleteSubCategoryId(null)}
+        className="max-w-md p-6 text-center"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+            <TrashIcon className="w-6 h-6" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">Delete Sub Category?</h3>
+          <p className="text-gray-500">
+            Are you sure you want to delete this sub category? This action cannot be undone.
+          </p>
+          <div className="flex items-center gap-3 w-full mt-4">
+            <button
+              onClick={() => setDeleteSubCategoryId(null)}
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50"
+              disabled={isDeletingSubCategory}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmDeleteSubCategory}
+              className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              disabled={isDeletingSubCategory}
+            >
+              {isDeletingSubCategory ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );
