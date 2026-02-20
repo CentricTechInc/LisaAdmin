@@ -40,12 +40,16 @@ export const AppImage: React.FC<AppImageProps> = ({
     }
   }, [imageName]);
 
+  const isLocalHttpImage =
+    src.startsWith("http://localhost:8000") || src.startsWith("http://127.0.0.1:8000");
+
   return (
     <Image
       src={src}
       alt={alt}
       width={width}
       height={height}
+      unoptimized={isLocalHttpImage}
       className={cn(
         rounded ? "rounded-[1.25rem] object-cover" : "",
         className
@@ -57,4 +61,3 @@ export const AppImage: React.FC<AppImageProps> = ({
 };
 
 export default AppImage;
-
