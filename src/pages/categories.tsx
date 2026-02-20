@@ -529,7 +529,7 @@ export default function CategoriesPage() {
               ? "Kid"
               : serviceFor;
     const matchedCategory = categories.find((cat) => cat.name === category);
-
+ 
     if (editingSubCategory) {
       try {
         const payload = new FormData();
