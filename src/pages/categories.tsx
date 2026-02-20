@@ -1014,9 +1014,12 @@ export default function CategoriesPage() {
                   name="serviceFor"
                   className="h-10 w-full rounded-[1.25rem] border border-[color-mix(in_oklab,var(--color-muted)_60%,transparent)] bg-white px-4 text-[color-mix(in_oklab,var(--color-muted-foreground)_85%,transparent)] focus:border-[#FF4460] focus:outline-none"
                   options={[
+                    { label: "Man", value: "man" },
+                    { label: "Woman", value: "woman" },
+                    { label: "Kid", value: "kid" },
                     { label: "For All", value: "all" },
                   ]}
-                  defaultValue={editingSubCategory?.serviceFor === "For All" ? "all" : "all"}
+                  defaultValue={editingSubCategory?.serviceFor === "For All" ? "all" : (editingSubCategory?.serviceFor || "").toLowerCase()}
                 />
               </div>
             </div>
