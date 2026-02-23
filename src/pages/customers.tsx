@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { DataTable } from "@/components/table/DataTable";
 import { Column } from "@/components/table/types";
 import { EyeIcon } from "@/components/ui/EyeIcon";
 import api from "@/utils/axios";
+import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
 
 type Customer = {
   id: number;
@@ -20,6 +21,29 @@ type Customer = {
   status: "Active" | "Blocked";
 };
 
+type CustomerApiItem = {
+  id?: number | string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  age?: string | number;
+  gender?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  country?: string;
+  picture?: string;
+  status?: "Active" | "Blocked";
+};
+
+type CustomerListingResponse = {
+  status?: boolean;
+  data?: {
+    data?: CustomerApiItem[];
+    total?: number;
+  };
+};
+
 export default function CustomersPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,60 +51,93 @@ export default function CustomersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [blockingId, setBlockingId] = useState<number | null>(null);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    customerId: number | null;
+    customerName: string;
+    currentStatus: "Active" | "Blocked";
+  }>({
+    isOpen: false,
+    customerId: null,
+    customerName: "",
+    currentStatus: "Active"
+  });
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      const response = await api.get(`/customer/salon-listing/${currentPage}?pageLimit=${pageSize}`);
+
+      const serverResponse = response.data.data as CustomerListingResponse;
+
+      if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
+        const mappedData: Customer[] = serverResponse.data.data.map((item) => ({
+          id: Number(item.id),
+          user_id: Number(item.id),
+          picture: item.picture || "/images/avatar.png",
+          name: `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Unknown",
+          email: item.email || "N/A",
+          age: item.age ? String(item.age) : "N/A",
+          gender: item.gender || "N/A",
+          address: [
+            item.city,
+            item.state,
+            item.zipcode,
+            item.country
+          ].filter(Boolean).join(", "),
+          status: item.status || "Active"
+        }));
+        setCustomers(mappedData);
+        // Try to get total count from response
+        setTotalCustomers(serverResponse.data.total || 0);
+      } else {
+        console.warn("Unexpected API response structure:", serverResponse);
+        setCustomers([]);
+        setTotalCustomers(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch customers:", error);
+    }
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get(`/customer/salon-listing/${currentPage}?pageLimit=${pageSize}`);
-
-        const serverResponse = response.data.data as any;
-
-        if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
-          const mappedData: Customer[] = serverResponse.data.data.map((item: any) => ({
-            id: Number(item.id),
-            user_id: Number(item.id),
-            picture: item.picture || "/images/avatar.png",
-            name: `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Unknown",
-            email: item.email || "N/A",
-            age: item.age || "N/A",
-            gender: item.gender || "N/A",
-            address: [
-              item.city,
-              item.state,
-              item.zipcode,
-              item.country
-            ].filter(Boolean).join(", "),
-            status: "Active" // Default status as API doesn't provide it yet
-          }));
-          setCustomers(mappedData);
-          // Try to get total count from response
-          setTotalCustomers(serverResponse.data.total || 0);
-        } else {
-          console.warn("Unexpected API response structure:", serverResponse);
-          setCustomers([]);
-          setTotalCustomers(0);
-        }
-      } catch (error) {
-        console.error("Failed to fetch customers:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCustomers();
-  }, [currentPage, pageSize]);
+  }, [fetchCustomers]);
 
   // Filter
   const filteredCustomers = customers.filter((customer) =>
     customer.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleBlockToggle = (id: number) => {
-    setCustomers(customers.map(c =>
-      c.id === id ? { ...c, status: c.status === "Blocked" ? "Active" : "Blocked" } : c
-    ));
+  const initiateBlockToggle = useCallback((customer: Customer) => {
+    setModalState({
+      isOpen: true,
+      customerId: customer.id,
+      customerName: customer.name,
+      currentStatus: customer.status ,
+    });
+  }, []);
+
+  const handleBlockConfirm = async () => {
+    if (!modalState.customerId) return;
+
+    try {
+      setBlockingId(modalState.customerId);
+      const nextStatus = modalState.currentStatus === "Blocked" ? "Active" : "Block";
+      console.log(modalState.currentStatus,"modalState.currentStatus")
+      await api.put(`/admin/updateProfessionalStatus/${modalState.customerId}`, {
+        status: nextStatus,
+        reason: nextStatus === "Block" ? "Blocked by admin" : "Unblocked by admin"
+      });
+
+      // Refresh data from API
+      await fetchCustomers();
+      setModalState(prev => ({ ...prev, isOpen: false }));
+    } catch (error) {
+      console.error("Failed to update customer status:", error);
+    } finally {
+      setBlockingId(null);
+    }
   };
 
   const columns: Column<Customer>[] = useMemo(() => [
@@ -101,20 +158,23 @@ export default function CustomersPage() {
             <EyeIcon className="h-4 w-4 text-gray-500" />
           </button>
           <button
-            onClick={() => handleBlockToggle(item.id)}
+            onClick={() => initiateBlockToggle(item)}
+            disabled={blockingId === item.id}
             className={cn(
-              "h-8 w-24 rounded text-xs font-medium transition-colors",
+              "h-8 w-24 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               item.status === "Active"
                 ? "bg-red-50 text-red-600 hover:bg-red-100"
                 : "bg-green-50 text-green-600 hover:bg-green-100"
             )}
           >
-            {item.status === "Active" ? "Block" : "Unblock"}
+            {blockingId === item.id 
+              ? (item.status === "Active" ? "Blocking..." : "Unblocking...")
+              : (item.status === "Active" ? "Block" : "Unblock")}
           </button>
         </div>
       ),
     },
-  ], [router]);
+  ], [router, blockingId, initiateBlockToggle]);
 
   return (
     <div className="mx-auto w-full flex flex-col gap-3">
@@ -178,6 +238,17 @@ export default function CustomersPage() {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleBlockConfirm}
+        title={modalState.currentStatus === "Active" ? "Block Customer" : "Unblock Customer"}
+        message={`Are you sure you want to ${modalState.currentStatus === "Active" ? "block" : "unblock"} ${modalState.customerName}?`}
+        confirmText={modalState.currentStatus === "Active" ? "Block" : "Unblock"}
+        isProcessing={blockingId !== null}
+        variant={modalState.currentStatus === "Active" ? "danger" : "info"}
+      />
     </div>
   );
 }

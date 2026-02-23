@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { DataTable } from "@/components/table/DataTable";
 import { EyeIcon } from "@/components/ui/EyeIcon";
 import { Column } from "@/components/table/types";
 import api from "@/utils/axios";
+import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
 
 // Types
 type Appointment = {
@@ -48,7 +49,7 @@ type CustomerProfileData = {
     age: number | string;
     gender: string;
     profileImage: string;
-    status: "Active" | "Blocked";
+    status: "Active" | "Block";
 };
 
 export default function CustomerProfile() {
@@ -61,91 +62,99 @@ export default function CustomerProfile() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [totalAppointments, setTotalAppointments] = useState<number>(0);
     const [isBlocking, setIsBlocking] = useState(false);
+    const [modalState, setModalState] = useState<{
+        isOpen: boolean;
+        currentStatus: "Active" | "Block";
+    }>({
+        isOpen: false,
+        currentStatus: "Active"
+    });
 
-    // Fetch Customer Data
-    useEffect(() => {
+    const fetchData = useCallback(async () => {
         if (!router.isReady || !user_id) return;
+        try {
+            setLoading(true);
+            const customerResponse = await api.get(`/customer/get-customer-by-id/${user_id}`);
+            const appointmentsResponse = await api.get(`/appointment/details/${user_id}?page=1`);
 
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                // Fetch Customer Details
-                const customerResponse = await api.get(`/customer/get-customer-by-id/${user_id}`);
-                
-                // Fetch Appointments
-                const appointmentsResponse = await api.get(`/appointment/details/${user_id}?page=1`);
+            const userData = customerResponse.data?.data?.data?.user || {};
+            const userAddress = userData.address || {};
 
-                // Process Customer Data
-                const userData = customerResponse.data?.data?.data?.user || {};
-                const userAddress = userData.address || {};
+            const getCleanImageUrl = (url: string) => {
+                if (!url) return "/images/avatar.png";
+                if (url.includes("http") && url.includes("/images/http")) {
+                    return url.split("/images/")[1];
+                }
+                return url;
+            };
 
-                const getCleanImageUrl = (url: string) => {
-                    if (!url) return "/images/avatar.png";
-                    if (url.includes("http") && url.includes("/images/http")) {
-                        return url.split("/images/")[1];
-                    }
-                    return url;
-                };
+            const formattedAddress = [
+                userAddress.street,
+                userAddress.city,
+                userAddress.state,
+                userAddress.zipcode
+            ].filter(Boolean).join(", ");
 
-                const formattedAddress = [
-                    userAddress.street,
-                    userAddress.city,
-                    userAddress.state,
-                    userAddress.zipcode
-                ].filter(Boolean).join(", ");
+            setCustomer({
+                id: userData.id,
+                name: `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "Unknown",
+                email: userData.email || "",
+                phone: userData.phone_number || "",
+                address: userAddress.street || "",
+                city: userAddress.city || "",
+                state: userAddress.state || "",
+                zipCode: userAddress.zipcode || "",
+                formattedAddress: formattedAddress,
+                age: userData.age || "",
+                gender: userData.gender || "",
+                profileImage: getCleanImageUrl(userData.picture),
+                status: userData.status || "Active"
+            });
+            console.log(customerResponse,"customerResponse")
+            const appointmentsData = appointmentsResponse.data?.data?.data?.rows || [];
+            const appointmentsCount = appointmentsResponse.data?.data?.data?.count || 0;
+            setTotalAppointments(appointmentsCount);
 
-                setCustomer({
-                    id: userData.id,
-                    name: `${userData.first_name || ""} ${userData.last_name || ""}`.trim() || "Unknown",
-                    email: userData.email || "",
-                    phone: userData.phone_number || "",
-                    address: userAddress.street || "",
-                    city: userAddress.city || "",
-                    state: userAddress.state || "",
-                    zipCode: userAddress.zipcode || "",
-                    formattedAddress: formattedAddress,
-                    age: userData.age || "",
-                    gender: userData.gender || "",
-                    profileImage: getCleanImageUrl(userData.picture),
-                    status: userData.status || "Active"
-                });
-                console.log(customerResponse,"customerResponse")
-                // Process Appointments Data
-                const appointmentsData = appointmentsResponse.data?.data?.data?.rows || [];
-                const appointmentsCount = appointmentsResponse.data?.data?.data?.count || 0;
-                setTotalAppointments(appointmentsCount);
+            const formattedAppointments = appointmentsData.map((item: APIAppointment, index: number) => ({
+                id: item.id,
+                sNo: index + 1,
+                service: item.appointmentServices?.map((s) => s.service.name).join(", ") || "Unknown Service",
+                dateTime: `${item.appointment_date} ${item.appointment_time}`,
+                professional: item.salon?.bussiness_name || "Unknown",
+                amount: `$${item.total_price}`
+            }));
 
-                const formattedAppointments = appointmentsData.map((item: APIAppointment, index: number) => ({
-                    id: item.id,
-                    sNo: index + 1,
-                    service: item.appointmentServices?.map((s) => s.service.name).join(", ") || "Unknown Service",
-                    dateTime: `${item.appointment_date} ${item.appointment_time}`,
-                    professional: item.salon?.bussiness_name || "Unknown",
-                    amount: `$${item.total_price}`
-                }));
-
-                setAppointments(formattedAppointments);
-
-            } catch (error) {
-                console.error("Failed to fetch data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+            setAppointments(formattedAppointments);
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        } finally {
+            setLoading(false);
+        }
     }, [router.isReady, user_id]);
 
-    const handleBlockToggle = async () => {
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const initiateBlockToggle = () => {
         if (!customer) return;
-        const nextStatus = customer.status === "Blocked" ? "Active" : "Blocked";
+        setModalState({
+            isOpen: true,
+            currentStatus: customer.status
+        });
+    };
+
+    const handleBlockConfirm = async () => {
+        if (!customer) return;
+        const nextStatus = modalState.currentStatus === "Block" ? "Active" : "Block";
         try {
             setIsBlocking(true);
             await api.put(`/admin/updateProfessionalStatus/${user_id}`, {
                 status: nextStatus,
-                reason: nextStatus === "Blocked" ? "Blocked by admin" : "Unblocked by admin"
+                reason: nextStatus === "Block" ? "Blocked by admin" : "Unblocked by admin"
             });
-            setCustomer({ ...customer, status: nextStatus });
+            await fetchData();
+            setModalState(prev => ({ ...prev, isOpen: false }));
         } catch (error) {
             console.error("Failed to update customer status:", error);
         } finally {
@@ -216,12 +225,12 @@ export default function CustomerProfile() {
                     </p>
                     <Button
                         className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
-                        onClick={handleBlockToggle}
+                        onClick={initiateBlockToggle}
                         disabled={isBlocking || !customer}
                     >
                         {isBlocking
-                            ? customer?.status === "Blocked" ? "Unblocking..." : "Blocking..."
-                            : customer?.status === "Blocked" ? "Unblock" : "Block"}
+                            ? customer?.status === "Block" ? "Unblocking..." : "Blocking..."
+                            : customer?.status === "Block" ? "Unblock" : "Block"}
                     </Button>
                 </div>
             </div>
@@ -302,6 +311,17 @@ export default function CustomerProfile() {
                     />
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={modalState.isOpen}
+                onClose={() => setModalState(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={handleBlockConfirm}
+                title={modalState.currentStatus === "Active" ? "Block Customer" : "Unblock Customer"}
+                message={`Are you sure you want to ${modalState.currentStatus === "Active" ? "block" : "unblock"} ${customer?.name || "this customer"}?`}
+                confirmText={modalState.currentStatus === "Active" ? "Block" : "Unblock"}
+                isProcessing={isBlocking}
+                variant={modalState.currentStatus === "Active" ? "danger" : "info"}
+            />
         </div>
     );
 }
