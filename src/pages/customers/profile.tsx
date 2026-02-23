@@ -108,7 +108,7 @@ export default function CustomerProfile() {
                 age: userData.age || "",
                 gender: userData.gender || "",
                 profileImage: getCleanImageUrl(userData.picture),
-                status: userData.status || "Active"
+                status: userData.status === "Blocked" ? "Block" : (userData.status || "Active")
             });
             console.log(customerResponse,"customerResponse")
             const appointmentsData = appointmentsResponse.data?.data?.data?.rows || [];

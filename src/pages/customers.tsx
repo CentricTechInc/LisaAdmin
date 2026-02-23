@@ -18,7 +18,7 @@ type Customer = {
   age: string;
   gender: string;
   address: string; // street_address + city + country
-  status: "Active" | "Blocked";
+  status: "Active" | "Block";
 };
 
 type CustomerApiItem = {
@@ -56,7 +56,7 @@ export default function CustomersPage() {
     isOpen: boolean;
     customerId: number | null;
     customerName: string;
-    currentStatus: "Active" | "Blocked";
+    currentStatus: "Active" | "Block";
   }>({
     isOpen: false,
     customerId: null,
@@ -71,22 +71,32 @@ export default function CustomersPage() {
       const serverResponse = response.data.data as CustomerListingResponse;
 
       if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
-        const mappedData: Customer[] = serverResponse.data.data.map((item) => ({
-          id: Number(item.id),
-          user_id: Number(item.id),
-          picture: item.picture || "/images/avatar.png",
-          name: `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Unknown",
-          email: item.email || "N/A",
-          age: item.age ? String(item.age) : "N/A",
-          gender: item.gender || "N/A",
-          address: [
-            item.city,
-            item.state,
-            item.zipcode,
-            item.country
-          ].filter(Boolean).join(", "),
-          status: item.status || "Active"
-        }));
+        const mappedData: Customer[] = serverResponse.data.data.map((item) => {
+          // Normalize status
+          let status: "Active" | "Block" = "Active";
+          if (item.status === "Blocked" ) {
+            status = "Block";
+          } else if (item.status === "Active") {
+            status = "Active";
+          }
+          
+          return {
+            id: Number(item.id),
+            user_id: Number(item.id),
+            picture: item.picture || "/images/avatar.png",
+            name: `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Unknown",
+            email: item.email || "N/A",
+            age: item.age ? String(item.age) : "N/A",
+            gender: item.gender || "N/A",
+            address: [
+              item.city,
+              item.state,
+              item.zipcode,
+              item.country
+            ].filter(Boolean).join(", "),
+            status: status
+          };
+        });
         setCustomers(mappedData);
         // Try to get total count from response
         setTotalCustomers(serverResponse.data.total || 0);
@@ -123,8 +133,9 @@ export default function CustomersPage() {
 
     try {
       setBlockingId(modalState.customerId);
-      const nextStatus = modalState.currentStatus === "Blocked" ? "Active" : "Block";
-      console.log(modalState.currentStatus,"modalState.currentStatus")
+      const nextStatus = modalState.currentStatus === "Block" ? "Active" : "Block";
+      console.log("Current Status:", modalState.currentStatus, "Next Status:", nextStatus);
+      
       await api.put(`/admin/updateProfessionalStatus/${modalState.customerId}`, {
         status: nextStatus,
         reason: nextStatus === "Block" ? "Blocked by admin" : "Unblocked by admin"
