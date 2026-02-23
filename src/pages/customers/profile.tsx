@@ -76,8 +76,16 @@ export default function CustomerProfile() {
                 const appointmentsResponse = await api.get(`/appointment/details/${user_id}?page=1`);
 
                 // Process Customer Data
-                const userData = customerResponse.data?.data?.user || {};
+                const userData = customerResponse.data?.data?.data?.user || {};
                 const userAddress = userData.address || {};
+
+                const getCleanImageUrl = (url: string) => {
+                    if (!url) return "/images/avatar.png";
+                    if (url.includes("http") && url.includes("/images/http")) {
+                        return url.split("/images/")[1];
+                    }
+                    return url;
+                };
 
                 const formattedAddress = [
                     userAddress.street,
@@ -96,12 +104,12 @@ export default function CustomerProfile() {
                     state: userAddress.state || "",
                     zipCode: userAddress.zipcode || "",
                     formattedAddress: formattedAddress,
-                    age: userData.age || "N/A",
-                    gender: userData.gender || "N/A",
-                    profileImage: userData.picture || "/images/avatar.png",
+                    age: userData.age || "",
+                    gender: userData.gender || "",
+                    profileImage: getCleanImageUrl(userData.picture),
                     status: userData.status || "Active"
                 });
-                console.log(appointmentsResponse,"appointmentsResponse")
+                console.log(customerResponse,"customerResponse")
                 // Process Appointments Data
                 const appointmentsData = appointmentsResponse.data?.data?.data?.rows || [];
                 const appointmentsCount = appointmentsResponse.data?.data?.data?.count || 0;
@@ -187,18 +195,19 @@ export default function CustomerProfile() {
                 <div className="flex items-center gap-4">
                     <div className="w-24 h-24 relative rounded-2xl overflow-hidden bg-gray-200">
                         <Image
-                            src={customer?.profileImage || "/images/b5c17e81cc9828e32c3fa60901037d45d33375ec.jpg"}
+                            src={customer?.profileImage || "/images/avatar.png"}
                             alt={customer?.name || "Customer"}
                             fill
                             className="object-cover"
                             onError={(e) => {
-                                // Handle error if needed
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/images/avatar.png";
                             }}
                         />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-[#13000A]">{customer?.name || "Eleanor"}</h2>
-                        <p className="text-gray-500">{customer?.email || "eleanor@mail.com"}</p>
+                        <h2 className="text-2xl font-bold text-[#13000A]">{customer?.name || "Unknown"}</h2>
+                        <p className="text-gray-500">{customer?.email || ""}</p>
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
@@ -221,19 +230,19 @@ export default function CustomerProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 <FormInput
                     label="Age"
-                    defaultValue={String(customer?.age || "25")}
+                    defaultValue={String(customer?.age || "")}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12"
                 />
                 <FormInput
-                    label="Gander"
-                    defaultValue={customer?.gender || "Female"}
+                    label="Gender"
+                    defaultValue={customer?.gender || ""}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12"
                 />
                 <FormInput
                     label="Mobile Number*"
-                    defaultValue={customer?.phone || "(631) 273-2740"}
+                    defaultValue={customer?.phone || ""}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12 pl-20!"
                     leftSlot={
@@ -251,26 +260,26 @@ export default function CustomerProfile() {
                 />
                 <FormInput
                     label="Street Address"
-                    defaultValue={customer?.formattedAddress || "Not Available"}
+                    defaultValue={customer?.formattedAddress || ""}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12"
                 />
                 <FormInput
                     label="City"
-                    defaultValue={customer?.city || "Brentwood"}
+                    defaultValue={customer?.city || ""}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12"
                 />
                 <FormInput
                     label="State"
-                    defaultValue={customer?.state || "New York"}
+                    defaultValue={customer?.state || ""}
                     readOnly
                     className="bg-white border-gray-200 rounded-xl h-12"
                 />
                 <div className="md:col-span-2">
                     <FormInput
                         label="Zip Code"
-                        defaultValue={customer?.zipCode || "11717"}
+                        defaultValue={customer?.zipCode || ""}
                         wrapperClassName="w-full md:w-1/2 pr-0 md:pr-4"
                         readOnly
                         className="bg-white border-gray-200 rounded-xl h-12"
