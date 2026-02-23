@@ -13,6 +13,9 @@ type Customer = {
   user_id: number;
   picture: string;
   name: string; // business_name mapped to name
+  email: string;
+  age: string;
+  gender: string;
   address: string; // street_address + city + country
   status: "Active" | "Blocked";
 };
@@ -36,12 +39,14 @@ export default function CustomersPage() {
 
         if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
           const mappedData: Customer[] = serverResponse.data.data.map((item: any) => ({
-            id: item.id,
-            user_id: item.user_id,
+            id: Number(item.id),
+            user_id: Number(item.id),
             picture: item.picture || "/images/avatar.png",
-            name: item.bussiness_name || "Unknown",
+            name: `${item.first_name || ""} ${item.last_name || ""}`.trim() || "Unknown",
+            email: item.email || "N/A",
+            age: item.age || "N/A",
+            gender: item.gender || "N/A",
             address: [
-              item.street_address,
               item.city,
               item.state,
               item.zipcode,
@@ -79,34 +84,10 @@ export default function CustomersPage() {
   };
 
   const columns: Column<Customer>[] = useMemo(() => [
-    {
-      id: "picture",
-      header: "Picture",
-      accessor: (item) => (
-        <div onClick={() => console.log(item)} className="relative h-10 w-10 overflow-hidden rounded-full">
-          <img
-            src={item?.picture}
-            alt={item?.name}
-            className="object-cover"
-          />
-        </div>
-      ),
-    },
-    { id: "name", header: "Business Name", field: "name", sortable: true },
-    { id: "address", header: "Address", field: "address", sortable: true },
-    {
-      id: "status",
-      header: "Status",
-      sortable: true,
-      accessor: (item) => (
-        <span className={cn(
-          "px-3 py-1 rounded-md text-xs font-semibold",
-          item.status === "Blocked" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"
-        )}>
-          {item.status}
-        </span>
-      ),
-    },
+    { id: "name", header: "Name", field: "name", sortable: true },
+    { id: "email", header: "Email", field: "email", sortable: true },
+    { id: "age", header: "Age", field: "age", sortable: true },
+    { id: "gender", header: "Gender", field: "gender", sortable: true },
     {
       id: "action",
       header: "Action",
@@ -114,15 +95,15 @@ export default function CustomersPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push(`/customers/profile?user_id=${item?.user_id}`)}
-            className="group flex items-center justify-center transition-transform hover:scale-105 focus:outline-none"
+            className="group flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 transition-colors hover:bg-gray-100"
             aria-label="View details"
           >
-            <EyeIcon className="w-9 h-9" />
+            <EyeIcon className="h-4 w-4 text-gray-500" />
           </button>
           <button
             onClick={() => handleBlockToggle(item.id)}
             className={cn(
-              "h-8 px-4 rounded text-xs font-medium transition-colors",
+              "h-8 w-24 rounded text-xs font-medium transition-colors",
               item.status === "Active"
                 ? "bg-red-50 text-red-600 hover:bg-red-100"
                 : "bg-green-50 text-green-600 hover:bg-green-100"

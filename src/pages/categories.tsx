@@ -111,6 +111,8 @@ export default function CategoriesPage() {
   const [deleteSubCategoryId, setDeleteSubCategoryId] = useState<number | null>(null);
   const [isDeletingSubCategory, setIsDeletingSubCategory] = useState(false);
 
+  const [limit, setLimit] = useState(10);
+
   const sortCategoriesDesc = (items: Array<typeof categoriesData[0]>) =>
     [...items].sort((a, b) => b.id - a.id);
   const sortSubCategoriesDesc = (items: Array<typeof subCategoriesData[0]>) =>
@@ -241,13 +243,12 @@ export default function CategoriesPage() {
         const categoryParam = categoryFilter !== "All" ? categoryFilter : undefined;
         const response = await api.get("/subcategory/listing", {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-          params:
-            serviceForParam || categoryParam
-              ? {
-                  ...(categoryParam ? { category: categoryParam } : {}),
-                  ...(serviceForParam ? { service_for: serviceForParam } : {}),
-                }
-              : undefined,
+          params: {
+            page: 1,
+            limit: limit,
+            ...(categoryParam ? { category: categoryParam } : {}),
+            ...(serviceForParam ? { service_for: serviceForParam } : {}),
+          },
         });
         const serverResponse = response.data.data as unknown;
         const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -331,7 +332,7 @@ export default function CategoriesPage() {
     if (activeTab === "sub-categories") {
       fetchSubCategories();
     }
-  }, [activeTab, subCategoryServiceFilter, categoryFilter]);
+  }, [activeTab, subCategoryServiceFilter, categoryFilter, limit]);
 
   const handleEditCategory = (category: typeof categoriesData[0]) => {
     setEditingCategory(category);
@@ -829,10 +830,7 @@ export default function CategoriesPage() {
     },
   ];
 
-  const filteredSubCategories = subCategories.filter((sub) => {
-    if (categoryFilter !== "All" && sub.category !== categoryFilter) return false;
-    return true;
-  });
+  const filteredSubCategories = subCategories;
 
   return (
     <>
@@ -840,12 +838,14 @@ export default function CategoriesPage() {
 
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <Button
-            variant="brand"
-            onClick={() => activeTab === "categories" ? setIsCategoryModalOpen(true) : setIsSubCategoryModalOpen(true)}
-          >
-            + {activeTab === "categories" ? "Add Category" : "Add Sub Categories"}
-          </Button>
+          {activeTab === "categories" && (
+            <Button
+              variant="brand"
+              onClick={() => setIsCategoryModalOpen(true)}
+            >
+              + Add Category
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center justify-between">
@@ -865,7 +865,7 @@ export default function CategoriesPage() {
               <Select
                 options={[
                   { label: "All Categories", value: "All" },
-                  ...categories.map((c) => ({ label: c.name, value: c.name })),
+                  ...categories.map((c) => ({ label: c.name, value: String(c.id) })),
                 ]}
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
@@ -878,10 +878,14 @@ export default function CategoriesPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Show</span>
-            <select className="border rounded px-2 py-1 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#FF4460]">
-              <option>10</option>
-              <option>20</option>
-              <option>50</option>
+            <select
+              className="border rounded px-2 py-1 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#FF4460]"
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value))}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
             </select>
             <span className="text-sm text-gray-600">entries</span>
           </div>
