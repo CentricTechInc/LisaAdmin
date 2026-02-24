@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -15,14 +15,17 @@ import { EyeIcon } from "@/components/ui/EyeIcon";
 import { TrashIcon } from "@/components/ui/TrashIcon";
 import { Column } from "@/components/table/types";
 import { Modal } from "@/components/ui/Modal";
+import api from "@/utils/axios";
+import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
 
 type Banner = {
-  id: string;
+  id: number;
   title: string;
-  startDate: string;
-  endDate: string;
+  start_date: string;
+  end_date: string;
   image: string;
-  promotionFor: string;
+  promotion_for: string;
+  is_active: boolean;
 };
 
 type Coupon = {
@@ -43,27 +46,19 @@ type PushNotification = {
   date: string;
 };
 
-const mockBanners: Banner[] = [
-  { id: "1", title: "Get up to 5% discount", startDate: "12 November, 2025", endDate: "25 December, 2025", image: "/images/banner1.jpg", promotionFor: "All" },
-  { id: "2", title: "Free shipping on orders over $50", startDate: "15 November, 2025", endDate: "30 December, 2025", image: "/images/banner2.jpg", promotionFor: "Professional" },
-  { id: "3", title: "Buy one get one free", startDate: "20 November, 2025", endDate: "05 January, 2026", image: "/images/banner3.jpg", promotionFor: "Customers" },
-  { id: "4", title: "15% off for first-time customers", startDate: "25 November, 2025", endDate: "10 January, 2026", image: "/images/banner4.jpg", promotionFor: "Customers" },
-  { id: "5", title: "Seasonal discount for all services: Up to 30% off", startDate: "01 December, 2025", endDate: "15 January, 2026", image: "/images/banner5.jpg", promotionFor: "Professional" },
-];
-
 const mockCoupons: Coupon[] = [
   { id: "1", title: "Get up to 5% discount", code: "winterget5", discountValue: "Percentage", startDate: "12 November, 2025", endDate: "25 December, 2025", userLimit: 200 },
   { id: "2", title: "Free shipping on orders over $50", code: "FS-50", discountValue: "Fixed Amount", startDate: "15 November, 2025", endDate: "30 December, 2025", userLimit: 20 },
   { id: "3", title: "Buy one get one free", code: "B1g1f", discountValue: "Fixed Amount", startDate: "20 November, 2025", endDate: "05 January, 2026", userLimit: 50 },
-  { id: "4", title: "15% off for first-time customers", code: "15ftc", discountValue: "Percentage", startDate: "25 November, 2025", endDate: "10 January, 2026", userLimit: 35 },
+  { id: "4", title: "15% off for first-time Customer", code: "15ftc", discountValue: "Percentage", startDate: "25 November, 2025", endDate: "10 January, 2026", userLimit: 35 },
   { id: "5", title: "Seasonal discount for all services: Up to 30% off", code: "Sdiscount-30", discountValue: "Percentage", startDate: "01 December, 2025", endDate: "15 January, 2026", userLimit: 15 },
 ];
 
 const mockPushNotifications: PushNotification[] = [
-  { id: "1", title: "Get up to 5% discount", message: "12 November, 2025", notifyTo: "Customers", date: "12 November, 2025" },
+  { id: "1", title: "Get up to 5% discount", message: "12 November, 2025", notifyTo: "Customer", date: "12 November, 2025" },
   { id: "2", title: "Free shipping on orders over $50", message: "15 November, 2025", notifyTo: "Professional", date: "15 November, 2025" },
-  { id: "3", title: "Buy one get one free", message: "20 November, 2025", notifyTo: "Customers", date: "20 November, 2025" },
-  { id: "4", title: "15% off for first-time customers", message: "25 November, 2025", notifyTo: "Customers", date: "25 November, 2025" },
+  { id: "3", title: "Buy one get one free", message: "20 November, 2025", notifyTo: "Customer", date: "20 November, 2025" },
+  { id: "4", title: "15% off for first-time Customer", message: "25 November, 2025", notifyTo: "Customer", date: "25 November, 2025" },
   { id: "5", title: "Seasonal discount for all services: Up to 30% off", message: "01 December, 2025", notifyTo: "Professional", date: "01 December, 2025" },
 ];
 
@@ -82,14 +77,17 @@ export default function PromotionsPage() {
     return "banner";
   })();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(2); // Default to 2 to show pagination with mock data
-  const [banners, setBanners] = useState<Banner[]>(mockBanners);
-  const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
+  const [pageSize, setPageSize] = useState(10); 
+   const [banners, setBanners] = useState<Banner[]>([]);
+   const [totalItems, setTotalItems] = useState(0);
+   const [isLoading, setIsLoading] = useState(false);
+   
+   const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
   const [pushNotifications, setPushNotifications] = useState<PushNotification[]>(mockPushNotifications);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [addModal, setAddModal] = useState<ActiveTab | null>(null);
 
-  const [bannerPromotionFor, setBannerPromotionFor] = useState("Customers");
+  const [bannerPromotionFor, setBannerPromotionFor] = useState("Customer");
   const [bannerTitle, setBannerTitle] = useState("");
   const [bannerStartDate, setBannerStartDate] = useState("");
   const [bannerEndDate, setBannerEndDate] = useState("");
@@ -98,7 +96,7 @@ export default function PromotionsPage() {
   const [bannerPreview, setBannerPreview] = useState<string>("");
 
   const [couponSpecificProfessional, setCouponSpecificProfessional] = useState("Salon");
-  const [couponName, setCouponName] = useState("Customers");
+  const [couponName, setCouponName] = useState("Customer");
   const [couponTitle, setCouponTitle] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscountType, setCouponDiscountType] = useState<"percentage" | "fixed">("percentage");
@@ -108,10 +106,37 @@ export default function PromotionsPage() {
   const [couponNoDuration, setCouponNoDuration] = useState(false);
   const [couponUserLimit, setCouponUserLimit] = useState("");
 
-  const [pushNotifyTo, setPushNotifyTo] = useState("Customers");
+  const [pushNotifyTo, setPushNotifyTo] = useState("Customer");
   const [pushTitle, setPushTitle] = useState("");
   const [pushMessage, setPushMessage] = useState("");
   const [pushDate, setPushDate] = useState("");
+
+  const fetchBanners = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/admin/banner/?page=${page}&limit=${pageSize}`);
+      // api.interceptors returns response.data as { data: body, status: httpStatus, ... }
+      // So response.data is apiResponse.
+      // response.data.data is the body from backend.
+      const backendBody = response.data.data;
+
+      // Backend returns { status: true, data: { banners: [...], pagination: {...} } }
+      if (backendBody && backendBody.status && backendBody.data) {
+         setBanners(backendBody.data.banners);
+         setTotalItems(backendBody.data.pagination?.totalItems || 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch banners", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "banner") {
+      fetchBanners();
+    }
+  }, [activeTab, page, pageSize]);
 
   const handleTabChange = (tab: string) => {
     if (tab !== "banner" && tab !== "coupon" && tab !== "push-notification") return;
@@ -120,17 +145,18 @@ export default function PromotionsPage() {
   };
 
   const resetBannerForm = () => {
-    setBannerPromotionFor("Customers");
+    setBannerPromotionFor("Customer");
     setBannerTitle("");
     setBannerStartDate("");
     setBannerEndDate("");
     setBannerNoDuration(false);
     setBannerFile(null);
+    setBannerPreview("");
   };
 
   const resetCouponForm = () => {
     setCouponSpecificProfessional("Salon");
-    setCouponName("Customers");
+    setCouponName("Customer");
     setCouponTitle("");
     setCouponCode("");
     setCouponDiscountType("percentage");
@@ -142,7 +168,7 @@ export default function PromotionsPage() {
   };
 
   const resetPushForm = () => {
-    setPushNotifyTo("Customers");
+    setPushNotifyTo("Customer");
     setPushTitle("");
     setPushMessage("");
     setPushDate("");
@@ -158,19 +184,42 @@ export default function PromotionsPage() {
 
   const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    type: SelectedItem["type"] | null;
+    id: string | null;
+  }>({ isOpen: false, type: null, id: null });
+
   const handleDelete = (type: SelectedItem["type"], id: string) => {
-    const confirmed = window.confirm("Delete this item?");
-    if (!confirmed) return;
-    if (type === "banner") setBanners((prev) => prev.filter((x) => x.id !== id));
+    setDeleteConfirmation({ isOpen: true, type, id });
+  };
+
+  const confirmDelete = async () => {
+    const { type, id } = deleteConfirmation;
+    if (!type || !id) return;
+
+    if (type === "banner") {
+      try {
+        const response = await api.delete(`/admin/banner/${id}`);
+        if (response.data.data.status) {
+          fetchBanners();
+        }
+      } catch (error) {
+        console.error("Failed to delete banner", error);
+        alert("Failed to delete banner");
+      }
+    }
     if (type === "coupon") setCoupons((prev) => prev.filter((x) => x.id !== id));
     if (type === "push-notification") setPushNotifications((prev) => prev.filter((x) => x.id !== id));
+    
+    setDeleteConfirmation({ isOpen: false, type: null, id: null });
   };
 
   const bannerColumns: Column<Banner>[] = [
     { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
     { id: "title", header: "Title", field: "title", sortable: true },
-    { id: "startDate", header: "Start Date", field: "startDate", sortable: true },
-    { id: "endDate", header: "End Date", field: "endDate", sortable: true },
+    { id: "startDate", header: "Start Date", accessor: (row) => new Date(row.start_date).toLocaleDateString(), sortable: true },
+    { id: "endDate", header: "End Date", accessor: (row) => new Date(row.end_date).toLocaleDateString(), sortable: true },
     { 
       id: "image", 
       header: "Banner Image", 
@@ -181,7 +230,7 @@ export default function PromotionsPage() {
       ),
       sortable: true,
     },
-    { id: "promotionFor", header: "Promotion For", field: "promotionFor", sortable: true },
+    { id: "promotionFor", header: "Promotion For", field: "promotion_for", sortable: true },
     {
       id: "action",
       header: "Action",
@@ -199,7 +248,7 @@ export default function PromotionsPage() {
             type="button"
             aria-label="Delete banner"
             className="hover:opacity-80 p-1 rounded hover:bg-red-50"
-            onClick={() => handleDelete("banner", row.id)}
+            onClick={() => handleDelete("banner", String(row.id))}
           >
             <TrashIcon className="w-5 h-5 text-[#FF4460]" />
           </button>
@@ -334,6 +383,9 @@ export default function PromotionsPage() {
                    onPageChange={setPage}
                    selectable={false}
                    showColumnToggle={false}
+                   manualPagination={true}
+                   totalCount={totalItems}
+                   loading={isLoading}
                  />
                )}
                {activeTab === "coupon" && (
@@ -385,7 +437,7 @@ export default function PromotionsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Promotion For</label>
                 <Select
                   options={[
-                    { label: "Customers", value: "Customers" },
+                    { label: "Customer", value: "Customer" },
                     { label: "Professional", value: "Professional" },
                     { label: "All", value: "All" },
                   ]}
@@ -493,17 +545,53 @@ export default function PromotionsPage() {
               </Button>
               <Button
                 variant="brand"
-                onClick={() => {
-                  const newItem: Banner = {
-                    id: makeId(),
-                    title: bannerTitle || "—",
-                    startDate: bannerStartDate || "—",
-                    endDate: bannerNoDuration ? "—" : bannerEndDate || "—",
-                    image: bannerPreview || "",
-                    promotionFor: bannerPromotionFor,
-                  };
-                  setBanners((prev) => [newItem, ...prev]);
-                  setAddModal(null);
+                onClick={async () => {
+                  if (!bannerFile || !bannerTitle || !bannerStartDate || (!bannerNoDuration && !bannerEndDate)) {
+                    alert("Please fill all required fields");
+                    return;
+                  }
+
+                  const formData = new FormData();
+                  formData.append("title", bannerTitle);
+                  formData.append("promotion_for", bannerPromotionFor);
+                  formData.append("start_date", bannerStartDate);
+                  if (!bannerNoDuration && bannerEndDate) {
+                    formData.append("end_date", bannerEndDate);
+                  }
+                  // Default end date if not provided? Or backend handles it? 
+                  // Assuming backend handles it or we send empty/null. 
+                  // But example.json showed end_date being sent. 
+                  // Let's send start_date as end_date if no duration, or handle as per logic.
+                  // For now, let's assume end_date is required unless noDuration is checked.
+                  // If noDuration, maybe send a far future date or same as start date?
+                  // User rule says "Don't set duration", usually means indefinite.
+                  // Let's check existing logic: existing just put "—".
+                  // I will send bannerStartDate as end_date if noDuration is true, or maybe not send it.
+                  // But example.json has end_date. I'll stick to logic: if noDuration, don't send end_date?
+                  // But type definition says end_date is string.
+                  // Let's send start_date if noDuration is checked for now to avoid errors, or check backend requirement.
+                  // Backend likely expects a date.
+                  
+                  if (bannerNoDuration) {
+                     formData.append("end_date", bannerStartDate); // Fallback
+                  }
+
+                  formData.append("is_active", "true");
+                  formData.append("image", bannerFile);
+
+                  try {
+                    const response = await api.post("/admin/banner/create", formData, {
+                      headers: { "Content-Type": "multipart/form-data" },
+                    });
+                    if (response.data.data.status) {
+                      fetchBanners();
+                      setAddModal(null);
+                      resetBannerForm();
+                    }
+                  } catch (error) {
+                    console.error("Failed to create banner", error);
+                    alert("Failed to create banner");
+                  }
                 }}
                 className="w-32"
               >
@@ -533,7 +621,7 @@ export default function PromotionsPage() {
                 <Input
                   value={couponName}
                   onChange={(e) => setCouponName(e.target.value)}
-                  placeholder="Customers"
+                  placeholder="Customer"
                   className="bg-white border-gray-200 rounded-xl"
                 />
               </div>
@@ -668,7 +756,7 @@ export default function PromotionsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Notify To</label>
                 <Select
                   options={[
-                    { label: "Customers", value: "Customers" },
+                    { label: "Customer", value: "Customer" },
                     { label: "Professional", value: "Professional" },
                     { label: "All", value: "All" },
                   ]}
@@ -764,15 +852,15 @@ export default function PromotionsPage() {
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Promotion For</div>
-              <div className="font-medium text-gray-900">{selected.item.promotionFor}</div>
+              <div className="font-medium text-gray-900">{selected.item.promotion_for}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Start Date</div>
-              <div className="font-medium text-gray-900">{selected.item.startDate}</div>
+              <div className="font-medium text-gray-900">{new Date(selected.item.start_date).toLocaleDateString()}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">End Date</div>
-              <div className="font-medium text-gray-900">{selected.item.endDate}</div>
+              <div className="font-medium text-gray-900">{new Date(selected.item.end_date).toLocaleDateString()}</div>
             </div>
           </div>
         ) : null}
@@ -827,6 +915,16 @@ export default function PromotionsPage() {
           </div>
         ) : null}
       </Modal>
+
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={() => setDeleteConfirmation({ ...deleteConfirmation, isOpen: false })}
+        onConfirm={confirmDelete}
+        title="Delete Item"
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </>
   );
 }

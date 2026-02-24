@@ -47,7 +47,7 @@ export default function AddBannerPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Promotion For</label>
                 <Select
                   options={[
-                    { label: "Customers", value: "Customers" },
+                    { label: "Customer", value: "Customer" },
                     { label: "Professional", value: "Professional" },
                     { label: "All", value: "All" },
                   ]}
