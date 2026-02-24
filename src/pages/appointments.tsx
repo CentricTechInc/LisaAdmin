@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -6,116 +6,102 @@ import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/table/DataTable";
 import { EyeIcon } from "@/components/ui/EyeIcon";
 import { Column } from "@/components/table/types";
+import api from "@/utils/axios";
 
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
 
 type Appointment = {
   id: string;
+  userId: string;
   customerName: string;
   service: string;
   dateTime: string;
   professional: string;
-  status: "pending" | "completed" | "cancelled";
+  status: "Pending" | "Previous" | "Rejected";
 };
 
-const mockAppointments: Appointment[] = [
-  {
-    id: "1",
-    customerName: "Eleanor",
-    service: "Nail, Facial",
-    dateTime: "12 November, 09:00 AM",
-    professional: "Salon",
-    status: "pending",
-  },
-  {
-    id: "2",
-    customerName: "Jennie Whang",
-    service: "Regular Haircut, Body Glowing",
-    dateTime: "12 November, 09:00 AM",
-    professional: "Individual Service Providers",
-    status: "pending",
-  },
-  {
-    id: "3",
-    customerName: "Michael Chen",
-    service: "Beard Trim, Scalp Treatment",
-    dateTime: "12 November, 10:00 AM",
-    professional: "Salon",
-    status: "pending",
-  },
-  {
-    id: "4",
-    customerName: "Samantha Lee",
-    service: "Full Body Massage, Facial Treatment",
-    dateTime: "12 November, 11:00 AM",
-    professional: "Individual Service Providers",
-    status: "pending",
-  },
-  {
-    id: "5",
-    customerName: "David Kim",
-    service: "Manicure, Pedicure",
-    dateTime: "12 November, 12:00 PM",
-    professional: "Individual Service Providers",
-    status: "pending",
-  },
-  {
-    id: "6",
-    customerName: "Sarah Connor",
-    service: "Hair Styling",
-    dateTime: "10 November, 02:00 PM",
-    professional: "Salon",
-    status: "completed",
-  },
-  {
-    id: "7",
-    customerName: "John Doe",
-    service: "Massage",
-    dateTime: "11 November, 09:00 AM",
-    professional: "Individual Service Providers",
-    status: "cancelled",
-  },
-  {
-    id: "8",
-    customerName: "Emily Blunt",
-    service: "Makeup",
-    dateTime: "13 November, 01:00 PM",
-    professional: "Salon",
-    status: "pending",
-  },
-  {
-    id: "9",
-    customerName: "Chris Evans",
-    service: "Haircut",
-    dateTime: "13 November, 02:00 PM",
-    professional: "Individual Service Providers",
-    status: "pending",
-  },
-  {
-    id: "10",
-    customerName: "Scarlett Johansson",
-    service: "Manicure",
-    dateTime: "13 November, 03:00 PM",
-    professional: "Salon",
-    status: "pending",
-  },
-  {
-    id: "11",
-    customerName: "Robert Downey Jr.",
-    service: "Facial",
-    dateTime: "13 November, 04:00 PM",
-    professional: "Individual Service Providers",
-    status: "pending",
-  },
-];
+type ApiAppointment = {
+    id: number;
+    user_id?: number; // Added to capture customer id if available
+    customer_id?: number; // Alternative common name
+    salon_id: number;
+    customer_name: string;
+    services: string;
+    date_time: string;
+    professional: string;
+};
+
+type AppointmentListingResponse = {
+    data: {
+        rows: ApiAppointment[];
+        count: number;
+    };
+};
 
 export default function AppointmentsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("Pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetchAppointments = useCallback(async () => {
+    try {
+        setLoading(true);
+        // API endpoint: /api/appointment/listing/{page}?status={status}
+        // Map UI tabs to API statuses (Pending -> Upcoming, Cancelled -> Canceled)
+        const apiStatus =
+          activeTab === "Pending"
+            ? "Upcoming"
+            : activeTab === "Cancelled"
+            ? "Canceled"
+            : activeTab;
+
+        const response = await api.get(`/admin/getAllAppointments`, {
+            params: {
+                page: page,
+                status: apiStatus,
+                limit: pageSize, // Assuming API supports limit, if not it might be ignored
+                search: searchQuery // Assuming API supports search
+            }
+        });
+
+        const serverResponse = response.data.data as AppointmentListingResponse;
+        
+        if (serverResponse?.data?.rows && Array.isArray(serverResponse.data.rows)) {
+            const mappedData: Appointment[] = serverResponse.data.rows.map((item) => ({
+                id: String(item.id),
+                userId: String(item.user_id || item.customer_id || "0"),
+                customerName: item.customer_name || "Unknown",
+                service: item.services || "Unknown Service",
+                dateTime: item.date_time,
+                professional: item.professional || "Salon",
+                status: activeTab as any
+            }));
+            
+            setAppointments(mappedData);
+            setTotalItems(serverResponse.data.count || 0);
+        } else {
+            setAppointments([]);
+            setTotalItems(0);
+        }
+    } catch (error) {
+        console.error("Failed to fetch appointments:", error);
+        setAppointments([]);
+        setTotalItems(0);
+    } finally {
+        setLoading(false);
+    }
+  }, [page, pageSize, activeTab, searchQuery]);
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
 
   // Columns definition
   const columns: Column<Appointment>[] = [
@@ -157,7 +143,7 @@ export default function AppointmentsPage() {
       accessor: (row) => (
         <button
           className="hover:opacity-80 transition-opacity"
-          onClick={() => router.push(`/appointment-detail?source=Appointments&status=${activeTab}`)}
+          onClick={() => router.push(`/appointment-detail?source=customers&id=${row.id}&user_id=${row.userId}`)}
         >
           <EyeIcon width={32} height={32} />
         </button>
@@ -167,36 +153,22 @@ export default function AppointmentsPage() {
     },
   ];
 
-  // Filtering Logic
-  const filteredData = useMemo(() => {
-    return mockAppointments.filter((item) => {
-      // Filter by status
-      if (item.status !== activeTab) return false;
-
-      // Filter by search query
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        return (
-          item.customerName.toLowerCase().includes(q) ||
-          item.service.toLowerCase().includes(q) ||
-          item.professional.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    });
-  }, [activeTab, searchQuery]);
-
+  // Filtering Logic (Client-side filtering removed as we use API)
+  // But we still need to filter if API doesn't support search/filter properly, 
+  // however, for pagination to work correctly, filtering MUST happen on server.
+  // We will assume server handles it.
+  
   // Pagination Logic
-  const totalItems = filteredData.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const startEntry = (page - 1) * pageSize + 1;
-  const endEntry = Math.min(page * pageSize, totalItems);
+  // const totalItems = filteredData.length; // Now from state
+  // const totalPages = Math.ceil(totalItems / pageSize);
+  // const startEntry = (page - 1) * pageSize + 1;
+  // const endEntry = Math.min(page * pageSize, totalItems);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
+  // const handlePageChange = (newPage: number) => {
+  //   if (newPage >= 1 && newPage <= totalPages) {
+  //     setPage(newPage);
+  //   }
+  // };
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -226,9 +198,9 @@ export default function AppointmentsPage() {
               <div className="w-full sm:w-auto">
                 <SegmentedControl
                   options={[
-                    { id: "pending", label: "Pending" },
-                    { id: "completed", label: "Completed" },
-                    { id: "cancelled", label: "Cancelled" },
+                    { id: "Pending", label: "Pending" },
+                    { id: "Previous", label: "Completed" },
+                    { id: "Canceled", label: "Rejected" },
                   ]}
                   value={activeTab}
                   onChange={(id) => {
@@ -260,12 +232,14 @@ export default function AppointmentsPage() {
             <div className="bg-white rounded-lg p-6  shadow-sm border border-gray-100 overflow-hidden">
               <DataTable
                 columns={columns}
-                data={filteredData}
+                data={appointments}
                 page={page}
                 pageSize={pageSize}
+                onPageChange={setPage}
                 selectable={false}
                 showColumnToggle={false}
-              // We handle pagination UI outside
+                manualPagination={true}
+                totalCount={totalItems}
               />
         </div>
       </div>

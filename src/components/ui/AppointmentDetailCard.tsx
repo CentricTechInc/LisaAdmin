@@ -62,9 +62,9 @@ export const AppointmentDetailCard: React.FC<AppointmentDetailCardProps> = ({
     switch (normalizedStatus) {
       case "completed":
         return "bg-[#E6F6EC] text-[#039855]";
-      case "pending":
-        return "bg-[#FFF0F4] text-[#FF4460]"; // Pink for pending
-      case "cancelled":
+      case "upcoming":
+        return "bg-[#FFF0F4] text-[#FF4460]";
+      case "canceled":
         return "bg-[#F2F4F7] text-[#344054]"; // Gray for cancelled
       default:
         return "bg-[#F9FAFB] text-[#344054]"; // Gray default

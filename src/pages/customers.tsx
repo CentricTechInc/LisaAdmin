@@ -47,6 +47,7 @@ type CustomerListingResponse = {
 export default function CustomersPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
@@ -64,9 +65,23 @@ export default function CustomersPage() {
     currentStatus: "Active"
   });
 
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
   const fetchCustomers = useCallback(async () => {
     try {
-      const response = await api.get(`/customer/salon-listing/${currentPage}?pageLimit=${pageSize}`);
+      const response = await api.get(
+        `/customer/salon-listing/${currentPage}?pageLimit=${pageSize}&search=${debouncedSearchQuery}`
+      );
 
       const serverResponse = response.data.data as CustomerListingResponse;
 
@@ -108,16 +123,14 @@ export default function CustomersPage() {
     } catch (error) {
       console.error("Failed to fetch customers:", error);
     }
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, debouncedSearchQuery]);
 
   useEffect(() => {
     fetchCustomers();
   }, [fetchCustomers]);
 
-  // Filter
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter - Server side filtering ab use ho rahi hai, to client side filter hata diya
+  const filteredCustomers = customers;
 
   const initiateBlockToggle = useCallback((customer: Customer) => {
     setModalState({
