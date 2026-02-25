@@ -1,56 +1,51 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { useRouter } from "next/router";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { GreetingHeader as Header } from "@/components/layout/GreetingHeader";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import React, { useEffect } from "react";
-import Cookies from "js-cookie";
+import { useRouter } from "next/router";
+import { Toaster } from 'react-hot-toast';
 
-const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+// Wrapper component to access auth context
+const AppContent = ({ Component, pageProps }: { Component: any, pageProps: any }) => {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
-  const isAuthPage = router.pathname.startsWith("/auth");
-
-  useEffect(() => {
-    const token = Cookies.get("token");
-
-    if (!isLoading) {
-      if (!token && !isAuthPage) {
-        router.push("/auth/login");
-      } else if (token && isAuthPage) {
-        router.push("/dashboard");
-      }
-    }
-  }, [isLoading, isAuthPage, router]);
-
-  if (isLoading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
-  }
-
-  // If not authenticated and trying to access protected route, render nothing while redirecting
-  if (!isAuthenticated && !isAuthPage) {
-    return null; 
-  }
-
-  return <>{children}</>;
-};
-
-export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  // Ensure we correctly identify auth pages and root
+  const { user, logout } = useAuth();
+  
+  // Pages that don't need the dashboard layout (sidebar + header)
   const isAuthPage = router.pathname.startsWith("/auth") || router.pathname === "/";
 
   return (
+    <>
+      <Toaster position="top-right" />
+      {isAuthPage ? (
+        <Component {...pageProps} />
+      ) : (
+        <div className="flex min-h-screen bg-[#F9FAFB]">
+          <Sidebar 
+            className="hidden w-64 border-r border-gray-100 bg-white lg:block fixed h-full overflow-y-auto" 
+            onLogout={logout}
+          />
+          <div className="flex flex-1 flex-col lg:pl-64">
+            <Header 
+              className="sticky top-0 z-10 border-b border-gray-100 bg-white/80 backdrop-blur-md" 
+              userName={user?.name || "User"}
+              onLogoutClick={logout}
+              avatarSrc={user?.avatar}
+            />
+            <main className="flex-1 p-6">
+              <Component {...pageProps} />
+            </main>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
     <AuthProvider>
-      <AuthGuard>
-        {isAuthPage ? (
-          <Component {...pageProps} />
-        ) : (
-          <AppLayout>
-            <Component {...pageProps} />
-          </AppLayout>
-        )}
-      </AuthGuard>
+      <AppContent Component={Component} pageProps={pageProps} />
     </AuthProvider>
   );
 }

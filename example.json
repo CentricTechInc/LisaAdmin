@@ -1,0 +1,45 @@
+{
+    "status": true,
+    "message": "success",
+    "data": {
+        "count": 2,
+        "rows": [
+            {
+                "id": 6,
+                "salon_id": 23,
+                "name": "dwed",
+                "title": "wed",
+                "code": "wedwe",
+                "discount_type": "percentage",
+                "discount_value": "232.00",
+                "limit": 3222,
+                "start_date": "2026-02-05T00:00:00.000Z",
+                "end_date": "2026-02-12T00:00:00.000Z",
+                "dont_set_duration": false,
+                "is_active": true,
+                "salon": {
+                    "id": 23,
+                    "bussiness_name": "Guy Gloom"
+                }
+            },
+            {
+                "id": 3,
+                "salon_id": 37,
+                "name": "string",
+                "title": "string",
+                "code": "string",
+                "discount_type": "percentage",
+                "discount_value": "10.00",
+                "limit": 10,
+                "start_date": "2026-02-25T00:00:00.000Z",
+                "end_date": "2026-02-25T00:00:00.000Z",
+                "dont_set_duration": true,
+                "is_active": true,
+                "salon": {
+                    "id": 37,
+                    "bussiness_name": "Raza test salon"
+                }
+            }
+        ]
+    }
+}

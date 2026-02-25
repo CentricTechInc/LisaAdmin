@@ -17,6 +17,7 @@ import { Column } from "@/components/table/types";
 import { Modal } from "@/components/ui/Modal";
 import api from "@/utils/axios";
 import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
+import toast from 'react-hot-toast';
 
 type Banner = {
   id: number;
@@ -29,13 +30,22 @@ type Banner = {
 };
 
 type Coupon = {
-  id: string;
+  id: number;
+  salon_id: number;
+  name: string;
   title: string;
   code: string;
-  discountValue: string;
-  startDate: string;
-  endDate: string;
-  userLimit: number;
+  discount_type: string;
+  discount_value: string;
+  limit: number;
+  start_date: string;
+  end_date: string;
+  dont_set_duration: boolean;
+  is_active: boolean;
+  salon?: {
+    id: number;
+    bussiness_name: string;
+  };
 };
 
 type PushNotification = {
@@ -46,13 +56,7 @@ type PushNotification = {
   date: string;
 };
 
-const mockCoupons: Coupon[] = [
-  { id: "1", title: "Get up to 5% discount", code: "winterget5", discountValue: "Percentage", startDate: "12 November, 2025", endDate: "25 December, 2025", userLimit: 200 },
-  { id: "2", title: "Free shipping on orders over $50", code: "FS-50", discountValue: "Fixed Amount", startDate: "15 November, 2025", endDate: "30 December, 2025", userLimit: 20 },
-  { id: "3", title: "Buy one get one free", code: "B1g1f", discountValue: "Fixed Amount", startDate: "20 November, 2025", endDate: "05 January, 2026", userLimit: 50 },
-  { id: "4", title: "15% off for first-time Customer", code: "15ftc", discountValue: "Percentage", startDate: "25 November, 2025", endDate: "10 January, 2026", userLimit: 35 },
-  { id: "5", title: "Seasonal discount for all services: Up to 30% off", code: "Sdiscount-30", discountValue: "Percentage", startDate: "01 December, 2025", endDate: "15 January, 2026", userLimit: 15 },
-];
+const mockCoupons: Coupon[] = [];
 
 const mockPushNotifications: PushNotification[] = [
   { id: "1", title: "Get up to 5% discount", message: "12 November, 2025", notifyTo: "Customer", date: "12 November, 2025" },
@@ -68,6 +72,11 @@ type SelectedItem =
   | { type: "coupon"; item: Coupon }
   | { type: "push-notification"; item: PushNotification };
 
+type SalonOption = {
+  id: number;
+  name: string;
+};
+
 export default function PromotionsPage() {
   const router = useRouter();
   const activeTab: ActiveTab = (() => {
@@ -82,7 +91,7 @@ export default function PromotionsPage() {
    const [totalItems, setTotalItems] = useState(0);
    const [isLoading, setIsLoading] = useState(false);
    
-   const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
+   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [pushNotifications, setPushNotifications] = useState<PushNotification[]>(mockPushNotifications);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [addModal, setAddModal] = useState<ActiveTab | null>(null);
@@ -96,7 +105,7 @@ export default function PromotionsPage() {
   const [bannerPreview, setBannerPreview] = useState<string>("");
 
   const [couponSpecificProfessional, setCouponSpecificProfessional] = useState("Salon");
-  const [couponName, setCouponName] = useState("Customer");
+  const [couponName, setCouponName] = useState("");
   const [couponTitle, setCouponTitle] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscountType, setCouponDiscountType] = useState<"percentage" | "fixed">("percentage");
@@ -105,6 +114,8 @@ export default function PromotionsPage() {
   const [couponEndDate, setCouponEndDate] = useState("");
   const [couponNoDuration, setCouponNoDuration] = useState(false);
   const [couponUserLimit, setCouponUserLimit] = useState("");
+  const [salons, setSalons] = useState<SalonOption[]>([]);
+  const [selectedSalonId, setSelectedSalonId] = useState<string>("");
 
   const [pushNotifyTo, setPushNotifyTo] = useState("Customer");
   const [pushTitle, setPushTitle] = useState("");
@@ -115,12 +126,7 @@ export default function PromotionsPage() {
     setIsLoading(true);
     try {
       const response = await api.get(`/admin/banner/?page=${page}&limit=${pageSize}`);
-      // api.interceptors returns response.data as { data: body, status: httpStatus, ... }
-      // So response.data is apiResponse.
-      // response.data.data is the body from backend.
       const backendBody = response.data.data;
-
-      // Backend returns { status: true, data: { banners: [...], pagination: {...} } }
       if (backendBody && backendBody.status && backendBody.data) {
          setBanners(backendBody.data.banners);
          setTotalItems(backendBody.data.pagination?.totalItems || 0);
@@ -132,11 +138,75 @@ export default function PromotionsPage() {
     }
   };
 
+  const fetchCoupons = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/coupon/listing`, {
+        params: {
+          page: page,
+          limit: pageSize
+        }
+      });
+      // The API returns the structure directly: { status: true, message: "success", data: { count: number, rows: [] } }
+      // Axios interceptor wraps it in response.data (ApiResponse object), and response.data.data is the actual server response.
+      const apiWrapper = response.data; 
+      const backendResponse = apiWrapper.data;
+      
+      if (backendResponse && backendResponse.status && backendResponse.data) {
+         setCoupons(backendResponse.data.rows || []);
+         setTotalItems(backendResponse.data.count || 0);
+      } else {
+         setCoupons([]);
+         setTotalItems(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch coupons", error);
+      setCoupons([]);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchSalons = async () => {
+    try {
+      const response = await api.get('/admin/getAllProfessionals', {
+        params: { status: "Approved", limit: 100 } // Fetch reasonable amount
+      });
+      const backendResponse = response.data.data;
+      if (backendResponse?.data?.items) {
+        // Filter for Salons only. 
+        // We assume items with category 'Salons' or having a business_name are salons.
+        const salonItems = backendResponse.data.items.filter((item: any) => {
+             const category = item.category || "";
+             const role = item.role || "";
+             return category === "Salons" || role === "Salon" || item.bussiness_name;
+        });
+
+        const items = salonItems.map((item: any) => ({
+          id: Number(item.id), // Use salon ID (which seems to be the main ID here)
+          name: item.bussiness_name || item.name || "Unknown Salon"
+        }));
+        setSalons(items);
+      }
+    } catch (error) {
+      console.error("Failed to fetch salons", error);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "banner") {
       fetchBanners();
+    } else if (activeTab === "coupon") {
+      fetchCoupons();
     }
   }, [activeTab, page, pageSize]);
+
+  useEffect(() => {
+    if (addModal === "coupon") {
+      fetchSalons();
+    }
+  }, [addModal]);
 
   const handleTabChange = (tab: string) => {
     if (tab !== "banner" && tab !== "coupon" && tab !== "push-notification") return;
@@ -156,7 +226,7 @@ export default function PromotionsPage() {
 
   const resetCouponForm = () => {
     setCouponSpecificProfessional("Salon");
-    setCouponName("Customer");
+    setCouponName("");
     setCouponTitle("");
     setCouponCode("");
     setCouponDiscountType("percentage");
@@ -165,6 +235,7 @@ export default function PromotionsPage() {
     setCouponEndDate("");
     setCouponNoDuration(false);
     setCouponUserLimit("");
+    setSelectedSalonId("");
   };
 
   const resetPushForm = () => {
@@ -203,13 +274,23 @@ export default function PromotionsPage() {
         const response = await api.delete(`/admin/banner/${id}`);
         if (response.data.data.status) {
           fetchBanners();
+          toast.success("Banner deleted successfully");
         }
       } catch (error) {
         console.error("Failed to delete banner", error);
-        alert("Failed to delete banner");
+        toast.error("Failed to delete banner");
       }
     }
-    if (type === "coupon") setCoupons((prev) => prev.filter((x) => x.id !== id));
+    if (type === "coupon") {
+      try {
+        await api.delete(`/coupon/${id}`);
+        fetchCoupons();
+        toast.success("Coupon deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete coupon", error);
+        toast.error("Failed to delete coupon");
+      }
+    }
     if (type === "push-notification") setPushNotifications((prev) => prev.filter((x) => x.id !== id));
     
     setDeleteConfirmation({ isOpen: false, type: null, id: null });
@@ -260,12 +341,18 @@ export default function PromotionsPage() {
 
   const couponColumns: Column<Coupon>[] = [
     { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
+    { id: "salon", header: "Salon", accessor: (row) => row.salon?.bussiness_name || "N/A", sortable: true },
     { id: "title", header: "Title", field: "title", sortable: true },
     { id: "code", header: "Code", field: "code", sortable: true },
-    { id: "discountValue", header: "Discount Value", field: "discountValue", sortable: true },
-    { id: "startDate", header: "Start Date", field: "startDate", sortable: true },
-    { id: "endDate", header: "End Date", field: "endDate", sortable: true },
-    { id: "userLimit", header: "User Limit", field: "userLimit", sortable: true },
+    { 
+      id: "discountValue", 
+      header: "Discount Value", 
+      accessor: (row) => `${row.discount_value} ${row.discount_type === 'percentage' ? '%' : ''}`,
+      sortable: true 
+    },
+    { id: "startDate", header: "Start Date", accessor: (row) => new Date(row.start_date).toLocaleDateString(), sortable: true },
+    { id: "endDate", header: "End Date", accessor: (row) => row.dont_set_duration ? "No Duration" : new Date(row.end_date).toLocaleDateString(), sortable: true },
+    { id: "userLimit", header: "User Limit", field: "limit", sortable: true },
     {
       id: "action",
       header: "Action",
@@ -283,7 +370,7 @@ export default function PromotionsPage() {
             type="button"
             aria-label="Delete coupon"
             className="hover:opacity-80 p-1 rounded hover:bg-red-50"
-            onClick={() => handleDelete("coupon", row.id)}
+            onClick={() => handleDelete("coupon", String(row.id))}
           >
             <TrashIcon className="w-5 h-5 text-[#FF4460]" />
           </button>
@@ -547,7 +634,7 @@ export default function PromotionsPage() {
                 variant="brand"
                 onClick={async () => {
                   if (!bannerFile || !bannerTitle || !bannerStartDate || (!bannerNoDuration && !bannerEndDate)) {
-                    alert("Please fill all required fields");
+                    toast.error("Please fill all required fields");
                     return;
                   }
 
@@ -558,19 +645,6 @@ export default function PromotionsPage() {
                   if (!bannerNoDuration && bannerEndDate) {
                     formData.append("end_date", bannerEndDate);
                   }
-                  // Default end date if not provided? Or backend handles it? 
-                  // Assuming backend handles it or we send empty/null. 
-                  // But example.json showed end_date being sent. 
-                  // Let's send start_date as end_date if no duration, or handle as per logic.
-                  // For now, let's assume end_date is required unless noDuration is checked.
-                  // If noDuration, maybe send a far future date or same as start date?
-                  // User rule says "Don't set duration", usually means indefinite.
-                  // Let's check existing logic: existing just put "—".
-                  // I will send bannerStartDate as end_date if noDuration is true, or maybe not send it.
-                  // But example.json has end_date. I'll stick to logic: if noDuration, don't send end_date?
-                  // But type definition says end_date is string.
-                  // Let's send start_date if noDuration is checked for now to avoid errors, or check backend requirement.
-                  // Backend likely expects a date.
                   
                   if (bannerNoDuration) {
                      formData.append("end_date", bannerStartDate); // Fallback
@@ -587,10 +661,11 @@ export default function PromotionsPage() {
                       fetchBanners();
                       setAddModal(null);
                       resetBannerForm();
+                      toast.success("Banner created successfully");
                     }
                   } catch (error) {
                     console.error("Failed to create banner", error);
-                    alert("Failed to create banner");
+                    toast.error("Failed to create banner");
                   }
                 }}
                 className="w-32"
@@ -609,22 +684,38 @@ export default function PromotionsPage() {
                 <Select
                   options={[
                     { label: "Salon", value: "Salon" },
-                    { label: "Individual", value: "Individual" },
+                    // { label: "Individual", value: "Individual" }, // Keeping simplistic for now as per instructions or re-enable if needed
                   ]}
                   value={couponSpecificProfessional}
                   onChange={(e) => setCouponSpecificProfessional(e.target.value)}
                   className="bg-white border-gray-200 rounded-xl"
                 />
               </div>
-              <div>
+              
+              {couponSpecificProfessional === "Salon" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Salon</label>
+                  <Select
+                    options={[
+                        { label: "Select Salon", value: "" },
+                        ...salons.map(s => ({ label: s.name, value: String(s.id) }))
+                    ]}
+                    value={selectedSalonId}
+                    onChange={(e) => setSelectedSalonId(e.target.value)}
+                    className="bg-white border-gray-200 rounded-xl"
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <Input
                   value={couponName}
                   onChange={(e) => setCouponName(e.target.value)}
-                  placeholder="Customer"
+                  placeholder="Coupon Name"
                   className="bg-white border-gray-200 rounded-xl"
                 />
-              </div>
             </div>
 
             <div>
@@ -666,7 +757,7 @@ export default function PromotionsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCouponDiscountType("fixed")}
+                      onClick={() => setCouponDiscountType("fixed")} // UI says fixed, backend might expect 'fixed' or 'amount'
                       className={`px-3 py-1 rounded-md text-sm font-bold transition-colors ${couponDiscountType === "fixed" ? "bg-[#FF4460] text-white" : "text-gray-500 hover:text-gray-900"}`}
                     >
                       $
@@ -727,19 +818,42 @@ export default function PromotionsPage() {
               </Button>
               <Button
                 variant="brand"
-                onClick={() => {
-                  const discountLabel = couponDiscountType === "percentage" ? "Percentage" : "Fixed Amount";
-                  const newItem: Coupon = {
-                    id: makeId(),
-                    title: couponTitle || "—",
-                    code: couponCode || "—",
-                    discountValue: discountLabel,
-                    startDate: couponStartDate || "—",
-                    endDate: couponNoDuration ? "—" : couponEndDate || "—",
-                    userLimit: Number(couponUserLimit) || 0,
-                  };
-                  setCoupons((prev) => [newItem, ...prev]);
-                  setAddModal(null);
+                onClick={async () => {
+                  if (!selectedSalonId || !couponTitle || !couponCode || !couponDiscountValue || !couponStartDate || (!couponNoDuration && !couponEndDate)) {
+                    toast.error("Please fill all required fields");
+                    return;
+                  }
+
+                  try {
+                      const payload = {
+                          salon_id: Number(selectedSalonId),
+                          name: couponName,
+                          title: couponTitle,
+                          code: couponCode,
+                          discount_type: couponDiscountType,
+                          discount_value: Number(couponDiscountValue),
+                          start_date: couponStartDate,
+                          end_date: couponNoDuration ? couponStartDate : couponEndDate, // Assuming backend needs date even if no duration
+                          limit: Number(couponUserLimit) || 0,
+                          dont_set_duration: couponNoDuration
+                      };
+
+                      const response = await api.post('/coupon/create', payload);
+                      
+                      if (response.data.status) {
+                          setAddModal(null);
+                          resetCouponForm();
+                          fetchCoupons();
+                          toast.success("Coupon created successfully");
+                      } else {
+                          const errorMsg = response.data.errors ? response.data.errors.join(", ") : response.data.message;
+                          toast.error(errorMsg || "Failed to create coupon");
+                      }
+                  } catch (error: any) {
+                      console.error("Failed to create coupon", error);
+                      const errorMsg = error.response?.data?.errors ? error.response.data.errors.join(", ") : error.response?.data?.message || error.message;
+                      toast.error(errorMsg || "Failed to create coupon");
+                  }
                 }}
                 className="w-32"
               >
@@ -877,19 +991,33 @@ export default function PromotionsPage() {
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Discount</div>
-              <div className="font-medium text-gray-900">{selected.item.discountValue}</div>
+              <div className="font-medium text-gray-900">
+                {selected.item.discount_value} {selected.item.discount_type === 'percentage' ? '%' : ''}
+              </div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">User Limit</div>
-              <div className="font-medium text-gray-900">{selected.item.userLimit}</div>
+              <div className="font-medium text-gray-900">{selected.item.limit}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Start Date</div>
-              <div className="font-medium text-gray-900">{selected.item.startDate}</div>
+              <div className="font-medium text-gray-900">{new Date(selected.item.start_date).toLocaleDateString()}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">End Date</div>
-              <div className="font-medium text-gray-900">{selected.item.endDate}</div>
+              <div className="font-medium text-gray-900">
+                {selected.item.dont_set_duration ? "No Duration" : new Date(selected.item.end_date).toLocaleDateString()}
+              </div>
+            </div>
+            {selected.item.salon && (
+                <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
+                    <div className="text-gray-500">Salon</div>
+                    <div className="font-medium text-gray-900">{selected.item.salon.bussiness_name}</div>
+                </div>
+            )}
+            <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
+                <div className="text-gray-500">Internal Name</div>
+                <div className="font-medium text-gray-900">{selected.item.name}</div>
             </div>
           </div>
         ) : null}
