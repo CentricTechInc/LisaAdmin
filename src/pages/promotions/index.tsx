@@ -49,22 +49,18 @@ type Coupon = {
 };
 
 type PushNotification = {
-  id: string;
+  id: number;
   title: string;
   message: string;
-  notifyTo: string;
-  date: string;
+  notify_to: string;
+  sent_count: number;
+  created_by: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 const mockCoupons: Coupon[] = [];
 
-const mockPushNotifications: PushNotification[] = [
-  { id: "1", title: "Get up to 5% discount", message: "12 November, 2025", notifyTo: "Customer", date: "12 November, 2025" },
-  { id: "2", title: "Free shipping on orders over $50", message: "15 November, 2025", notifyTo: "Professional", date: "15 November, 2025" },
-  { id: "3", title: "Buy one get one free", message: "20 November, 2025", notifyTo: "Customer", date: "20 November, 2025" },
-  { id: "4", title: "15% off for first-time Customer", message: "25 November, 2025", notifyTo: "Customer", date: "25 November, 2025" },
-  { id: "5", title: "Seasonal discount for all services: Up to 30% off", message: "01 December, 2025", notifyTo: "Professional", date: "01 December, 2025" },
-];
 
 type ActiveTab = "banner" | "coupon" | "push-notification";
 type SelectedItem =
@@ -92,7 +88,7 @@ export default function PromotionsPage() {
    const [isLoading, setIsLoading] = useState(false);
    
    const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [pushNotifications, setPushNotifications] = useState<PushNotification[]>(mockPushNotifications);
+  const [pushNotifications, setPushNotifications] = useState<PushNotification[]>([]);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [addModal, setAddModal] = useState<ActiveTab | null>(null);
 
@@ -120,7 +116,6 @@ export default function PromotionsPage() {
   const [pushNotifyTo, setPushNotifyTo] = useState("Customer");
   const [pushTitle, setPushTitle] = useState("");
   const [pushMessage, setPushMessage] = useState("");
-  const [pushDate, setPushDate] = useState("");
 
   const fetchBanners = async () => {
     setIsLoading(true);
@@ -194,11 +189,39 @@ export default function PromotionsPage() {
     }
   };
 
+  const fetchPushNotifications = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.get(`/push-notifications/list`, {
+        params: {
+          page: page,
+          limit: pageSize
+        }
+      });
+      const backendResponse = response.data.data;
+      if (backendResponse && backendResponse.status && backendResponse.data) {
+         setPushNotifications(backendResponse.data.data || []);
+         setTotalItems(backendResponse.data.pagination?.totalItems || 0);
+      } else {
+         setPushNotifications([]);
+         setTotalItems(0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch push notifications", error);
+      setPushNotifications([]);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "banner") {
       fetchBanners();
     } else if (activeTab === "coupon") {
       fetchCoupons();
+    } else if (activeTab === "push-notification") {
+      fetchPushNotifications();
     }
   }, [activeTab, page, pageSize]);
 
@@ -242,7 +265,6 @@ export default function PromotionsPage() {
     setPushNotifyTo("Customer");
     setPushTitle("");
     setPushMessage("");
-    setPushDate("");
   };
 
   const openAddModal = (tab: ActiveTab) => {
@@ -291,7 +313,16 @@ export default function PromotionsPage() {
         toast.error("Failed to delete coupon");
       }
     }
-    if (type === "push-notification") setPushNotifications((prev) => prev.filter((x) => x.id !== id));
+    if (type === "push-notification") {
+      try {
+        await api.delete(`/push-notifications/${id}`);
+        fetchPushNotifications();
+        toast.success("Notification deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete notification", error);
+        toast.error("Failed to delete notification");
+      }
+    }
     
     setDeleteConfirmation({ isOpen: false, type: null, id: null });
   };
@@ -384,7 +415,8 @@ export default function PromotionsPage() {
     { id: "sr", header: "Sr.", accessor: (_, index) => (page - 1) * pageSize + index + 1, className: "w-16 text-center", sortable: true },
     { id: "title", header: "Title", field: "title", sortable: true },
     { id: "message", header: "Message", field: "message", sortable: true },
-    { id: "notifyTo", header: "Notify To", field: "notifyTo", sortable: true },
+    { id: "notifyTo", header: "Notify To", field: "notify_to", sortable: true },
+    { id: "date", header: "Date", accessor: (row) => new Date(row.createdAt).toLocaleDateString(), sortable: true },
     {
       id: "action",
       header: "Action",
@@ -402,7 +434,7 @@ export default function PromotionsPage() {
             type="button"
             aria-label="Delete push notification"
             className="hover:opacity-80 p-1 rounded hover:bg-red-50"
-            onClick={() => handleDelete("push-notification", row.id)}
+            onClick={() => handleDelete("push-notification", String(row.id))}
           >
             <TrashIcon className="w-5 h-5 text-[#FF4460]" />
           </button>
@@ -495,6 +527,9 @@ export default function PromotionsPage() {
                    onPageChange={setPage}
                    selectable={false}
                    showColumnToggle={false}
+                   manualPagination={true}
+                   totalCount={totalItems}
+                   loading={isLoading}
                  />
                )}
             </div>
@@ -901,18 +936,6 @@ export default function PromotionsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <Input
-                  type="date"
-                  value={pushDate}
-                  onChange={(e) => setPushDate(e.target.value)}
-                  className="bg-white border-gray-200 rounded-xl"
-                />
-              </div>
-            </div>
-
             <div className="flex justify-end gap-4 mt-4">
               <Button
                 variant="ghost"
@@ -923,16 +946,26 @@ export default function PromotionsPage() {
               </Button>
               <Button
                 variant="brand"
-                onClick={() => {
-                  const newItem: PushNotification = {
-                    id: makeId(),
-                    title: pushTitle || "—",
-                    message: pushMessage || "—",
-                    notifyTo: pushNotifyTo,
-                    date: pushDate || "—",
-                  };
-                  setPushNotifications((prev) => [newItem, ...prev]);
-                  setAddModal(null);
+                onClick={async () => {
+                   if (!pushTitle || !pushMessage || !pushNotifyTo) {
+                      toast.error("Please fill all required fields");
+                      return;
+                   }
+
+                   try {
+                     await api.post("/push-notifications/create", {
+                       title: pushTitle,
+                       message: pushMessage,
+                       notify_to: pushNotifyTo
+                     });
+                     fetchPushNotifications();
+                     setAddModal(null);
+                     resetPushForm();
+                     toast.success("Notification sent successfully");
+                   } catch (error) {
+                     console.error("Failed to send notification", error);
+                     toast.error("Failed to send notification");
+                   }
                 }}
                 className="w-32"
               >
@@ -1030,15 +1063,15 @@ export default function PromotionsPage() {
             </div>
             <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
               <div className="text-gray-500">Message</div>
-              <div className="font-medium text-gray-900">{(selected as any).item.message}</div>
+              <div className="font-medium text-gray-900">{selected.item.message}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Notify To</div>
-              <div className="font-medium text-gray-900">{(selected as any).item.notifyTo}</div>
+              <div className="font-medium text-gray-900">{selected.item.notify_to}</div>
             </div>
             <div className="rounded-xl bg-slate-50 p-3">
               <div className="text-gray-500">Date</div>
-              <div className="font-medium text-gray-900">{(selected as any).item.date}</div>
+              <div className="font-medium text-gray-900">{new Date(selected.item.createdAt).toLocaleDateString()}</div>
             </div>
           </div>
         ) : null}

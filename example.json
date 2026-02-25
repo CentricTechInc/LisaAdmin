@@ -1,45 +1,54 @@
 {
     "status": true,
-    "message": "success",
+    "message": "Success",
     "data": {
-        "count": 2,
-        "rows": [
+        "data": [
             {
-                "id": 6,
-                "salon_id": 23,
-                "name": "dwed",
-                "title": "wed",
-                "code": "wedwe",
-                "discount_type": "percentage",
-                "discount_value": "232.00",
-                "limit": 3222,
-                "start_date": "2026-02-05T00:00:00.000Z",
-                "end_date": "2026-02-12T00:00:00.000Z",
-                "dont_set_duration": false,
-                "is_active": true,
-                "salon": {
-                    "id": 23,
-                    "bussiness_name": "Guy Gloom"
-                }
+                "id": 5,
+                "title": "hhhh",
+                "message": "hhhhhhhhh",
+                "notify_to": "Professional",
+                "sent_count": 0,
+                "created_by": 1,
+                "createdAt": "2026-02-25T22:46:13.596Z",
+                "updatedAt": "2026-02-25T22:46:13.596Z"
+            },
+            {
+                "id": 4,
+                "title": "ffff",
+                "message": "fffffffff",
+                "notify_to": "Customers",
+                "sent_count": 0,
+                "created_by": 1,
+                "createdAt": "2026-02-25T22:43:25.589Z",
+                "updatedAt": "2026-02-25T22:43:25.589Z"
             },
             {
                 "id": 3,
-                "salon_id": 37,
-                "name": "string",
                 "title": "string",
-                "code": "string",
-                "discount_type": "percentage",
-                "discount_value": "10.00",
-                "limit": 10,
-                "start_date": "2026-02-25T00:00:00.000Z",
-                "end_date": "2026-02-25T00:00:00.000Z",
-                "dont_set_duration": true,
-                "is_active": true,
-                "salon": {
-                    "id": 37,
-                    "bussiness_name": "Raza test salon"
-                }
+                "message": "string",
+                "notify_to": "Customers",
+                "sent_count": 0,
+                "created_by": 1,
+                "createdAt": "2026-02-25T22:23:52.227Z",
+                "updatedAt": "2026-02-25T22:23:52.227Z"
+            },
+            {
+                "id": 1,
+                "title": "string",
+                "message": "string",
+                "notify_to": "Customers",
+                "sent_count": 0,
+                "created_by": 1,
+                "createdAt": "2026-02-25T22:19:39.056Z",
+                "updatedAt": "2026-02-25T22:19:39.056Z"
             }
-        ]
+        ],
+        "pagination": {
+            "totalItems": 4,
+            "totalPages": 1,
+            "currentPage": 1,
+            "itemsPerPage": 10
+        }
     }
 }
