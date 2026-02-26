@@ -18,7 +18,7 @@ type Professional = {
   email: string;
   phone: string;
   category: string;
-  status: "Active" | "Blocked" | "Rejected" | "Pending";
+  status: "Active" | "Blocked" | "Rejected" | "Pending" | "Block";
 };
 
 export default function ProfessionalsPage() {
@@ -166,18 +166,38 @@ export default function ProfessionalsPage() {
     { id: "phone", header: "Phone", field: "phone", sortable: true },
     { id: "category", header: "Category", field: "category", sortable: true },
     {
+      id: "status",
+      header: "Status",
+      accessor: (item) => {
+        let styles = "bg-gray-100 text-gray-700";
+        const status = item.status?.trim();
+
+        if (status === "Active") styles = "bg-green-100 text-green-700";
+        else if (["Blocked", "Rejected", "Block"].includes(status)) styles = "bg-red-100 text-red-700";
+        else if (status === "Pending") styles = "bg-yellow-100 text-yellow-700";
+        
+        return (
+          <span className={cn("px-2 py-1 rounded-full text-xs font-medium", styles)}>
+            {status}
+          </span>
+        );
+      },
+    },
+    {
       id: "action",
       header: "Action",
-      accessor: (item) => (
+      accessor: (item) => {
+        const status = item.status?.trim();
+        return (
         <div className="flex items-center gap-2">
             <button 
                 onClick={() => router.push(
                   `/professionals/profile?id=${item.id}&user_id=${item.user_id}${
-                    item.status === "Pending"
+                    status === "Pending"
                       ? "&status=pending"
-                      : item.status === "Rejected"
+                      : status === "Rejected"
                       ? "&status=rejected"
-                      : item.status === "Blocked"
+                      : (status === "Blocked" || status === "Block")
                       ? "&status=blocked"
                       : ""
                   }`
@@ -219,7 +239,8 @@ export default function ProfessionalsPage() {
                 </button>
             )}
         </div>
-      ),
+      );
+      },
     },
   ], [activeTab, router, handleDeleteClick, handleBlockClick]);
 

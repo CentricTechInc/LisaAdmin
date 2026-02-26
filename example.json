@@ -1,54 +1,104 @@
 {
     "status": true,
-    "message": "Success",
+    "message": "Professionals retrieved successfully",
     "data": {
-        "data": [
+        "items": [
             {
-                "id": 5,
-                "title": "hhhh",
-                "message": "hhhhhhhhh",
-                "notify_to": "Professional",
-                "sent_count": 0,
-                "created_by": 1,
-                "createdAt": "2026-02-25T22:46:13.596Z",
-                "updatedAt": "2026-02-25T22:46:13.596Z"
+                "id": "58",
+                "name": "Harry salon",
+                "email": "customer@yopmail.com",
+                "phone": "24242485858",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": "http://localhost:8000/images/1772128531254-scaled_Screenshot_20260224-221028.jpg"
             },
             {
-                "id": 4,
-                "title": "ffff",
-                "message": "fffffffff",
-                "notify_to": "Customers",
-                "sent_count": 0,
-                "created_by": 1,
-                "createdAt": "2026-02-25T22:43:25.589Z",
-                "updatedAt": "2026-02-25T22:43:25.589Z"
+                "id": "43",
+                "name": "Test",
+                "email": "s@yopmail.com",
+                "phone": "78 123 4567",
+                "category": "Salons",
+                "status": "Blocked",
+                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
             },
             {
-                "id": 3,
-                "title": "string",
-                "message": "string",
-                "notify_to": "Customers",
-                "sent_count": 0,
-                "created_by": 1,
-                "createdAt": "2026-02-25T22:23:52.227Z",
-                "updatedAt": "2026-02-25T22:23:52.227Z"
+                "id": "36",
+                "name": "Girl Salon",
+                "email": "b@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Blocked",
+                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
             },
             {
-                "id": 1,
-                "title": "string",
-                "message": "string",
-                "notify_to": "Customers",
-                "sent_count": 0,
-                "created_by": 1,
-                "createdAt": "2026-02-25T22:19:39.056Z",
-                "updatedAt": "2026-02-25T22:19:39.056Z"
+                "id": "35",
+                "name": "Guy Gloom",
+                "email": "a@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Blocked",
+                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
+            },
+            {
+                "id": "19",
+                "name": "Blooming",
+                "email": "centrictechuser17@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
+            },
+            {
+                "id": "17",
+                "name": "Bloom & Blade",
+                "email": "centrictechuser16@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
+            },
+            {
+                "id": "16",
+                "name": "string",
+                "email": "centrictechuser15@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
+            },
+            {
+                "id": "16",
+                "name": "Bloom & Blade",
+                "email": "centrictechuser15@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
+            },
+            {
+                "id": "13",
+                "name": "Bloom n Bladers",
+                "email": "centrictechuser13@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
+            },
+            {
+                "id": "6",
+                "name": "null null",
+                "email": "centrictechuser7@yopmail.com",
+                "phone": "N/A",
+                "category": "Salons",
+                "status": "Rejected",
+                "picture": null
             }
         ],
-        "pagination": {
-            "totalItems": 4,
+        "meta": {
+            "total": 10,
+            "page": 1,
             "totalPages": 1,
-            "currentPage": 1,
-            "itemsPerPage": 10
+            "limit": 10
         }
     }
 }
