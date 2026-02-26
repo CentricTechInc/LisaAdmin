@@ -462,15 +462,18 @@ export default function ProfessionalProfile() {
                                     readOnly
                                     className="bg-white border-gray-200 rounded-xl h-12"
                                 />
-                                <div className="md:col-span-2">
-                                    <FormInput
-                                        label="Zip Code"
-                                        value={salon?.zipCode || ""}
-                                        wrapperClassName="w-full md:w-1/2 pr-0 md:pr-4"
-                                        readOnly
-                                        className="bg-white border-gray-200 rounded-xl h-12"
-                                    />
-                                </div>
+                                <FormInput
+                                    label="Country"
+                                    value={salon?.country || ""}
+                                    readOnly
+                                    className="bg-white border-gray-200 rounded-xl h-12"
+                                />
+                                <FormInput
+                                    label="Zip Code"
+                                    value={salon?.zipCode || ""}
+                                    readOnly
+                                    className="bg-white border-gray-200 rounded-xl h-12"
+                                />
                             </div>
 
                             {/* Table */}
