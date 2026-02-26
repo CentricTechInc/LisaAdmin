@@ -171,10 +171,17 @@ export default function ProfessionalsPage() {
       accessor: (item) => {
         let styles = "bg-gray-100 text-gray-700";
         const status = item.status?.trim();
-
-        if (status === "Active") styles = "bg-green-100 text-green-700";
-        else if (["Blocked", "Rejected", "Block"].includes(status)) styles = "bg-red-100 text-red-700";
-        else if (status === "Pending") styles = "bg-yellow-100 text-yellow-700";
+        const statusLower = status?.toLowerCase() || "";
+        
+        if (statusLower === "active") {
+          styles = "bg-green-100 text-green-700";
+        } else if (["rejected", "cancelled", "fail", "failed"].includes(statusLower)) {
+          styles = "bg-red-100 text-red-700";
+        } else if (["blocked", "block", "banned", "suspended", "inactive"].includes(statusLower)) {
+          styles = "bg-gray-300 text-gray-900"; // Blocked/Inactive as Gray
+        } else if (statusLower === "pending") {
+          styles = "bg-yellow-100 text-yellow-700";
+        }
         
         return (
           <span className={cn("px-2 py-1 rounded-full text-xs font-medium", styles)}>
