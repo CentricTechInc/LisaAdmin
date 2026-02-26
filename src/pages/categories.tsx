@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/table/DataTable";
@@ -110,6 +110,7 @@ export default function CategoriesPage() {
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
   const [deleteSubCategoryId, setDeleteSubCategoryId] = useState<number | null>(null);
   const [isDeletingSubCategory, setIsDeletingSubCategory] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [limit, setLimit] = useState(10);
 
@@ -954,29 +955,77 @@ export default function CategoriesPage() {
 
           <div className="flex flex-col gap-2">
             <label className="text-sm text-gray-600">Upload Your The Image</label>
-            <div className="flex flex-col items-center gap-4">
-              {(editingCategory || selectedImage) && (
-                <ImageUploadPreview
-                  imageName={selectedImage || editingCategory?.image || "avatar.png"}
-                  alt="Category Preview"
-                  onFileSelect={handleFileSelect}
-                />
-              )}
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-8 cursor-pointer hover:bg-gray-50 transition-colors w-full relative"
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileSelect(file);
+                }}
+              />
 
-              {!editingCategory && !selectedImage && <UploadArea onFileSelect={handleFileSelect} label={null} className="w-full" />}
+              {editingCategory || selectedImage ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative h-24 w-24 overflow-hidden rounded-xl">
+                    <AppImage
+                      imageName={selectedImage || editingCategory?.image || "avatar.png"}
+                      alt="Category Preview"
+                      fill
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="mt-2 rounded border border-[#FF4460] px-4 py-2 text-sm font-medium text-[#FF4460] hover:bg-red-50"
+                  >
+                    Change Image
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 20H4C2.89543 20 2 19.1046 2 18V6C2 4.89543 2.89543 4 4 4H10L12 6H20C21.1046 6 22 6.89543 22 8V18C22 19.1046 21.1046 20 20 20Z" fill="#FF4460" stroke="#FF4460" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 16V10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M9 13L12 10L15 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className="mb-2 text-sm font-medium text-gray-900">
+                    Your file(s) to start uploading
+                  </p>
+                  <div className="flex w-full max-w-[200px] items-center gap-2 my-2">
+                    <div className="h-px flex-1 bg-gray-200" />
+                    <span className="text-xs text-gray-400">OR</span>
+                    <div className="h-px flex-1 bg-gray-200" />
+                  </div>
+                  <button
+                    type="button"
+                    className="mt-2 rounded border border-[#FF4460] px-6 py-2 text-sm font-medium text-[#FF4460] hover:bg-red-50"
+                  >
+                    Browse files
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <FormInput
-              name="name"
-              label="Category Name"
-              placeholder="Grooming"
-              defaultValue={editingCategory?.name || ""}
-              wrapperClassName="col-span-1"
-            />
+          <div className="flex gap-4 w-full">
+            <div className="flex-grow">
+              <FormInput
+                name="name"
+                label="Category Name"
+                placeholder="Grooming"
+                defaultValue={editingCategory?.name || ""}
+                wrapperClassName="w-full"
+              />
+            </div>
 
-            <div className="flex flex-col gap-2 col-span-1">
+            <div className="w-[30%] flex-shrink-0 flex flex-col gap-2">
               <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Service For</label>
               <Select
                 name="serviceFor"
@@ -992,8 +1041,8 @@ export default function CategoriesPage() {
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <Button variant="brand" type="submit" disabled={isSavingCategory}>
+          <div className="flex justify-end mt-4">
+            <Button variant="brand" type="submit" disabled={isSavingCategory} className="bg-[#FF4460] hover:bg-[#ff2445] text-white px-8">
               {isSavingCategory ? "Saving..." : editingCategory ? "Save" : "Add"}
             </Button>
           </div>
