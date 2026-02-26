@@ -37,7 +37,7 @@ export function TableBody<T>({ columns, rows, selectable, selected, onToggleRow,
             >
               {columns.map((col) =>
                 col.visible === false ? null : (
-                  <td key={col.id} className={cn("px-3 py-2 text-sm text-black", col.className)}>
+                  <td key={col.id} className={cn("px-3 py-2 text-sm text-black", col.sortable ? "pl-8" : "", col.className)}>
                     {col.accessor
                       ? col.accessor(row, i, { isExpanded, toggleExpand: () => onToggleExpand(i) })
                       : col.field

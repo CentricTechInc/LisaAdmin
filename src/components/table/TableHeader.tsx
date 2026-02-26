@@ -21,8 +21,8 @@ export function TableHeader<T>({ columns, sort, onToggleSort, onToggleVisibility
               key={col.id}
               scope="col"
               className={cn(
-                "select-none whitespace-nowrap border-b px-3 py-2 text-left text-sm font-medium text-black",
-                col.sortable ? "cursor-pointer" : "",
+                "relative select-none whitespace-nowrap border-b px-3 py-2 text-left text-sm font-medium text-black",
+                col.sortable ? "cursor-pointer pl-8" : "",
                 col.className
               )}
               style={col.width ? { width: col.width } : undefined}
@@ -31,33 +31,34 @@ export function TableHeader<T>({ columns, sort, onToggleSort, onToggleVisibility
               }
               onClick={() => (col.sortable ? onToggleSort(col.id) : undefined)}
             >
-              <span className="inline-flex items-center gap-2">
-                {col.sortable ? (
-                  <span aria-hidden="true" className="text-xs">
-                    {sort && sort.columnId === col.id ? (
-                      sort.direction === "asc" ? (
-                        <Image 
-                          src="/images/DownIcon.png" 
-                          alt="asc" 
-                          width={10} 
-                          height={10} 
-                          className="rotate-180"
-                        />
-                      ) : (
-                        <Image 
-                          src="/images/DownIcon.png" 
-                          alt="desc" 
-                          width={10} 
-                          height={10} 
-                        />
-                      )
+              {col.sortable ? (
+                <span 
+                  aria-hidden="true" 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-xs"
+                >
+                  {sort && sort.columnId === col.id ? (
+                    sort.direction === "asc" ? (
+                      <Image 
+                        src="/images/DownIcon.png" 
+                        alt="asc" 
+                        width={10} 
+                        height={10} 
+                        className="rotate-180"
+                      />
                     ) : (
-                      <Image src="/icons/sort.png" alt="sort" width={10} height={10} />
-                    )}
-                  </span>
-                ) : null}
-                {col.header}
-              </span>
+                      <Image 
+                        src="/images/DownIcon.png" 
+                        alt="desc" 
+                        width={10} 
+                        height={10} 
+                      />
+                    )
+                  ) : (
+                    <Image src="/icons/sort.png" alt="sort" width={10} height={10} />
+                  )}
+                </span>
+              ) : null}
+              {col.header}
             </th>
           )
         )}
