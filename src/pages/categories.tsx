@@ -998,7 +998,7 @@ export default function CategoriesPage() {
                   <p className="mb-2 text-sm font-medium text-gray-900">
                     Your file(s) to start uploading
                   </p>
-                  <div className="flex w-full max-w-[200px] items-center gap-2 my-2">
+                  <div className="flex w-full max-w-50 items-center gap-2 my-2">
                     <div className="h-px flex-1 bg-gray-200" />
                     <span className="text-xs text-gray-400">OR</span>
                     <div className="h-px flex-1 bg-gray-200" />
@@ -1015,7 +1015,7 @@ export default function CategoriesPage() {
           </div>
 
           <div className="flex gap-4 w-full">
-            <div className="flex-grow">
+            <div className="grow">
               <FormInput
                 name="name"
                 label="Category Name"
@@ -1025,7 +1025,7 @@ export default function CategoriesPage() {
               />
             </div>
 
-            <div className="w-[30%] flex-shrink-0 flex flex-col gap-2">
+            <div className="w-[30%] shrink-0 flex flex-col gap-2">
               <label className="text-sm text-[color-mix(in_oklab,var(--color-foreground)_85%,transparent)]">Service For</label>
               <Select
                 name="serviceFor"
