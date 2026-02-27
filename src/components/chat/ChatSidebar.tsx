@@ -55,9 +55,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ users, activeUserId, o
              <div className="flex-1 min-w-0">
                <div className="flex justify-between items-center mb-0.5">
                  <h3 className={cn("font-semibold text-sm truncate text-gray-900", activeUserId === user.id && "text-black")}>{user.name}</h3>
-                 <span className="text-[10px] text-gray-400 font-medium">12:24 AM</span>
+                 <span className="text-[10px] text-gray-400 font-medium">{user.lastSeen}</span>
                </div>
-               <p className="text-xs text-gray-500 truncate">{user.role}</p>
+               <p className="text-xs text-gray-500 truncate">{user.lastMessageText || user.role}</p>
              </div>
            </div>
          ))}
