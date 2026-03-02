@@ -9,8 +9,14 @@ interface User {
   id: string;
   name: string;
   email: string;
+  first_name?: string;
+  last_name?: string;
   role?: string;
+  phone?: string;
+  profile_pic?: string;
   avatar?: string;
+  token?: string;
+  isVerified?: boolean;
 }
 
 interface LoginResponse {
@@ -48,7 +54,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (token && storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        // Ensure avatar is set for UI compatibility (for legacy cookies)
+        if (parsedUser.profile_pic && !parsedUser.avatar) {
+            parsedUser.avatar = parsedUser.profile_pic;
+        }
+        setUser(parsedUser);
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       } catch (e) {
         console.error("Failed to parse user from cookies", e);
@@ -65,20 +76,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Adjust the endpoint as per your actual API
       const response = await api.post<ApiResponse<any>>("/auth/login", { email, password, fcm_token });
       
+      const responseData = response.data.data; // The backend response JSON
+      const userObj = responseData.data; // The user object inside backend response
+
+      // Ensure avatar is set for UI compatibility
+      if (userObj.profile_pic && !userObj.avatar) {
+        userObj.avatar = userObj.profile_pic;
+      }
+      
       // Store token and user in Cookies (expire in 7 days if rememberMe is true, else 1 day)
       const expiryDays = rememberMe ? 7 : 1;
-      Cookies.set("token", response.data.data.data.token, { expires: expiryDays });
-      Cookies.set("user", JSON.stringify(response.data.data.data), { expires: expiryDays });
+      Cookies.set("token", userObj.token, { expires: expiryDays });
+      Cookies.set("user", JSON.stringify(userObj), { expires: expiryDays });
       
       // Also keep in localStorage for backup if needed (optional, but good for redundancy)
-      localStorage.setItem("token", response.data.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.data));
+      localStorage.setItem("token", userObj.token);
+      localStorage.setItem("user", JSON.stringify(userObj));
 
       // Set axios default header for future requests
-      api.defaults.headers.common["Authorization"] = `Bearer ${response.data.data.data.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${userObj.token}`;
 
-      setUser(response.data.data.data as any);
-      setSuccess(response.data.data.message || "Login successful");
+      setUser(userObj as any);
+      setSuccess(responseData.message || "Login successful");
       router.push("/dashboard");
     } catch (err) {
       const axiosError = err as any;

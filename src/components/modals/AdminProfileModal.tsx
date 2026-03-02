@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
 import FormInput from '@/components/ui/FormInput';
 import Button from '@/components/ui/Button';
 import { ImageUploadPreview } from '@/components/ui/ImageUploadPreview';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminProfileModalProps {
   isOpen: boolean;
@@ -13,11 +14,29 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: 'Alison Parker',
-    email: 'alisonparker@example.com',
+    name: '',
+    email: '',
     password: '*************',
   });
+  
+  // Initialize image with user avatar or default
+  const [imageName, setImageName] = useState<string>("avatar.png");
+
+  useEffect(() => {
+    if (user && isOpen) {
+      setFormData({
+        name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || '',
+        email: user.email || '',
+        password: '*************',
+      });
+      
+      if (user.avatar || user.profile_pic) {
+          setImageName(user.avatar || user.profile_pic || "avatar.png");
+      }
+    }
+  }, [user, isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,7 +62,7 @@ export const AdminProfileModal: React.FC<AdminProfileModalProps> = ({
       <div className="mb-6">
         <label className="text-sm text-gray-600 mb-2 block">Upload Your The Image</label>
         <ImageUploadPreview
-            imageName="avatar.png"
+            imageName={imageName}
             alt="Admin Profile"
             onFileSelect={(file) => console.log(file)}
             className="bg-white border-dashed border-2 border-gray-200 rounded-xl"

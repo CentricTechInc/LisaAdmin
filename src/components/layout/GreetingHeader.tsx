@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import { Bell } from "lucide-react";
 import { Dropdown, type DropdownItem } from "@/components/ui/Dropdown";
 import { cn } from "@/lib/utils";
+import { AppImage } from "@/components/ui/AppImage";
 
 import { AdminProfileModal } from "@/components/modals/AdminProfileModal";
 import { NotificationDropdown } from "@/components/ui/NotificationDropdown";
@@ -22,7 +22,7 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
   className,
   onProfileClick,
   onLogoutClick,
-  avatarSrc = "/images/avatar.png",
+  avatarSrc,
 }) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = React.useState(false);
 
@@ -73,8 +73,8 @@ export const GreetingHeader: React.FC<GreetingHeaderProps> = ({
             trigger={
               <div className="flex items-center gap-2 rounded-xl bg-[color-mix(in_oklab,var(--color-dark-bg)_85%,white)] px-3 py-2">
                 {avatarSrc ? (
-                  <Image
-                    src={avatarSrc}
+                  <AppImage
+                    imageName={avatarSrc}
                     alt={userName}
                     width={32}
                     height={32}
