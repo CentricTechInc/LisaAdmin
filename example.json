@@ -1,104 +1,149 @@
 {
     "status": true,
-    "message": "Professionals retrieved successfully",
+    "message": "success",
     "data": {
-        "items": [
+        "certificate": "http://localhost:8000/images/1772475620567-Screenshot_20260302-230441.jpg",
+        "picture": "http://localhost:8000/images/1772475620569-scaled_Screenshot_20260227-032847.jpg",
+        "id": 55,
+        "bussiness_name": "Alan saloon",
+        "street_address": "Street:45 Ai corniche road",
+        "city": "Alexandria",
+        "state": "Alexandria Governorate",
+        "zipcode": 2153,
+        "latitude": "31.19918060",
+        "longitude": "29.89517160",
+        "total_professionals": 10,
+        "license_type": "Barber",
+        "license_number": "35152",
+        "issuing_state": "Egypt",
+        "professionol_bio": "hi",
+        "total_experience": 23,
+        "country": "Egypt",
+        "average_rating": "0.0",
+        "user": {
+            "picture": "http://localhost:8000/images/1772475620569-scaled_Screenshot_20260227-032847.jpg",
+            "id": "59",
+            "first_name": "alan",
+            "last_name": "saloon",
+            "email": "loon@yopmail.com",
+            "phone_number": "3342056132",
+            "age": 39,
+            "gender": "Male",
+            "salonBankDetail": [
+                {
+                    "id": 37,
+                    "user_id": 59,
+                    "bank_name": "Abu Dhabi Islamic Bank (ADIB) Egypt",
+                    "account_number": "43433434",
+                    "account_holder_name": "tester",
+                    "confirm_consent": true,
+                    "isCurrent": true
+                }
+            ],
+            "rejectionHistories": []
+        },
+        "services": [
             {
-                "id": "58",
-                "name": "Harry salon",
-                "email": "customer@yopmail.com",
-                "phone": "24242485858",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": "http://localhost:8000/images/1772128531254-scaled_Screenshot_20260224-221028.jpg"
+                "picture": "http://localhost:8000/images/1772475815259-scaled_Screenshot_20260227-032834.jpg",
+                "id": 60,
+                "category_id": 9,
+                "subcategory_id": 41,
+                "salon_id": 55,
+                "name": "hydra facial whole ",
+                "price": "66.00",
+                "service_for": "Both",
+                "description": "test",
+                "deletedAt": null
             },
             {
-                "id": "43",
-                "name": "Test",
-                "email": "s@yopmail.com",
-                "phone": "78 123 4567",
-                "category": "Salons",
-                "status": "Blocked",
-                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
+                "picture": "http://localhost:8000/images/1772475789026-scaled_Screenshot_20260227-032834.jpg",
+                "id": 59,
+                "category_id": 9,
+                "subcategory_id": 41,
+                "salon_id": 55,
+                "name": "hydra facial whole ",
+                "price": "66.00",
+                "service_for": "Both",
+                "description": "test",
+                "deletedAt": null
             },
             {
-                "id": "36",
-                "name": "Girl Salon",
-                "email": "b@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Blocked",
-                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
-            },
-            {
-                "id": "35",
-                "name": "Guy Gloom",
-                "email": "a@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Blocked",
-                "picture": "http://localhost:8000/images/1770913673233-Capture.PNG"
-            },
-            {
-                "id": "19",
-                "name": "Blooming",
-                "email": "centrictechuser17@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
-            },
-            {
-                "id": "17",
-                "name": "Bloom & Blade",
-                "email": "centrictechuser16@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
-            },
-            {
-                "id": "16",
-                "name": "string",
-                "email": "centrictechuser15@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
-            },
-            {
-                "id": "16",
-                "name": "Bloom & Blade",
-                "email": "centrictechuser15@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
-            },
-            {
-                "id": "13",
-                "name": "Bloom n Bladers",
-                "email": "centrictechuser13@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
-            },
-            {
-                "id": "6",
-                "name": "null null",
-                "email": "centrictechuser7@yopmail.com",
-                "phone": "N/A",
-                "category": "Salons",
-                "status": "Rejected",
-                "picture": null
+                "picture": "http://localhost:8000/images/1772475700147-scaled_Screenshot_20260227-032834.jpg",
+                "id": 58,
+                "category_id": 9,
+                "subcategory_id": 41,
+                "salon_id": 55,
+                "name": "hydra facial whole ",
+                "price": "66.00",
+                "service_for": "Both",
+                "description": "test",
+                "deletedAt": null
             }
         ],
-        "meta": {
-            "total": 10,
-            "page": 1,
-            "totalPages": 1,
-            "limit": 10
+        "weeklySchedules": [
+            {
+                "id": 276,
+                "salon_id": 55,
+                "day_of_week": "Monday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "13:30:00"
+            },
+            {
+                "id": 277,
+                "salon_id": 55,
+                "day_of_week": "Tuesday",
+                "is_open": true,
+                "start_time": "08:30:00",
+                "end_time": "17:00:00"
+            },
+            {
+                "id": 278,
+                "salon_id": 55,
+                "day_of_week": "Wednesday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 279,
+                "salon_id": 55,
+                "day_of_week": "Thursday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 280,
+                "salon_id": 55,
+                "day_of_week": "Friday",
+                "is_open": true,
+                "start_time": "07:30:00",
+                "end_time": "13:00:00"
+            },
+            {
+                "id": 281,
+                "salon_id": 55,
+                "day_of_week": "Saturday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            },
+            {
+                "id": 282,
+                "salon_id": 55,
+                "day_of_week": "Sunday",
+                "is_open": false,
+                "start_time": null,
+                "end_time": null
+            }
+        ],
+        "breakTime": {
+            "id": 34,
+            "salon_id": 55,
+            "has_break": true,
+            "break_start_time": "10:30:00",
+            "break_end_time": "11:30:00"
         }
     }
 }

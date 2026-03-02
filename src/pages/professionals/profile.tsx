@@ -12,7 +12,6 @@ import { Column } from "@/components/table/types";
 import { FormTextarea } from "@/components/ui/FormTextarea";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { DaySelector } from "@/components/ui/DaySelector";
 import { Modal } from "@/components/ui/Modal";
 import api from "@/utils/axios";
 
@@ -102,6 +101,7 @@ type SalonProfileData = {
     scheduleEnd: string | null;
     breakStart: string | null;
     breakEnd: string | null;
+    weeklySchedules: WeeklySchedule[];
     rejectionHistories: RejectionHistory[];
 };
 
@@ -143,7 +143,6 @@ export default function ProfessionalProfile() {
     const isRejected = router.query.status === 'rejected';
     const [activeTab, setActiveTab] = useState("personal");
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-    const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const salonId = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id;
     const userId = Array.isArray(router.query.user_id) ? router.query.user_id[0] : router.query.user_id;
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -155,6 +154,13 @@ export default function ProfessionalProfile() {
     const [isStatusUpdating, setIsStatusUpdating] = useState(false);
     const [statusError, setStatusError] = useState<string | null>(null);
     const [rejectReason, setRejectReason] = useState("");
+    const [viewingDay, setViewingDay] = useState<string>("");
+
+    useEffect(() => {
+        // Set initial viewing day to today
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
+        setViewingDay(today);
+    }, []);
 
     useEffect(() => {
         if (!router.isReady) return;
@@ -174,7 +180,6 @@ export default function ProfessionalProfile() {
                 const serviceNames = services.map((service) => service?.name).filter(Boolean) as string[];
                 const weeklySchedules: WeeklySchedule[] = Array.isArray(salonData?.weeklySchedules) ? salonData.weeklySchedules : [];
                 const openSchedules = weeklySchedules.filter((schedule) => schedule.is_open);
-                const selectedScheduleDays = openSchedules.map((schedule) => toDayId(schedule.day_of_week)).filter(Boolean) as string[];
                 const primarySchedule = openSchedules[0] || weeklySchedules[0];
                 const breakTime: BreakTime = salonData?.breakTime || {};
                 const fallbackName = `${userData?.first_name || ""} ${userData?.last_name || ""}`.trim();
@@ -218,10 +223,10 @@ export default function ProfessionalProfile() {
                     scheduleEnd: primarySchedule?.end_time ?? null,
                     breakStart: breakTime?.has_break ? breakTime?.break_start_time ?? null : null,
                     breakEnd: breakTime?.has_break ? breakTime?.break_end_time ?? null : null,
+                    weeklySchedules: weeklySchedules,
                     rejectionHistories: rejectionHistories,
                 });
                 setSelectedServices(serviceNames);
-                setSelectedDays(selectedScheduleDays);
                 setRejectReason(fetchedRejectionReason);
 
                 const appointmentsData = appointmentsResponse?.data?.data?.data?.rows || [];
@@ -335,11 +340,26 @@ export default function ProfessionalProfile() {
         return <div className="p-6">Loading...</div>;
     }
 
-    const scheduleStart = to12Hour(salon?.scheduleStart);
-    const scheduleEnd = to12Hour(salon?.scheduleEnd);
+    const currentDayId = viewingDay || "mon";
+    const currentSchedule = salon?.weeklySchedules?.find(s => toDayId(s.day_of_week) === currentDayId);
+    
+    const displayStart = currentSchedule ? to12Hour(currentSchedule.start_time) : { time: "--:--", period: "--" };
+    const displayEnd = currentSchedule ? to12Hour(currentSchedule.end_time) : { time: "--:--", period: "--" };
+    const isDayOpen = currentSchedule?.is_open ?? false;
+
     const breakStart = to12Hour(salon?.breakStart);
     const breakEnd = to12Hour(salon?.breakEnd);
     const availableServices = salon?.services?.length ? salon.services : defaultServices;
+
+    const DAYS = [
+        { id: "mon", label: "Mon" },
+        { id: "tue", label: "Tue" },
+        { id: "wed", label: "Wed" },
+        { id: "thu", label: "Thu" },
+        { id: "fri", label: "Fri" },
+        { id: "sat", label: "Sat" },
+        { id: "sun", label: "Sun" },
+    ];
 
     return (
         <>
@@ -556,24 +576,55 @@ export default function ProfessionalProfile() {
                             </div>
 
                             {/* Availability Schedule */}
-                            <div className="flex  gap-6 justify-between items-center">
+                            <div className="flex gap-6 justify-between items-center flex-wrap">
                                 <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Availability Schedule</h3>
                                 <div className="flex items-center gap-4 flex-wrap">
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <span>From</span>
-                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                            <span className="font-bold text-gray-900">{scheduleStart.time}</span>
-                                            <span className="font-bold text-[#FF4460]">{scheduleStart.period}</span>
-                                        </div>
-                                        <span>—</span>
-                                        <span>To</span>
-                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                            <span className="font-bold text-gray-900">{scheduleEnd.time}</span>
-                                            <span className="font-bold text-[#FF4460]">{scheduleEnd.period}</span>
-                                        </div>
+                                        {isDayOpen ? (
+                                            <>
+                                                <span>From</span>
+                                                <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
+                                                    <span className="font-bold text-gray-900">{displayStart.time}</span>
+                                                    <span className="font-bold text-[#FF4460]">{displayStart.period}</span>
+                                                </div>
+                                                <span>—</span>
+                                                <span>To</span>
+                                                <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
+                                                    <span className="font-bold text-gray-900">{displayEnd.time}</span>
+                                                    <span className="font-bold text-[#FF4460]">{displayEnd.period}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-center">
+                                                <span className="font-bold text-gray-500">Closed</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <DaySelector selectedDays={selectedDays} onChange={setSelectedDays} />
+                                <div className="flex flex-wrap gap-2">
+                                    {DAYS.map((day) => {
+                                        const daySchedule = salon?.weeklySchedules?.find(s => toDayId(s.day_of_week) === day.id);
+                                        const isOpen = daySchedule?.is_open;
+                                        const isViewing = currentDayId === day.id;
+                                        
+                                        return (
+                                            <button
+                                                key={day.id}
+                                                type="button"
+                                                onClick={() => setViewingDay(day.id)}
+                                                className={`flex h-12 w-16 items-center justify-center rounded-xl border text-sm font-medium transition-colors 
+                                                    ${isViewing 
+                                                        ? "border-[#FF4460] bg-[#FF4460] text-white" 
+                                                        : isOpen 
+                                                            ? "border-[#FF4460] bg-[#FFE4E6] text-[#FF4460]" 
+                                                            : "border-gray-200 bg-gray-50 text-gray-400"
+                                                    }`}
+                                            >
+                                                {day.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             {/* Break Time */}

@@ -50,6 +50,27 @@ type CustomerProfileData = {
     gender: string;
     profileImage: string;
     status: "Active" | "Block";
+    country: string;
+};
+
+// Helper to get country code
+const getCountryCode = (countryName: string): string => {
+    const map: Record<string, string> = {
+        "Egypt": "eg",
+        "United States": "us",
+        "USA": "us",
+        "Canada": "ca",
+        "United Kingdom": "gb",
+        "Saudi Arabia": "sa",
+        "UAE": "ae",
+        "United Arab Emirates": "ae",
+        "India": "in",
+        "Pakistan": "pk",
+        "Germany": "de",
+        "France": "fr",
+        "Australia": "au",
+    };
+    return map[countryName] || "us";
 };
 
 export default function CustomerProfile() {
@@ -108,7 +129,8 @@ export default function CustomerProfile() {
                 age: userData.age || "",
                 gender: userData.gender || "",
                 profileImage: getCleanImageUrl(userData.picture),
-                status: userData.status === "Blocked" ? "Block" : (userData.status || "Active")
+                status: userData.status === "Blocked" ? "Block" : (userData.status || "Active"),
+                country: userData.country || "United States"
             });
             console.log(customerResponse,"customerResponse")
             const appointmentsData = appointmentsResponse.data?.data?.data?.rows || [];
@@ -258,11 +280,12 @@ export default function CustomerProfile() {
                     leftSlot={
                         <div className="flex items-center gap-3">
                             <Image
-                                src="/icons/US-flag.svg"
-                                alt="US"
+                                src={`https://flagcdn.com/w40/${getCountryCode(customer?.country || "United States")}.png`}
+                                alt={customer?.country || "Country"}
                                 width={24}
                                 height={16}
                                 className="w-6 h-auto object-contain"
+                                unoptimized
                             />
                             <div className="h-6 w-px bg-gray-200"></div>
                         </div>
