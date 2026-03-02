@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { GreetingHeader as Header } from "@/components/layout/GreetingHeader";
@@ -9,10 +10,29 @@ import { Toaster } from 'react-hot-toast';
 // Wrapper component to access auth context
 const AppContent = ({ Component, pageProps }: { Component: any, pageProps: any }) => {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   
   // Pages that don't need the dashboard layout (sidebar + header)
   const isAuthPage = router.pathname.startsWith("/auth") || router.pathname === "/";
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !isAuthPage) {
+      router.push("/auth/login");
+    }
+  }, [isLoading, isAuthenticated, isAuthPage, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-white">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#FF4460]"></div>
+      </div>
+    );
+  }
+
+  // Prevent flash of protected content before redirect
+  if (!isAuthenticated && !isAuthPage) {
+    return null;
+  }
 
   return (
     <>

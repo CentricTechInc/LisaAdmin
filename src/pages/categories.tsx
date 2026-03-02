@@ -760,8 +760,9 @@ export default function CategoriesPage() {
       accessor: (_, index, actions) => (
         <div className="flex items-center gap-2 font-medium">
           <button
+            disabled={true}
             onClick={(e) => { e.stopPropagation(); actions?.toggleExpand(); }}
-            className="p-1 hover:bg-gray-100 rounded focus:outline-none"
+            className="p-1 hover:bg-gray-100 rounded focus:outline-none opacity-50 cursor-not-allowed"
           >
             {actions?.isExpanded ? (
               <ChevronUpIcon className="h-4 w-4 text-gray-500" />
