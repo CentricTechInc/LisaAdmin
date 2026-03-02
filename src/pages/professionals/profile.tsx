@@ -412,7 +412,11 @@ export default function ProfessionalProfile() {
                                         If you want to &quot;Block or Unblock&quot; the user, tap here
                                     </p>
                                     <Button
-                                        className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
+                                        className={`border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto ${
+                                            salon?.status === "Block"
+                                            ? "bg-green-50 text-green-600 hover:bg-green-100"
+                                            : "bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB]"
+                                        }`}
                                         onClick={handleBlockToggle}
                                         disabled={isStatusUpdating || !salon}
                                     >
@@ -628,19 +632,21 @@ export default function ProfessionalProfile() {
                             </div>
 
                             {/* Break Time */}
-                            <div className="flex items-center gap-4 flex-wrap">
+                            <div className="flex gap-6 justify-between items-center flex-wrap">
                                 <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Break Time</h3>
-                                <div className="flex items-center gap-2 text-sm text-gray-500">
-                                    <span>From</span>
-                                    <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                        <span className="font-bold text-gray-900">{breakStart.time}</span>
-                                        <span className="font-bold text-[#FF4460]">{breakStart.period}</span>
-                                    </div>
-                                    <span>—</span>
-                                    <span>To</span>
-                                    <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
-                                        <span className="font-bold text-gray-900">{breakEnd.time}</span>
-                                        <span className="font-bold text-[#FF4460]">{breakEnd.period}</span>
+                                <div className="flex items-center gap-4 flex-wrap">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                        <span>From</span>
+                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
+                                            <span className="font-bold text-gray-900">{breakStart.time}</span>
+                                            <span className="font-bold text-[#FF4460]">{breakStart.period}</span>
+                                        </div>
+                                        <span>—</span>
+                                        <span>To</span>
+                                        <div className="flex items-center gap-2 bg-[#F3F4F6] rounded-xl px-4 py-2 min-w-25 justify-between">
+                                            <span className="font-bold text-gray-900">{breakEnd.time}</span>
+                                            <span className="font-bold text-[#FF4460]">{breakEnd.period}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

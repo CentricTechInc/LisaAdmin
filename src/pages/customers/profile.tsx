@@ -247,7 +247,11 @@ export default function CustomerProfile() {
                         If you want to &quot;Block or Unblock&quot; the user, tap here
                     </p>
                     <Button
-                        className="bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB] border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto"
+                        className={`border-none px-8 py-2 h-10 font-semibold rounded-lg w-full md:w-auto ${
+                            customer?.status === "Block" 
+                            ? "bg-green-50 text-green-600 hover:bg-green-100" 
+                            : "bg-[#FFE5E9] text-[#FF4460] hover:bg-[#FFD1DB]"
+                        }`}
                         onClick={initiateBlockToggle}
                         disabled={isBlocking || !customer}
                     >
