@@ -13,6 +13,8 @@ import { FormTextarea } from "@/components/ui/FormTextarea";
 import { FileUpload } from "@/components/ui/FileUpload";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Modal } from "@/components/ui/Modal";
+import { UploadArea } from "@/components/ui/UploadArea";
+import toast from "react-hot-toast";
 import api from "@/utils/axios";
 import { getAppointmentsBySalonId } from "@/services/appointmentService";
 
@@ -153,6 +155,8 @@ export default function ProfessionalProfile() {
     const [statusError, setStatusError] = useState<string | null>(null);
     const [rejectReason, setRejectReason] = useState("");
     const [viewingDay, setViewingDay] = useState<string>("");
+    const [isDeletingCertificate, setIsDeletingCertificate] = useState(false);
+    const [isUpdatingCertificate, setIsUpdatingCertificate] = useState(false);
 
     useEffect(() => {
         // Set initial viewing day to today
@@ -292,6 +296,62 @@ export default function ProfessionalProfile() {
         const nextStatus = salon.status === "Block" ? "Active" : "Block";
         const reason = nextStatus === "Block" ? "Blocked by admin" : "Unblocked by admin";
         await updateProfessionalStatus(nextStatus, reason);
+    };
+
+    const handleDeleteCertificate = async () => {
+        if (!confirm("Are you sure you want to delete this certificate?")) return;
+        if (!salon) return;
+
+        try {
+            setIsDeletingCertificate(true);
+            await api.delete(`/salon/delete-certificate`, {
+                params: { salonId: salon.id } // Passing salonId just in case, though curl didn't specify
+            });
+            setSalon((prev) => prev ? { ...prev, certificateUrl: "" } : prev);
+            toast.success("Certificate deleted successfully");
+        } catch (error: any) {
+            console.error("Failed to delete certificate:", error);
+            toast.error(error?.response?.data?.message || "Failed to delete certificate");
+        } finally {
+            setIsDeletingCertificate(false);
+        }
+    };
+
+    const handleUpdateCertificate = async (file: File) => {
+        if (!salon) return;
+
+        try {
+            setIsUpdatingCertificate(true);
+            const formData = new FormData();
+            formData.append("certificate", file);
+            formData.append("salonId", String(salon.id)); // Passing salonId just in case
+
+            const response = await api.put(`/salon/update-certificate`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            // Assuming response returns the new certificate URL
+            // If not, we might need to refetch or assume it's updated
+            const newUrl = response.data?.data?.certificateUrl || response.data?.certificateUrl;
+            
+            if (newUrl) {
+                setSalon((prev) => prev ? { ...prev, certificateUrl: newUrl } : prev);
+            } else {
+                // If URL not returned, refetch or just show success
+                 // Create a local URL for immediate feedback if API doesn't return URL
+                 const objectUrl = URL.createObjectURL(file);
+                 setSalon((prev) => prev ? { ...prev, certificateUrl: objectUrl } : prev);
+            }
+            
+            toast.success("Certificate updated successfully");
+        } catch (error: any) {
+            console.error("Failed to update certificate:", error);
+            toast.error(error?.response?.data?.message || "Failed to update certificate");
+        } finally {
+            setIsUpdatingCertificate(false);
+        }
     };
 
     const handleApprove = async () => {
@@ -527,12 +587,21 @@ export default function ProfessionalProfile() {
                                     <FormInput label="Issuing State/Country" value={salon?.issuingState || "N/A"} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
                                     <FormInput label="Years Of Experience" value={String(salon?.totalExperience ?? "N/A")} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
                                     <FormInput label="How Many Professionals Are On Your Team?" value={String(salon?.totalProfessionals ?? "N/A")} readOnly className="bg-white border-gray-200 rounded-xl h-12" />
-                                    <FileUpload
-                                        label="License/Certificate"
-                                        fileName={getFileName(salon?.certificateUrl) || "No file uploaded"}
-                                        onDownload={salon?.certificateUrl ? () => window.open(salon.certificateUrl, "_blank", "noopener,noreferrer") : undefined}
-                                        className="h-12 border-gray-200"
-                                    />
+                                    {salon?.certificateUrl ? (
+                                        <FileUpload
+                                            label="License/Certificate"
+                                            fileName={getFileName(salon?.certificateUrl) || "No file uploaded"}
+                                            onDownload={() => window.open(salon.certificateUrl, "_blank", "noopener,noreferrer")}
+                                            onDelete={handleDeleteCertificate}
+                                            className="h-12 border-gray-200"
+                                        />
+                                    ) : (
+                                        <UploadArea
+                                            onFileSelect={handleUpdateCertificate}
+                                            label="License/Certificate"
+                                            className="h-full border-gray-200"
+                                        />
+                                    )}
                                     <div className="md:col-span-2">
                                         <FormTextarea
                                             label="Bio/Headline"
