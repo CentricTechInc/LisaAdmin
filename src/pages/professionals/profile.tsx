@@ -14,6 +14,7 @@ import { FileUpload } from "@/components/ui/FileUpload";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Modal } from "@/components/ui/Modal";
 import api from "@/utils/axios";
+import { getAppointmentsBySalonId } from "@/services/appointmentService";
 
 // Types
 type Appointment = {
@@ -27,17 +28,14 @@ type Appointment = {
 
 type APIAppointment = {
     id: number;
-    appointment_date: string;
-    appointment_time: string;
+    customer_name: string;
+    customer_image: string;
+    services: string;
+    date: string;
+    time: string;
+    status: string;
     total_price: string;
-    salon: {
-        bussiness_name: string;
-    };
-    appointmentServices: {
-        service: {
-            name: string;
-        };
-    }[];
+    professional: string;
 };
 
 type SalonService = {
@@ -170,7 +168,7 @@ export default function ProfessionalProfile() {
             try {
                 setLoading(true);
                 const salonResponse = salonId ? await api.get(`/admin/get-salon-by-id/${salonId}`) : null;
-                const appointmentsResponse = userId ? await api.get(`/appointment/details/${userId}?page=1`) : null;
+                const appointmentsResponse = salonId ? await getAppointmentsBySalonId(salonId) : null;
 
                 const salonData = salonResponse?.data?.data?.data || {};
                 const userData = salonData?.user || salonData?.user_data || {};
@@ -229,16 +227,16 @@ export default function ProfessionalProfile() {
                 setSelectedServices(serviceNames);
                 setRejectReason(fetchedRejectionReason);
 
-                const appointmentsData = appointmentsResponse?.data?.data?.data?.rows || [];
-                const appointmentsCount = appointmentsResponse?.data?.data?.data?.count || 0;
+                const appointmentsData = appointmentsResponse?.data?.data?.rows || [];
+                const appointmentsCount = appointmentsResponse?.data?.data?.count || 0;
                 setTotalAppointments(appointmentsCount);
 
                 const formattedAppointments = appointmentsData.map((item: APIAppointment, index: number) => ({
                     id: item.id,
                     sNo: index + 1,
-                    service: item.appointmentServices?.map((s) => s.service.name).join(", ") || "Unknown Service",
-                    dateTime: `${item.appointment_date} ${item.appointment_time}`,
-                    professional: item.salon?.bussiness_name || "Unknown",
+                    service: item.services || "Unknown Service",
+                    dateTime: `${item.date} ${item.time}`,
+                    professional: item.professional || "Unknown",
                     amount: `$${item.total_price}`
                 }));
 
