@@ -657,7 +657,7 @@ export default function ProfessionalProfile() {
                             </div>
 
                             {/* Availability Schedule */}
-                            <div className="flex gap-6 justify-between items-center flex-wrap">
+                            <div className="flex gap-6 items-center flex-wrap">
                                 <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Availability Schedule</h3>
                                 <div className="flex items-center gap-4 flex-wrap">
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -709,7 +709,7 @@ export default function ProfessionalProfile() {
                             </div>
 
                             {/* Break Time */}
-                            <div className="flex gap-6 justify-between items-center flex-wrap">
+                            <div className="flex gap-6 items-center flex-wrap">
                                 <h3 className="font-bold text-lg text-[#13000A] min-w-fit">Break Time</h3>
                                 <div className="flex items-center gap-4 flex-wrap">
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
