@@ -305,7 +305,7 @@ export default function PromotionsPage() {
     }
     if (type === "coupon") {
       try {
-        await api.delete(`/coupon/${id}`);
+        await api.delete(`/coupon/delete/${id}`);
         fetchCoupons();
         toast.success("Coupon deleted successfully");
       } catch (error) {
