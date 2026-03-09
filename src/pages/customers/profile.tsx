@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { FormInput } from "@/components/ui/FormInput";
 import { DataTable } from "@/components/table/DataTable";
 import { EyeIcon } from "@/components/ui/EyeIcon";
+import { Flag } from "@/components/ui/Flag";
 import { Column } from "@/components/table/types";
 import api from "@/utils/axios";
 import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
@@ -51,6 +52,22 @@ type CustomerProfileData = {
     profileImage: string;
     status: "Active" | "Block";
     country: string;
+};
+
+// Helper to get country flag
+const getCountryFlag = (country?: string) => {
+    let code = "US";
+    if (country) {
+        const lower = country.toLowerCase();
+        if (lower === "pakistan") code = "PK";
+        else if (lower === "united states" || lower === "usa") code = "US";
+        else if (lower === "india") code = "IN";
+        else if (lower === "united kingdom" || lower === "uk") code = "GB";
+        else if (lower === "canada") code = "CA";
+        else if (lower === "australia") code = "AU";
+        else if (country.length === 2) code = country.toUpperCase();
+    }
+    return <Flag countryCode={code} className="w-6 h-4 shadow-sm" />;
 };
 
 // Helper to get country code
@@ -283,14 +300,7 @@ export default function CustomerProfile() {
                     className="bg-white border-gray-200 rounded-xl h-12 pl-20!"
                     leftSlot={
                         <div className="flex items-center gap-3">
-                            <Image
-                                src={`https://flagcdn.com/w40/${getCountryCode(customer?.country || "United States")}.png`}
-                                alt={customer?.country || "Country"}
-                                width={24}
-                                height={16}
-                                className="w-6 h-auto object-contain"
-                                unoptimized
-                            />
+                            {getCountryFlag(customer?.country)}
                             <div className="h-6 w-px bg-gray-200"></div>
                         </div>
                     }

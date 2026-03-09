@@ -861,7 +861,7 @@ export default function PromotionsPage() {
 
                   try {
                       const payload = {
-                          salon_id: Number(selectedSalonId),
+                          id: Number(selectedSalonId),
                           name: couponName,
                           title: couponTitle,
                           code: couponCode,
