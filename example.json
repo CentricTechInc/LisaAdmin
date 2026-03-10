@@ -1,143 +1,34 @@
 {
     "status": true,
-    "message": "success",
+    "message": "Customers retrieved successfully",
     "data": {
-        "certificate": "http://localhost:8000/images/1773082078065-Screenshot_20260305-005020_One UI Home.jpg",
-        "picture": "http://localhost:8000/images/1773082078077-scaled_Screenshot_20260307-010152_One UI Home.jpg",
-        "id": 1,
-        "bussiness_name": "salon chapter one ",
-        "street_address": "empire state apartment sector 14/b Shadman town north nazimabad town karachi",
-        "city": "Karachi",
-        "state": "Sindh",
-        "zipcode": 3698,
-        "latitude": null,
-        "longitude": null,
-        "total_professionals": 25,
-        "license_type": "Barber",
-        "license_number": "36528",
-        "issuing_state": "Pakistan",
-        "professionol_bio": "testing bio",
-        "total_experience": 36,
-        "country": "Pakistan",
-        "average_rating": "0.0",
-        "user": {
-            "picture": "http://localhost:8000/images/1773082078077-scaled_Screenshot_20260307-010152_One UI Home.jpg",
-            "id": "2",
-            "first_name": "salon",
-            "last_name": "user",
-            "email": "salonone@yopmail.com",
-            "phone_number": "3352056109",
-            "age": 36,
-            "gender": "Male",
-            "status": "Active",
-            "salonBankDetail": [
-                {
-                    "id": 1,
-                    "user_id": 2,
-                    "bank_name": "Agricultural Development Bank (ADB)",
-                    "account_number": "42424242424242",
-                    "account_holder_name": "Tester",
-                    "confirm_consent": true,
-                    "isCurrent": true
-                }
-            ],
-            "rejectionHistories": [
-                {
-                    "id": 1,
-                    "user_id": 2,
-                    "admin_id": 1,
-                    "reason": "For testing and verification only",
-                    "createdAt": "2026-03-09T19:30:26.257Z",
-                    "updatedAt": "2026-03-09T19:30:26.257Z"
-                },
-                {
-                    "id": 2,
-                    "user_id": 2,
-                    "admin_id": 1,
-                    "reason": "Blocked by admin",
-                    "createdAt": "2026-03-09T19:38:22.516Z",
-                    "updatedAt": "2026-03-09T19:38:22.516Z"
-                }
-            ]
-        },
-        "services": [
+        "items": [
             {
-                "picture": "http://localhost:8000/images/1773084020611-scaled_Screenshot_20260307-010443.jpg",
-                "id": 1,
-                "category_id": 2,
-                "subcategory_id": 1,
-                "salon_id": 1,
-                "name": "Whole hair service",
-                "price": "38.00",
-                "service_for": "Both",
-                "description": "testing description ",
-                "deletedAt": null
+                "picture": "http://localhost:8000/images/1773175891847-scaled_Screenshot_20260226-035206.jpg",
+                "id": "5",
+                "first_name": "testcustomer@yopmail.com",
+                "last_name": "Test@123",
+                "email": "testcustomer@yopmail.com",
+                "age": 33,
+                "gender": "Female",
+                "status": "Pending"
+            },
+            {
+                "picture": null,
+                "id": "3",
+                "first_name": "customer",
+                "last_name": "one",
+                "email": "customerone@yopmail.com",
+                "age": null,
+                "gender": null,
+                "status": "Pending"
             }
         ],
-        "weeklySchedules": [
-            {
-                "id": 1,
-                "salon_id": 1,
-                "day_of_week": "Monday",
-                "is_open": true,
-                "start_time": "08:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 2,
-                "salon_id": 1,
-                "day_of_week": "Tuesday",
-                "is_open": true,
-                "start_time": "08:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 3,
-                "salon_id": 1,
-                "day_of_week": "Wednesday",
-                "is_open": true,
-                "start_time": "08:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 4,
-                "salon_id": 1,
-                "day_of_week": "Thursday",
-                "is_open": true,
-                "start_time": "11:30:00",
-                "end_time": "20:00:00"
-            },
-            {
-                "id": 5,
-                "salon_id": 1,
-                "day_of_week": "Friday",
-                "is_open": true,
-                "start_time": "11:30:00",
-                "end_time": "17:00:00"
-            },
-            {
-                "id": 6,
-                "salon_id": 1,
-                "day_of_week": "Saturday",
-                "is_open": false,
-                "start_time": null,
-                "end_time": null
-            },
-            {
-                "id": 7,
-                "salon_id": 1,
-                "day_of_week": "Sunday",
-                "is_open": false,
-                "start_time": null,
-                "end_time": null
-            }
-        ],
-        "breakTime": {
-            "id": 1,
-            "salon_id": 1,
-            "has_break": true,
-            "break_start_time": "14:30:00",
-            "break_end_time": "15:30:00"
+        "meta": {
+            "total": 2,
+            "page": 1,
+            "totalPages": 1,
+            "limit": 10
         }
     }
 }

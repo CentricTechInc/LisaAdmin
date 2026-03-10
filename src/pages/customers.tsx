@@ -33,14 +33,20 @@ type CustomerApiItem = {
   zipcode?: string;
   country?: string;
   picture?: string;
-  status?: "Active" | "Blocked";
+  status?: string;
 };
 
 type CustomerListingResponse = {
-  status?: boolean;
-  data?: {
-    data?: CustomerApiItem[];
-    total?: number;
+  status: boolean;
+  message: string;
+  data: {
+    items: CustomerApiItem[];
+    meta: {
+      total: number;
+      page: number;
+      totalPages: number;
+      limit: number;
+    };
   };
 };
 
@@ -80,18 +86,22 @@ export default function CustomersPage() {
   const fetchCustomers = useCallback(async () => {
     try {
       const response = await api.get(
-        `/customer/salon-listing/${currentPage}?pageLimit=${pageSize}&search=${debouncedSearchQuery}`
+        `/admin/getAllCustomers?page=${currentPage}&limit=${pageSize}&search=${debouncedSearchQuery}`
       );
 
       const serverResponse = response.data.data as CustomerListingResponse;
 
-      if (serverResponse?.status && serverResponse.data?.data && Array.isArray(serverResponse.data.data)) {
-        const mappedData: Customer[] = serverResponse.data.data.map((item) => {
+      if (serverResponse?.status && serverResponse.data?.items && Array.isArray(serverResponse.data.items)) {
+        const mappedData: Customer[] = serverResponse.data.items.map((item) => {
           // Normalize status
           let status: "Active" | "Block" = "Active";
-          if (item.status === "Blocked" ) {
+          if (item.status === "Blocked" || item.status === "Block") {
             status = "Block";
-          } else if (item.status === "Active") {
+          } else if (item.status === "Active" || item.status === "Pending") {
+             // Treat Pending as Active for now, or handle it? 
+             // The user rule says "Pending" in JSON.
+             // But the UI only supports "Active" | "Block".
+             // Let's map "Pending" to "Active" for now to avoid breaking UI.
             status = "Active";
           }
           
@@ -113,8 +123,7 @@ export default function CustomersPage() {
           };
         });
         setCustomers(mappedData);
-        // Try to get total count from response
-        setTotalCustomers(serverResponse.data.total || 0);
+        setTotalCustomers(serverResponse.data.meta?.total || 0);
       } else {
         console.warn("Unexpected API response structure:", serverResponse);
         setCustomers([]);
