@@ -121,13 +121,17 @@ export default function CategoriesPage() {
 
   const resolveCategoryImage = (value?: string) => {
     if (!value) return "/images/avatar.png";
-    if (value.startsWith("data:") || value.startsWith("http") || value.startsWith("/")) return value;
+    if (value.startsWith("data:") || value.startsWith("http")) return value;
+    if (value.startsWith("/images/")) return value;
+    if (value.startsWith("/")) return `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${value}`;
     return `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}/categories/${value}`;
   };
 
   const resolveSubCategoryImage = (value?: string) => {
     if (!value) return "/images/avatar.png";
-    if (value.startsWith("data:") || value.startsWith("http") || value.startsWith("/")) return value;
+    if (value.startsWith("data:") || value.startsWith("http")) return value;
+    if (value.startsWith("/images/")) return value;
+    if (value.startsWith("/")) return `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}${value}`;
     return `${process.env.NEXT_PUBLIC_API_BASE_URL_IMAGE}/subcategories/${value}`;
   };
 
