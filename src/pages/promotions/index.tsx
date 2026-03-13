@@ -82,12 +82,12 @@ export default function PromotionsPage() {
     return "banner";
   })();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); 
-   const [banners, setBanners] = useState<Banner[]>([]);
-   const [totalItems, setTotalItems] = useState(0);
-   const [isLoading, setIsLoading] = useState(false);
-   
-   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [pageSize, setPageSize] = useState(10);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [pushNotifications, setPushNotifications] = useState<PushNotification[]>([]);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [addModal, setAddModal] = useState<ActiveTab | null>(null);
@@ -112,7 +112,7 @@ export default function PromotionsPage() {
   const [couponUserLimit, setCouponUserLimit] = useState("");
   const [salons, setSalons] = useState<SalonOption[]>([]);
   const [selectedSalonId, setSelectedSalonId] = useState<string>("");
-
+  console.log("selectedSalonId", selectedSalonId);
   const [pushNotifyTo, setPushNotifyTo] = useState("Customer");
   const [pushTitle, setPushTitle] = useState("");
   const [pushMessage, setPushMessage] = useState("");
@@ -123,8 +123,8 @@ export default function PromotionsPage() {
       const response = await api.get(`/admin/banner/?page=${page}&limit=${pageSize}`);
       const backendBody = response.data.data;
       if (backendBody && backendBody.status && backendBody.data) {
-         setBanners(backendBody.data.banners);
-         setTotalItems(backendBody.data.pagination?.totalItems || 0);
+        setBanners(backendBody.data.banners);
+        setTotalItems(backendBody.data.pagination?.totalItems || 0);
       }
     } catch (error) {
       console.error("Failed to fetch banners", error);
@@ -144,15 +144,15 @@ export default function PromotionsPage() {
       });
       // The API returns the structure directly: { status: true, message: "success", data: { count: number, rows: [] } }
       // Axios interceptor wraps it in response.data (ApiResponse object), and response.data.data is the actual server response.
-      const apiWrapper = response.data; 
+      const apiWrapper = response.data;
       const backendResponse = apiWrapper.data;
-      
+
       if (backendResponse && backendResponse.status && backendResponse.data) {
-         setCoupons(backendResponse.data.rows || []);
-         setTotalItems(backendResponse.data.count || 0);
+        setCoupons(backendResponse.data.rows || []);
+        setTotalItems(backendResponse.data.count || 0);
       } else {
-         setCoupons([]);
-         setTotalItems(0);
+        setCoupons([]);
+        setTotalItems(0);
       }
     } catch (error) {
       console.error("Failed to fetch coupons", error);
@@ -169,17 +169,24 @@ export default function PromotionsPage() {
         params: { status: "Approved", limit: 100 } // Fetch reasonable amount
       });
       const backendResponse = response.data.data;
-      if (backendResponse?.data?.items) {
-        // Filter for Salons only. 
-        // We assume items with category 'Salons' or having a business_name are salons.
-        const salonItems = backendResponse.data.items.filter((item: any) => {
-             const category = item.category || "";
-             const role = item.role || "";
-             return category === "Salons" || role === "Salon" || item.bussiness_name;
+      // Handle potential double nesting or direct access
+      const itemsData = backendResponse?.items ? backendResponse : (response.data?.items ? response.data : (backendResponse?.data?.items ? backendResponse.data : null));
+      
+      if (itemsData?.items) {
+        console.log("Found items:", itemsData.items.length);
+        
+        // Relaxed filter to ensure we get salons
+        const salonItems = itemsData.items.filter((item: any) => {
+             // Check if it has salon_id (likely a salon or salon staff)
+             // Or check category/role
+             const category = (item.category || "").toLowerCase();
+             const role = (item.role || "").toLowerCase();
+             return item.salon_id || category.includes("salon") || role.includes("salon") || item.bussiness_name;
         });
+        console.log("Filtered salon items:", salonItems.length);
 
         const items = salonItems.map((item: any) => ({
-          id: Number(item.id), // Use salon ID (which seems to be the main ID here)
+          id: Number(item.salon_id || item.id), // Prefer salon_id
           name: item.bussiness_name || item.name || "Unknown Salon"
         }));
         setSalons(items);
@@ -200,11 +207,11 @@ export default function PromotionsPage() {
       });
       const backendResponse = response.data.data;
       if (backendResponse && backendResponse.status && backendResponse.data) {
-         setPushNotifications(backendResponse.data.data || []);
-         setTotalItems(backendResponse.data.pagination?.totalItems || 0);
+        setPushNotifications(backendResponse.data.data || []);
+        setTotalItems(backendResponse.data.pagination?.totalItems || 0);
       } else {
-         setPushNotifications([]);
-         setTotalItems(0);
+        setPushNotifications([]);
+        setTotalItems(0);
       }
     } catch (error) {
       console.error("Failed to fetch push notifications", error);
@@ -323,7 +330,7 @@ export default function PromotionsPage() {
         toast.error("Failed to delete notification");
       }
     }
-    
+
     setDeleteConfirmation({ isOpen: false, type: null, id: null });
   };
 
@@ -332,9 +339,9 @@ export default function PromotionsPage() {
     { id: "title", header: "Title", field: "title", sortable: true },
     { id: "startDate", header: "Start Date", accessor: (row) => new Date(row.start_date).toLocaleDateString(), sortable: true },
     { id: "endDate", header: "End Date", accessor: (row) => new Date(row.end_date).toLocaleDateString(), sortable: true },
-    { 
-      id: "image", 
-      header: "Banner Image", 
+    {
+      id: "image",
+      header: "Banner Image",
       accessor: (row) => (
         <div className="relative h-15 w-16 overflow-hidden rounded-xl bg-gray-100">
           <AppImage imageName={row.image} alt={row.title} fill className="object-cover" rounded={false} />
@@ -375,11 +382,11 @@ export default function PromotionsPage() {
     { id: "salon", header: "Salon", accessor: (row) => row.salon?.bussiness_name || "N/A", sortable: true },
     { id: "title", header: "Title", field: "title", sortable: true },
     { id: "code", header: "Code", field: "code", sortable: true },
-    { 
-      id: "discountValue", 
-      header: "Discount Value", 
+    {
+      id: "discountValue",
+      header: "Discount Value",
       accessor: (row) => `${row.discount_value} ${row.discount_type === 'percentage' ? '%' : ''}`,
-      sortable: true 
+      sortable: true
     },
     { id: "startDate", header: "Start Date", accessor: (row) => new Date(row.start_date).toLocaleDateString(), sortable: true },
     { id: "endDate", header: "End Date", accessor: (row) => row.dont_set_duration ? "No Duration" : new Date(row.end_date).toLocaleDateString(), sortable: true },
@@ -458,82 +465,82 @@ export default function PromotionsPage() {
       </Head>
       <div className="w-full flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-xl font-bold text-[#13000A]">Promotions</h2>
-              <Button variant="brand" onClick={handleAddClick}>
-                {getAddButtonText()}
-              </Button>
-            </div>
+          <h2 className="text-xl font-bold text-[#13000A]">Promotions</h2>
+          <Button variant="brand" onClick={handleAddClick}>
+            {getAddButtonText()}
+          </Button>
+        </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
-              <div className="w-full sm:w-auto">
-                <SegmentedControl
-                  options={[
-                    { id: "banner", label: "Banner" },
-                    { id: "coupon", label: "Coupon" },
-                    { id: "push-notification", label: "Push Notification" },
-                  ]}
-                  value={activeTab}
-                  onChange={handleTabChange}
-                  className="bg-white p-1 rounded-xl"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                 <span className="text-sm text-gray-500">Show</span>
-                 <select 
-                   className="border border-gray-200 rounded-md text-sm py-1 px-2 focus:outline-none focus:ring-1 focus:ring-black"
-                   value={pageSize}
-                   onChange={(e) => setPageSize(Number(e.target.value))}
-                 >
-                   <option value={10}>10</option>
-                   <option value={20}>20</option>
-                   <option value={50}>50</option>
-                 </select>
-                 <span className="text-sm text-gray-500">entries</span>
-              </div>
-            </div>
+        <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
+          <div className="w-full sm:w-auto">
+            <SegmentedControl
+              options={[
+                { id: "banner", label: "Banner" },
+                { id: "coupon", label: "Coupon" },
+                { id: "push-notification", label: "Push Notification" },
+              ]}
+              value={activeTab}
+              onChange={handleTabChange}
+              className="bg-white p-1 rounded-xl"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Show</span>
+            <select
+              className="border border-gray-200 rounded-md text-sm py-1 px-2 focus:outline-none focus:ring-1 focus:ring-black"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span className="text-sm text-gray-500">entries</span>
+          </div>
+        </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 overflow-hidden">
-               {activeTab === "banner" && (
-                 <DataTable 
-                   columns={bannerColumns} 
-                   data={banners} 
-                   page={page}
-                   pageSize={pageSize}
-                   onPageChange={setPage}
-                   selectable={false}
-                   showColumnToggle={false}
-                   manualPagination={true}
-                   totalCount={totalItems}
-                   loading={isLoading}
-                 />
-               )}
-               {activeTab === "coupon" && (
-                 <DataTable 
-                   columns={couponColumns} 
-                   data={coupons}
-                   page={page}
-                   pageSize={pageSize}
-                   onPageChange={setPage}
-                   selectable={false}
-                   showColumnToggle={false}
-                 />
-               )}
-               {activeTab === "push-notification" && (
-                 <DataTable 
-                   columns={pushNotificationColumns} 
-                   data={pushNotifications}
-                   page={page}
-                   pageSize={pageSize}
-                   onPageChange={setPage}
-                   selectable={false}
-                   showColumnToggle={false}
-                   manualPagination={true}
-                   totalCount={totalItems}
-                   loading={isLoading}
-                 />
-               )}
-            </div>
-    </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 overflow-hidden">
+          {activeTab === "banner" && (
+            <DataTable
+              columns={bannerColumns}
+              data={banners}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              selectable={false}
+              showColumnToggle={false}
+              manualPagination={true}
+              totalCount={totalItems}
+              loading={isLoading}
+            />
+          )}
+          {activeTab === "coupon" && (
+            <DataTable
+              columns={couponColumns}
+              data={coupons}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              selectable={false}
+              showColumnToggle={false}
+            />
+          )}
+          {activeTab === "push-notification" && (
+            <DataTable
+              columns={pushNotificationColumns}
+              data={pushNotifications}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              selectable={false}
+              showColumnToggle={false}
+              manualPagination={true}
+              totalCount={totalItems}
+              loading={isLoading}
+            />
+          )}
+        </div>
+      </div>
 
       <Modal isOpen={!!addModal} onClose={() => setAddModal(null)} className="max-w-3xl">
         <div className="flex items-start justify-between gap-4">
@@ -680,9 +687,9 @@ export default function PromotionsPage() {
                   if (!bannerNoDuration && bannerEndDate) {
                     formData.append("end_date", bannerEndDate);
                   }
-                  
+
                   if (bannerNoDuration) {
-                     formData.append("end_date", bannerStartDate); // Fallback
+                    formData.append("end_date", bannerStartDate); // Fallback
                   }
 
                   formData.append("is_active", "true");
@@ -726,14 +733,14 @@ export default function PromotionsPage() {
                   className="bg-white border-gray-200 rounded-xl"
                 />
               </div>
-              
+
               {couponSpecificProfessional === "Salon" && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Select Salon</label>
                   <Select
                     options={[
-                        { label: "Select Salon", value: "" },
-                        ...salons.map(s => ({ label: s.name, value: String(s.id) }))
+                      { label: "Select Salon", value: "" },
+                      ...salons.map(s => ({ label: s.name, value: String(s.id) }))
                     ]}
                     value={selectedSalonId}
                     onChange={(e) => setSelectedSalonId(e.target.value)}
@@ -742,15 +749,15 @@ export default function PromotionsPage() {
                 </div>
               )}
             </div>
-            
+
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                <Input
-                  value={couponName}
-                  onChange={(e) => setCouponName(e.target.value)}
-                  placeholder="Coupon Name"
-                  className="bg-white border-gray-200 rounded-xl"
-                />
+              <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+              <Input
+                value={couponName}
+                onChange={(e) => setCouponName(e.target.value)}
+                placeholder="Coupon Name"
+                className="bg-white border-gray-200 rounded-xl"
+              />
             </div>
 
             <div>
@@ -860,35 +867,35 @@ export default function PromotionsPage() {
                   }
 
                   try {
-                      const payload = {
-                          id: Number(selectedSalonId),
-                          salon_id: Number(selectedSalonId),
-                          name: couponName,
-                          title: couponTitle,
-                          code: couponCode,
-                          discount_type: couponDiscountType,
-                          discount_value: Number(couponDiscountValue),
-                          start_date: couponStartDate,
-                          end_date: couponNoDuration ? couponStartDate : couponEndDate, // Assuming backend needs date even if no duration
-                          limit: Number(couponUserLimit) || 0,
-                          dont_set_duration: couponNoDuration
-                      };
+                    const payload = {
+                      id: Number(selectedSalonId),
+                      salon_id: Number(selectedSalonId),
+                      name: couponName,
+                      title: couponTitle,
+                      code: couponCode,
+                      discount_type: couponDiscountType,
+                      discount_value: Number(couponDiscountValue),
+                      start_date: couponStartDate,
+                      end_date: couponNoDuration ? couponStartDate : couponEndDate, // Assuming backend needs date even if no duration
+                      limit: Number(couponUserLimit) || 0,
+                      dont_set_duration: couponNoDuration
+                    };
 
-                      const response = await api.post('/coupon/create', payload);
-                      
-                      if (response.data.status) {
-                          setAddModal(null);
-                          resetCouponForm();
-                          fetchCoupons();
-                          toast.success("Coupon created successfully");
-                      } else {
-                          const errorMsg = response.data.errors ? response.data.errors.join(", ") : response.data.message;
-                          toast.error(errorMsg || "Failed to create coupon");
-                      }
-                  } catch (error: any) {
-                      console.error("Failed to create coupon", error);
-                      const errorMsg = error.response?.data?.errors ? error.response.data.errors.join(", ") : error.response?.data?.message || error.message;
+                    const response = await api.post('/coupon/create', payload);
+
+                    if (response.data.status) {
+                      setAddModal(null);
+                      resetCouponForm();
+                      fetchCoupons();
+                      toast.success("Coupon created successfully");
+                    } else {
+                      const errorMsg = response.data.errors ? response.data.errors.join(", ") : response.data.message;
                       toast.error(errorMsg || "Failed to create coupon");
+                    }
+                  } catch (error: any) {
+                    console.error("Failed to create coupon", error);
+                    const errorMsg = error.response?.data?.errors ? error.response.data.errors.join(", ") : error.response?.data?.message || error.message;
+                    toast.error(errorMsg || "Failed to create coupon");
                   }
                 }}
                 className="w-32"
@@ -948,25 +955,25 @@ export default function PromotionsPage() {
               <Button
                 variant="brand"
                 onClick={async () => {
-                   if (!pushTitle || !pushMessage || !pushNotifyTo) {
-                      toast.error("Please fill all required fields");
-                      return;
-                   }
+                  if (!pushTitle || !pushMessage || !pushNotifyTo) {
+                    toast.error("Please fill all required fields");
+                    return;
+                  }
 
-                   try {
-                     await api.post("/push-notifications/create", {
-                       title: pushTitle,
-                       message: pushMessage,
-                       notify_to: pushNotifyTo
-                     });
-                     fetchPushNotifications();
-                     setAddModal(null);
-                     resetPushForm();
-                     toast.success("Notification sent successfully");
-                   } catch (error) {
-                     console.error("Failed to send notification", error);
-                     toast.error("Failed to send notification");
-                   }
+                  try {
+                    await api.post("/push-notifications/create", {
+                      title: pushTitle,
+                      message: pushMessage,
+                      notify_to: pushNotifyTo
+                    });
+                    fetchPushNotifications();
+                    setAddModal(null);
+                    resetPushForm();
+                    toast.success("Notification sent successfully");
+                  } catch (error) {
+                    console.error("Failed to send notification", error);
+                    toast.error("Failed to send notification");
+                  }
                 }}
                 className="w-32"
               >
@@ -1044,14 +1051,14 @@ export default function PromotionsPage() {
               </div>
             </div>
             {selected.item.salon && (
-                <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
-                    <div className="text-gray-500">Salon</div>
-                    <div className="font-medium text-gray-900">{selected.item.salon.bussiness_name}</div>
-                </div>
+              <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
+                <div className="text-gray-500">Salon</div>
+                <div className="font-medium text-gray-900">{selected.item.salon.bussiness_name}</div>
+              </div>
             )}
             <div className="rounded-xl bg-slate-50 p-3 sm:col-span-2">
-                <div className="text-gray-500">Internal Name</div>
-                <div className="font-medium text-gray-900">{selected.item.name}</div>
+              <div className="text-gray-500">Internal Name</div>
+              <div className="font-medium text-gray-900">{selected.item.name}</div>
             </div>
           </div>
         ) : null}
