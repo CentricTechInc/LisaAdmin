@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={cn(
-        "sticky top-0 flex h-screen w-60 shrink-0 flex-col overflow-y-auto border-r border-(--color-sidebar-border) bg-(--color-sidebar) px-4 pt-6 pb-24",
+        "sticky top-0 flex h-screen w-72 shrink-0 flex-col overflow-y-auto border-r border-(--color-sidebar-border) bg-(--color-sidebar) px-6 pt-6 pb-24",
         className
       )}
     >

@@ -8,14 +8,14 @@ type LogoProps = {
   height?: number;
 };
 
-export const Logo: React.FC<LogoProps> = ({ className, width = 96, height = 32 }) => {
+export const Logo: React.FC<LogoProps> = ({ className, width = 55, height = 55 }) => {
   return (
     <Image
       src="/icons/Lisa.svg"
       alt="Lisa logo"
       width={width}
       height={height}
-      className={cn("h-8 w-auto", className)}
+      className={cn("h-20 w-auto", className)}
       priority
     />
   );
