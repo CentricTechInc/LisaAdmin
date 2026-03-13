@@ -14,6 +14,7 @@ import Modal from "@/components/ui/Modal";
 type Professional = {
   id: number;
   user_id: number;
+  salon_id?: number;
   name: string;
   email: string;
   phone: string;
@@ -72,6 +73,7 @@ export default function ProfessionalsPage() {
          const items = backendResponse.data.items.map((item: any) => ({
             id: Number(item.id),
             user_id: Number(item.user_id ?? item.userId ?? item.id),
+            salon_id: item.salon_id ? Number(item.salon_id) : undefined,
             name: item.name || "Unknown",
             email: item.email || "",
             phone: item.phone || "",
@@ -200,6 +202,8 @@ export default function ProfessionalsPage() {
             <button 
                 onClick={() => router.push(
                   `/professionals/profile?id=${item.id}&user_id=${item.user_id}${
+                    item.salon_id ? `&salon_id=${item.salon_id}` : ""
+                  }${
                     status === "Pending"
                       ? "&status=pending"
                       : status === "Rejected"

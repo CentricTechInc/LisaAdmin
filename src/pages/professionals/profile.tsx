@@ -161,6 +161,7 @@ export default function ProfessionalProfile() {
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const salonId = Array.isArray(router.query.id) ? router.query.id[0] : router.query.id;
     const userId = Array.isArray(router.query.user_id) ? router.query.user_id[0] : router.query.user_id;
+    const querySalonId = Array.isArray(router.query.salon_id) ? router.query.salon_id[0] : router.query.salon_id;
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [salon, setSalon] = useState<SalonProfileData | null>(null);
@@ -188,9 +189,11 @@ export default function ProfessionalProfile() {
             try {
                 setLoading(true);
                 const salonResponse = salonId ? await api.get(`/admin/get-salon-by-id/${salonId}`) : null;
-                const appointmentsResponse = salonId ? await getAppointmentsBySalonId(salonId) : null;
-
                 const salonData = salonResponse?.data?.data?.data || {};
+                
+                // Use salon_id from query or from salon data, avoiding the professional 'id'
+                const actualSalonId = querySalonId || salonData?.salon_id;
+                const appointmentsResponse = actualSalonId ? await getAppointmentsBySalonId(actualSalonId) : null;
                 const userData = salonData?.user || salonData?.user_data || {};
                 const bankDetails: BankDetail[] = Array.isArray(userData?.salonBankDetail) ? userData.salonBankDetail : [];
                 const currentBank = bankDetails.find((detail) => detail.isCurrent) || bankDetails[0];
@@ -269,7 +272,7 @@ export default function ProfessionalProfile() {
         };
 
         fetchData();
-    }, [router.isReady, salonId, userId]);
+    }, [router.isReady, salonId, userId, querySalonId]);
 
     const resolveProfessionalId = salonId || userId;
 
