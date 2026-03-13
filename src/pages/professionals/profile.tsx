@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import api from "@/utils/axios";
 import { getAppointmentsBySalonId } from "@/services/appointmentService";
 import { Flag } from "@/components/ui/Flag";
+import { formatDateTime12h } from "@/utils/format";
 
 // Types
 type Appointment = {
@@ -258,7 +259,7 @@ export default function ProfessionalProfile() {
                     id: item.id,
                     sNo: index + 1,
                     service: item.services || "Unknown Service",
-                    dateTime: `${item.date} ${item.time}`,
+                    dateTime: formatDateTime12h(`${item.date} ${item.time}`),
                     professional: item.professional || "Unknown",
                     amount: `$${item.total_price}`
                 }));

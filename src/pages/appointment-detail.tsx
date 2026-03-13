@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { AppointmentDetailCard, AppointmentDetailData } from "@/components/ui/AppointmentDetailCard";
 import api from "@/utils/axios";
+import { formatDateTime12h } from "@/utils/format";
 
 // Define the API response types based on example.json
 interface ApiService {
@@ -113,11 +114,11 @@ export default function AppointmentDetail() {
                 image: apiData.professional?.picture || "/images/avatar.png",
               },
               notes: apiData.notes || "",
-              dateTime: apiData.date_time || "",
+              dateTime: formatDateTime12h(apiData.date_time || ""),
               services: apiData.services?.map((service, index) => ({
                 sNo: index + 1,
                 name: service.name || "Unknown Service",
-                dateTime: service.date || "", 
+                dateTime: formatDateTime12h(service.date || ""), 
                 amount: service.price || "0",
               })) || [],
               payment: {

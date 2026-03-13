@@ -11,6 +11,7 @@ import { Flag } from "@/components/ui/Flag";
 import { Column } from "@/components/table/types";
 import api from "@/utils/axios";
 import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
+import { formatDateTime12h } from "@/utils/format";
 
 // Types
 type Appointment = {
@@ -158,7 +159,7 @@ export default function CustomerProfile() {
                 id: item.id,
                 sNo: index + 1,
                 service: item.appointmentServices?.map((s) => s.service.name).join(", ") || "Unknown Service",
-                dateTime: `${item.appointment_date} ${item.appointment_time}`,
+                dateTime: formatDateTime12h(`${item.appointment_date} ${item.appointment_time}`),
                 professional: item.salon?.bussiness_name || "Unknown",
                 amount: `$${item.total_price}`
             }));

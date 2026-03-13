@@ -34,7 +34,7 @@ export const subscribeToSupportThreads = (callback: (users: ChatUser[]) => void)
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         
         if (days === 0) {
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
         } else if (days === 1) {
             return 'Yesterday';
         } else {
@@ -72,9 +72,9 @@ export const subscribeToMessages = (userId: string, callback: (messages: Message
           if (!timestamp) return '';
           // Handle Firestore Timestamp or pending writes (which might be null initially)
           if (typeof timestamp.toDate === 'function') {
-              return timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
           }
-          return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
       };
 
       return {

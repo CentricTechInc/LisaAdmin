@@ -7,6 +7,7 @@ import { DataTable } from "@/components/table/DataTable";
 import { EyeIcon } from "@/components/ui/EyeIcon";
 import { Column } from "@/components/table/types";
 import api from "@/utils/axios";
+import { formatDateTime12h } from "@/utils/format";
 
 import { Select } from "@/components/ui/Select";
 import { cn } from "@/lib/utils";
@@ -78,7 +79,7 @@ export default function AppointmentsPage() {
                 userId: String(item.user_id || item.customer_id || "0"),
                 customerName: item.customer_name || "Unknown",
                 service: item.services || "Unknown Service",
-                dateTime: item.date_time,
+                dateTime: formatDateTime12h(item.date_time),
                 professional: item.professional || "Salon",
                 status: activeTab as any
             }));
