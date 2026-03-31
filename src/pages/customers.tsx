@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/Input";
 import { DataTable } from "@/components/table/DataTable";
 import { Column } from "@/components/table/types";
 import { EyeIcon } from "@/components/ui/EyeIcon";
+import { TrashIcon } from "@/components/ui/TrashIcon";
 import api from "@/utils/axios";
 import { ConfirmationModal } from "@/components/modals/ConfirmationModal";
+import toast from "react-hot-toast";
 
 type Customer = {
   id: number;
@@ -59,6 +61,7 @@ export default function CustomersPage() {
   const [totalCustomers, setTotalCustomers] = useState(0);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [blockingId, setBlockingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     customerId: number | null;
@@ -69,6 +72,15 @@ export default function CustomersPage() {
     customerId: null,
     customerName: "",
     currentStatus: "Active"
+  });
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    customerId: number | null;
+    customerName: string;
+  }>({
+    isOpen: false,
+    customerId: null,
+    customerName: "",
   });
 
   // Debounce search query
@@ -150,6 +162,14 @@ export default function CustomersPage() {
     });
   }, []);
 
+  const initiateDelete = useCallback((customer: Customer) => {
+    setDeleteModalState({
+      isOpen: true,
+      customerId: customer.id,
+      customerName: customer.name,
+    });
+  }, []);
+
   const handleBlockConfirm = async () => {
     if (!modalState.customerId) return;
 
@@ -173,6 +193,26 @@ export default function CustomersPage() {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteModalState.customerId) return;
+
+    try {
+      setDeletingId(deleteModalState.customerId);
+      await api.delete(`/admin/delete-customer/${deleteModalState.customerId}`);
+      toast.success("Customer deleted successfully");
+      await fetchCustomers();
+      setDeleteModalState(prev => ({ ...prev, isOpen: false }));
+    } catch (error: unknown) {
+      const message =
+        error && typeof error === "object" && "message" in error && typeof (error as { message?: unknown }).message === "string"
+          ? (error as { message: string }).message
+          : "Failed to delete customer";
+      toast.error(message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const columns: Column<Customer>[] = useMemo(() => [
     { id: "name", header: "Name", field: "name", sortable: true },
     { id: "email", header: "Email", field: "email", sortable: true },
@@ -191,6 +231,14 @@ export default function CustomersPage() {
             <EyeIcon className="h-4 w-4 text-gray-500" />
           </button>
           <button
+            onClick={() => initiateDelete(item)}
+            disabled={deletingId === item.id}
+            className="group flex h-8 w-8 items-center justify-center rounded-full bg-red-50 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Delete customer"
+          >
+            <TrashIcon className="h-4 w-4 text-red-600" />
+          </button>
+          <button
             onClick={() => initiateBlockToggle(item)}
             disabled={blockingId === item.id}
             className={cn(
@@ -207,7 +255,7 @@ export default function CustomersPage() {
         </div>
       ),
     },
-  ], [router, blockingId, initiateBlockToggle]);
+  ], [router, blockingId, deletingId, initiateBlockToggle, initiateDelete]);
 
   return (
     <div className="mx-auto w-full flex flex-col gap-3">
@@ -281,6 +329,16 @@ export default function CustomersPage() {
         confirmText={modalState.currentStatus === "Active" ? "Block" : "Unblock"}
         isProcessing={blockingId !== null}
         variant={modalState.currentStatus === "Active" ? "danger" : "info"}
+      />
+      <ConfirmationModal
+        isOpen={deleteModalState.isOpen}
+        onClose={() => setDeleteModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Customer"
+        message={`Are you sure you want to delete ${deleteModalState.customerName}?`}
+        confirmText="Delete"
+        isProcessing={deletingId !== null}
+        variant="danger"
       />
     </div>
   );
